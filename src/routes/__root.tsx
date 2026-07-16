@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import React, { useEffect, type ReactNode, Suspense } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Toaster } from "sonner";
 
@@ -16,8 +16,15 @@ import appCss from "../styles.css?url";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { MobileTabBar } from "@/components/site/MobileTabBar";
-import { CommandPalette } from "@/components/site/CommandPalette";
-import { ChatWidget } from "@/components/chat/ChatWidget";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/use-theme";
+
+const CommandPalette = React.lazy(() =>
+  import("@/components/site/CommandPalette").then((m) => ({ default: m.CommandPalette }))
+);
+const ChatWidget = React.lazy(() =>
+  import("@/components/chat/ChatWidget").then((m) => ({ default: m.ChatWidget }))
+);
 
 function NotFoundComponent() {
   return (
@@ -169,27 +176,33 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-dvh flex-col bg-background pb-16 lg:pb-0">
-        <SiteHeader />
-        <main className="flex-1">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-        </main>
-        <SiteFooter />
-        <MobileTabBar />
-        <CommandPalette />
-        <ChatWidget />
-        <Toaster richColors position="top-right" />
-      </div>
+      <AuthProvider>
+        <ThemeProvider>
+          <div className="flex min-h-dvh flex-col bg-background pb-16 lg:pb-0">
+            <SiteHeader />
+            <main className="flex-1">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={pathname}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </main>
+            <SiteFooter />
+            <MobileTabBar />
+            <Suspense fallback={null}>
+              <CommandPalette />
+              <ChatWidget />
+            </Suspense>
+            <Toaster richColors position="top-right" />
+          </div>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

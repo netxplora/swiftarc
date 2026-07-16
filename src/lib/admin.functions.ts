@@ -25,11 +25,11 @@ export const adminOverview = createServerFn({ method: "GET" })
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [users, shipments, pickups, invoices, convos] = await Promise.all([
-      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("shipments").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("pickups").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("invoices").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("chat_conversations").select("id", { count: "exact", head: true }).eq("status", "open"),
+      supabaseAdmin.from("profiles").select("id", { count: "estimated", head: true }),
+      supabaseAdmin.from("shipments").select("id", { count: "estimated", head: true }),
+      supabaseAdmin.from("pickups").select("id", { count: "estimated", head: true }),
+      supabaseAdmin.from("invoices").select("id", { count: "estimated", head: true }),
+      supabaseAdmin.from("chat_conversations").select("id", { count: "estimated", head: true }).eq("status", "open"),
     ]);
     const { data: recent } = await supabaseAdmin
       .from("shipments")
@@ -61,13 +61,25 @@ export const adminListUsers = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) fail(error);
-    const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role");
+
+    const userIds = profiles?.map(p => p.id) || [];
+    let rolesData: any[] = [];
+    
+    if (userIds.length > 0) {
+      const { data: roles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id, role")
+        .in("user_id", userIds);
+      rolesData = roles ?? [];
+    }
+
     const roleMap = new Map<string, string[]>();
-    (roles ?? []).forEach((r) => {
+    rolesData.forEach((r) => {
       const arr = roleMap.get(r.user_id) ?? [];
       arr.push(r.role);
       roleMap.set(r.user_id, arr);
     });
+
     return (profiles ?? []).map((p) => ({
       id: p.id,
       displayName: p.display_name,
