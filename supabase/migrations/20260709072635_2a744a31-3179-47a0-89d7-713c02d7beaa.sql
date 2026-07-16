@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.gen_tracking_number();

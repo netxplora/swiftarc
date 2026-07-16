@@ -1,0 +1,2 @@
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS proof_of_delivery JSONB;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS telemetry JSONB;
