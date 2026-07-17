@@ -9,8 +9,9 @@ import { PageHero } from "@/components/site/PageHero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { bookShipment, AddressSnapshot } from "@/lib/api.functions";
+import { bookShipment, listAddresses, AddressSnapshot } from "@/lib/api.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { useQuery } from "@tanstack/react-query";
 import { LocationPicker, type LocationData } from "@/components/shipping/LocationPicker";
 import { RoutePreview } from "@/components/shipping/RoutePreview";
 
@@ -163,6 +164,8 @@ function BookingWizard({ user }: { user: any }) {
   const nav = useNavigate();
   const [s, dispatch] = useReducer(reducer, initial);
   const doBook = useServerFn(bookShipment);
+  const fetchAddresses = useServerFn(listAddresses);
+  const { data: addresses } = useQuery({ queryKey: ["addresses"], queryFn: () => fetchAddresses() });
 
   // Auto-fill sender from user profile
   useEffect(() => {
@@ -310,6 +313,7 @@ function BookingWizard({ user }: { user: any }) {
                 role="sender"
                 value={s.origin}
                 onChange={(p) => dispatch({ type: "origin", patch: p })}
+                addresses={addresses ?? []}
               />
             )}
             {s.step === 1 && (
@@ -317,6 +321,7 @@ function BookingWizard({ user }: { user: any }) {
                 role="receiver"
                 value={s.destination}
                 onChange={(p) => dispatch({ type: "destination", patch: p })}
+                addresses={addresses ?? []}
               />
             )}
             {s.step === 2 && <StepPackage s={s} dispatch={dispatch} />}

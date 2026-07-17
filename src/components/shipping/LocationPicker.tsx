@@ -26,6 +26,7 @@ interface Props {
   value: LocationData;
   onChange: (patch: Partial<LocationData>) => void;
   role: "sender" | "receiver";
+  addresses?: any[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -73,7 +74,7 @@ const reverseGeocode = async (lat: number, lng: number): Promise<NominatimResult
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function LocationPicker({ value, onChange, role }: Props) {
+export function LocationPicker({ value, onChange, role, addresses = [] }: Props) {
   const [mods, setMods] = useState<null | typeof import("react-leaflet")>(null);
   const [L, setL] = useState<null | typeof import("leaflet")>(null);
   const [query, setQuery] = useState("");
@@ -191,9 +192,43 @@ export function LocationPicker({ value, onChange, role }: Props) {
   return (
     <div className="space-y-4">
       {/* Contact fields */}
-      <h3 className="font-display text-lg">
-        {role === "sender" ? "Sender information" : "Receiver information"}
-      </h3>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-display text-lg">
+          {role === "sender" ? "Sender information" : "Receiver information"}
+        </h3>
+        
+        {addresses.length > 0 && (
+          <select
+            className="h-9 max-w-[200px] truncate rounded-md border border-input bg-background px-2 text-sm sm:max-w-[250px]"
+            onChange={(e) => {
+              const a = addresses.find((x) => x.id === e.target.value);
+              if (a) {
+                onChange({
+                  contact_name: a.contact_name,
+                  phone: a.phone || "",
+                  email: a.email || "",
+                  line1: a.line1,
+                  city: a.city,
+                  region: a.region || "",
+                  postal_code: a.postal_code,
+                  country_code: a.country_code,
+                  lat: a.lat ?? null,
+                  lng: a.lng ?? null,
+                });
+                toast.success("Loaded from address book");
+              }
+            }}
+            value=""
+          >
+            <option value="" disabled>Load from address book…</option>
+            {addresses.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.label} — {a.city} {a[role === "sender" ? "is_default_sender" : "is_default_recipient"] ? "★" : ""}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label={role === "sender" ? "Sender name" : "Receiver name"} v={value.contact_name} on={(x) => onChange({ contact_name: x })} required autoComplete="name" />
