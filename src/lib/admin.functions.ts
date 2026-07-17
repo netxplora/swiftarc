@@ -196,6 +196,7 @@ export const adminUpdateShipment = createServerFn({ method: "POST" })
     tracking_number: z.string(),
     service: z.string(),
     status: z.string(),
+    note: z.string().optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
@@ -206,6 +207,16 @@ export const adminUpdateShipment = createServerFn({ method: "POST" })
       status: data.status,
     }).eq("id", data.id);
     if (error) fail(error);
+    
+    if (data.note) {
+      await supabaseAdmin.from("shipment_events").insert({
+        shipment_id: data.id,
+        status: data.status,
+        description: data.note,
+        occurred_at: new Date().toISOString(),
+      });
+    }
+    
     return { ok: true };
   });
 
@@ -407,4 +418,113 @@ export const adminBroadcastNotification = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("notifications").insert(rows);
     if (error) fail(error);
     return { ok: true, sent: rows.length };
+  });
+
+// ---------- Payment Management ----------
+
+export const adminListPaymentMethods = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.from("payment_methods").select("*").order("sort_order");
+    if (error) fail(error);
+    return data ?? [];
+  });
+
+export const adminTogglePaymentMethod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid(), enabled: z.boolean() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("payment_methods").update({ enabled: data.enabled, updated_at: new Date().toISOString() }).eq("id", data.id);
+    if (error) fail(error);
+    return { ok: true };
+  });
+
+export const adminListWallets = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.from("wallets").select("*").order("sort_order");
+    if (error) fail(error);
+    return data ?? [];
+  });
+
+export const adminUpsertWallet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    id: z.string().uuid().optional(),
+    currency: z.string().min(1).max(10),
+    network: z.string().min(1).max(60),
+    address: z.string().min(10).max(200),
+    label: z.string().max(100).optional(),
+    instructions: z.string().max(1000).optional(),
+    status: z.enum(["active", "inactive", "maintenance"]).default("active"),
+    sort_order: z.number().int().default(0),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const payload = { ...data, updated_at: new Date().toISOString() };
+    if (data.id) {
+      const { error } = await supabaseAdmin.from("wallets").update(payload).eq("id", data.id);
+      if (error) fail(error);
+    } else {
+      const { error } = await supabaseAdmin.from("wallets").insert(payload);
+      if (error) fail(error);
+    }
+    return { ok: true };
+  });
+
+export const adminDeleteWallet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("wallets").delete().eq("id", data.id);
+    if (error) fail(error);
+    return { ok: true };
+  });
+
+export const adminListTransactions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("*, shipments(tracking_number, service)")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) fail(error);
+    return data ?? [];
+  });
+
+export const adminVerifyTransaction = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    id: z.string().uuid(),
+    action: z.enum(["verify", "reject"]),
+    note: z.string().max(500).optional(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const status = data.action === "verify" ? "verified" : "rejected";
+    const { error } = await supabaseAdmin
+      .from("payment_transactions")
+      .update({
+        status,
+        admin_note: data.note ?? null,
+        verified_by: context.userId,
+        verified_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.id);
+    if (error) fail(error);
+    return { ok: true, status };
   });

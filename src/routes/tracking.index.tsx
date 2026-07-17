@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getShipment, sampleTrackingIds, statusLabels } from "@/lib/mock-shipments";
 import type { Shipment } from "@/lib/mock-shipments";
+import { resolveTracking } from "@/lib/api.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/tracking/")({
   head: () => ({
@@ -27,7 +29,9 @@ function TrackingLanding() {
   const [results, setResults] = useState<Array<{ id: string; shipment?: Shipment }>>([]);
   const navigate = useNavigate();
 
-  const runLookup = (raw: string) => {
+  const lookupFn = useServerFn(resolveTracking);
+
+  const runLookup = async (raw: string) => {
     const parsed = raw
       .split(/[\s,\n;]+/)
       .map((s) => s.trim())
@@ -37,7 +41,19 @@ function TrackingLanding() {
       navigate({ to: "/tracking/$trackingId", params: { trackingId: parsed[0] } });
       return;
     }
-    setResults(parsed.map((id) => ({ id, shipment: getShipment(id) })));
+    
+    const results = await Promise.all(parsed.map(async (id) => {
+      try {
+        const res = await lookupFn({ data: { trackingNumber: id } });
+        if (res.kind === "db") {
+          return { id, shipment: { ...res.shipment, origin: res.shipment.origin as any, destination: res.shipment.destination as any } };
+        } else if (res.kind === "mock") {
+          return { id, shipment: getShipment(id) };
+        }
+      } catch (e) {}
+      return { id };
+    }));
+    setResults(results as any);
   };
 
   return (

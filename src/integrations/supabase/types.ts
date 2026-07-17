@@ -413,6 +413,108 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_methods: {
+        Row: {
+          id: string
+          key: string
+          label: string
+          description: string | null
+          enabled: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          label: string
+          description?: string | null
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          label?: string
+          description?: string | null
+          enabled?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          id: string
+          shipment_id: string
+          amount: number
+          currency: string
+          method: string
+          status: string
+          reference: string
+          wallet_id: string | null
+          wallet_address: string | null
+          admin_note: string | null
+          verified_by: string | null
+          verified_at: string | null
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          shipment_id: string
+          amount: number
+          currency?: string
+          method?: string
+          status?: string
+          reference: string
+          wallet_id?: string | null
+          wallet_address?: string | null
+          admin_note?: string | null
+          verified_by?: string | null
+          verified_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          shipment_id?: string
+          amount?: number
+          currency?: string
+          method?: string
+          status?: string
+          reference?: string
+          wallet_id?: string | null
+          wallet_address?: string | null
+          admin_note?: string | null
+          verified_by?: string | null
+          verified_at?: string | null
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -434,11 +536,80 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          id: string
+          currency: string
+          network: string
+          address: string
+          label: string | null
+          instructions: string | null
+          status: string
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          currency: string
+          network: string
+          address: string
+          label?: string | null
+          instructions?: string | null
+          status?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          currency?: string
+          network?: string
+          address?: string
+          label?: string | null
+          instructions?: string | null
+          status?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_user_id: string
+          p_endpoint: string
+          p_max_requests: number
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
+      create_shipment_with_payment: {
+        Args: {
+          p_user_id: string
+          p_service: string
+          p_origin: Json
+          p_destination: Json
+          p_package: Json
+          p_declared_value: number
+          p_insurance: boolean
+          p_signature_required: boolean
+          p_notes: string | null
+          p_estimated_delivery: string
+          p_total_amount: number
+        }
+        Returns: {
+          trackingNumber: string
+          id: string
+          transactionId: string
+          amount: number
+        }
+      }
       get_pickup_slot_counts: {
         Args: { target_date: string }
         Returns: {

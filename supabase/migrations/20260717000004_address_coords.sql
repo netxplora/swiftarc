@@ -1,0 +1,5 @@
+-- 20260717000004_address_coords.sql
+
+ALTER TABLE public.addresses
+ADD COLUMN IF NOT EXISTS lat NUMERIC,
+ADD COLUMN IF NOT EXISTS lng NUMERIC;

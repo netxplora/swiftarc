@@ -1,28 +1,50 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
-import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck } from "lucide-react";
-import { shipments, statusLabels } from "@/lib/mock-shipments";
+import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck, Loader2 } from "lucide-react";
+import { statusLabels } from "@/lib/mock-shipments";
 import { Counter } from "@/components/animated/Counter";
+import { listMyShipments, listInvoices, getMyProfile } from "@/lib/api.functions";
 
 export const Route = createFileRoute("/dashboard/")({
   component: Overview,
 });
 
 function Overview() {
-  const list = Object.values(shipments);
+  const fetchShipments = useServerFn(listMyShipments);
+  const fetchInvoices = useServerFn(listInvoices);
+  const fetchProfile = useServerFn(getMyProfile);
+
+  const { data: list = [], isLoading } = useQuery({ queryKey: ["my-shipments"], queryFn: () => fetchShipments() });
+  const { data: invoices = [] } = useQuery({ queryKey: ["my-invoices"], queryFn: () => fetchInvoices() });
+  const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
+
   const active = list.filter((s) => s.status !== "delivered").length;
+  const spend = invoices.reduce((sum, inv) => sum + (inv.status !== "void" ? inv.total : 0), 0);
+  
+  const delivered = list.filter(s => s.status === "delivered");
+  const onTimeRate = list.length === 0 ? 100 : Math.round(((list.length - list.filter(s => s.status === "exception").length) / list.length) * 100);
+  const avgTransit = delivered.length === 0 ? 0 : Math.round(delivered.reduce((sum, s) => {
+    const start = new Date((s as any).created_at || s.lastUpdate || Date.now()).getTime();
+    const end = new Date(s.lastUpdate || Date.now()).getTime();
+    return sum + Math.max(1, (end - start) / (1000 * 60 * 60));
+  }, 0) / delivered.length);
+
   const kpis = [
-    { label: "Active shipments", value: active, suffix: "", icon: Package, delta: "+3 this week" },
-    { label: "On-time rate", value: 98, suffix: "%", icon: TrendingUp, delta: "+0.4 pts" },
-    { label: "Avg transit", value: 32, suffix: "h", icon: Clock, delta: "-1.2h" },
-    { label: "Spend MTD", value: 12480, suffix: " USD", icon: DollarSign, delta: "-8.1%" },
+    { label: "Active shipments", value: active, suffix: "", icon: Package, delta: "Live Data" },
+    { label: "On-time rate", value: onTimeRate, suffix: "%", icon: TrendingUp, delta: "Live Data" },
+    { label: "Avg transit", value: avgTransit, suffix: "h", icon: Clock, delta: "Live Data" },
+    { label: "Spend MTD", value: spend, suffix: " USD", icon: DollarSign, delta: "Live Data" },
   ];
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-amber">Overview</p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">Welcome back, Ana</h1>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Welcome back, {profile?.display_name ?? "User"}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">Here's what's moving on your network today.</p>
         </div>
         <div className="flex gap-2">
@@ -84,7 +106,7 @@ function Overview() {
                   <span className="text-xs text-muted-foreground">· {s.service}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {s.origin.city} → {s.destination.city}
+                  {s.origin} → {s.destination}
                 </p>
               </div>
               <span className="hidden text-xs text-muted-foreground sm:block">

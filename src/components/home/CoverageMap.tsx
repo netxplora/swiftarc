@@ -37,36 +37,50 @@ export function CoverageMap() {
     return <div className="h-[420px] w-full bg-navy" aria-hidden />;
   }
 
-  const { MapContainer, TileLayer, CircleMarker, Tooltip } = mods;
+  const { MapContainer, TileLayer, Marker, Tooltip } = mods;
   const center: LatLngExpression = [30, 15];
 
+  const createHubIcon = (isMajor: boolean) => L.divIcon({
+    html: `
+      <div class="relative flex h-5 w-5 items-center justify-center">
+        ${isMajor ? '<div class="absolute h-full w-full animate-ping rounded-full bg-navy opacity-40"></div>' : ''}
+        <div class="relative h-3 w-3 rounded-full border-2 border-background bg-navy-deep shadow-sm"></div>
+      </div>
+    `,
+    className: "bg-transparent border-none",
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+
+  const majorIcon = createHubIcon(true);
+  const minorIcon = createHubIcon(false);
+
   return (
-    <div className="h-[420px] w-full">
+    <div className="h-[420px] w-full overflow-hidden rounded-2xl border border-border">
       <MapContainer
         center={center}
         zoom={2}
         minZoom={2}
         scrollWheelZoom={false}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", zIndex: 1 }}
         worldCopyJump
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/">Carto</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        {hubs.map((h) => (
-          <CircleMarker
+        {hubs.map((h, i) => (
+          <Marker
             key={h.name}
-            center={h.pos}
-            radius={6}
-            pathOptions={{ color: "#07162C", fillColor: "#07162C", fillOpacity: 1, weight: 2 }}
+            position={h.pos}
+            icon={i % 3 === 0 ? majorIcon : minorIcon} // Just for visual variance
           >
-            <Tooltip direction="top" offset={[0, -6]} opacity={1}>
-              <span style={{ fontFamily: "Inter Variable, sans-serif", fontSize: 12 }}>
-                {h.name} · {h.region}
+            <Tooltip direction="top" offset={[0, -5]} opacity={1}>
+              <span className="font-semibold text-navy-deep">
+                {h.name} <span className="text-muted-foreground font-normal ml-1">· {h.region}</span>
               </span>
             </Tooltip>
-          </CircleMarker>
+          </Marker>
         ))}
       </MapContainer>
     </div>

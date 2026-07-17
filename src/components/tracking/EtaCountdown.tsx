@@ -10,11 +10,23 @@ function fmt(ms: number) {
 }
 
 export function EtaCountdown({ iso }: { iso: string }) {
-  const [now, setNow] = useState<number>(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
+  
+  if (now === null) {
+    return (
+      <div className="grid grid-cols-4 gap-2">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-20 rounded-xl border border-border bg-card animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
   const target = new Date(iso).getTime();
   const t = fmt(target - now);
 

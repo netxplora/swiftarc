@@ -12,18 +12,27 @@ interface Props {
 
 export function TrackingMap({ origin, destination, current, checkpoints, height = 380 }: Props) {
   const [mods, setMods] = useState<null | typeof import("react-leaflet")>(null);
+  const [L, setL] = useState<null | typeof import("leaflet")>(null);
 
   useEffect(() => {
     let c = false;
-    import("react-leaflet").then((m) => { if (!c) setMods(m); });
+    Promise.all([
+      import("react-leaflet"),
+      import("leaflet")
+    ]).then(([m, leaflet]) => {
+      if (!c) {
+        setMods(m);
+        setL(leaflet);
+      }
+    });
     return () => { c = true; };
   }, []);
 
-  if (!mods) {
-    return <div style={{ height }} className="w-full animate-pulse bg-navy/40" aria-hidden />;
+  if (!mods || !L) {
+    return <div style={{ height }} className="w-full animate-pulse rounded-2xl bg-secondary" aria-hidden />;
   }
 
-  const { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip } = mods;
+  const { MapContainer, TileLayer, Polyline, Tooltip, Marker } = mods;
   const midLat = (origin[0] + destination[0]) / 2;
   const midLng = (origin[1] + destination[1]) / 2;
   const center: LatLngExpression = [midLat, midLng];
@@ -31,33 +40,47 @@ export function TrackingMap({ origin, destination, current, checkpoints, height 
   const traveled: [number, number][] = [origin, ...checkpoints.map((c) => [c.lat, c.lng] as [number, number]), current];
   const remaining: [number, number][] = [current, destination];
 
+  const createIcon = (html: string) => L.divIcon({ html, className: "bg-transparent border-none", iconSize: [24, 24], iconAnchor: [12, 12] });
+
+  const originIcon = createIcon(`<div class="grid h-6 w-6 place-items-center rounded-full border-2 border-background bg-navy-deep text-[10px] font-bold text-cream shadow-sm">O</div>`);
+  const destIcon = createIcon(`<div class="grid h-6 w-6 place-items-center rounded-full border-2 border-background bg-navy-deep text-[10px] font-bold text-cream shadow-sm">D</div>`);
+  const checkpointIcon = createIcon(`<div class="h-3 w-3 rounded-full border-2 border-background bg-amber shadow-sm"></div>`);
+  const currentIcon = createIcon(`
+    <div class="relative flex h-6 w-6 items-center justify-center">
+      <div class="absolute h-full w-full animate-ping rounded-full bg-amber opacity-75"></div>
+      <div class="relative h-4 w-4 rounded-full border-2 border-navy-deep bg-amber shadow-md"></div>
+    </div>
+  `);
+
   return (
-    <div style={{ height }} className="w-full">
-      <MapContainer center={center} zoom={3} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
+    <div style={{ height }} className="w-full overflow-hidden rounded-2xl">
+      <MapContainer center={center} zoom={4} scrollWheelZoom={false} style={{ height: "100%", width: "100%", zIndex: 1 }}>
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/">Carto</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        <Polyline positions={traveled} pathOptions={{ color: "#FFB020", weight: 3 }} />
-        <Polyline positions={remaining} pathOptions={{ color: "#FFB020", weight: 2, dashArray: "6 8", opacity: 0.6 }} />
-        <CircleMarker center={origin} radius={5} pathOptions={{ color: "#07162C", fillColor: "#07162C", fillOpacity: 1 }}>
-          <Tooltip>Origin</Tooltip>
-        </CircleMarker>
-        <CircleMarker center={destination} radius={5} pathOptions={{ color: "#07162C", fillColor: "#07162C", fillOpacity: 1 }}>
-          <Tooltip>Destination</Tooltip>
-        </CircleMarker>
+        <Polyline positions={traveled} pathOptions={{ color: "#FFB020", weight: 4, lineCap: "round", lineJoin: "round" }} />
+        <Polyline positions={remaining} pathOptions={{ color: "#07162C", weight: 3, dashArray: "6 8", opacity: 0.4, lineCap: "round", lineJoin: "round" }} />
+        
+        <Marker position={origin} icon={originIcon}>
+          <Tooltip direction="bottom" offset={[0, 10]} opacity={1}>Origin</Tooltip>
+        </Marker>
+        
+        <Marker position={destination} icon={destIcon}>
+          <Tooltip direction="bottom" offset={[0, 10]} opacity={1}>Destination</Tooltip>
+        </Marker>
+        
         {checkpoints.map((c) => (
-          <CircleMarker key={c.id} center={[c.lat, c.lng]} radius={3} pathOptions={{ color: "#FFB020", fillColor: "#FFB020", fillOpacity: 0.8 }}>
-            <Tooltip>{c.facility}</Tooltip>
-          </CircleMarker>
+          <Marker key={c.id} position={[c.lat, c.lng]} icon={checkpointIcon}>
+            <Tooltip direction="top" offset={[0, -5]} opacity={1}>{c.facility}</Tooltip>
+          </Marker>
         ))}
-        <CircleMarker center={current} radius={9} pathOptions={{ color: "#FFB020", fillColor: "#FFB020", fillOpacity: 1, weight: 3 }}>
-          <Tooltip permanent direction="top" offset={[0, -10]}>
-            <span style={{ fontFamily: "Inter Variable, sans-serif", fontSize: 12, fontWeight: 600 }}>
-              Current
-            </span>
+        
+        <Marker position={current} icon={currentIcon}>
+          <Tooltip permanent direction="top" offset={[0, -12]} className="font-semibold" opacity={1}>
+            Live
           </Tooltip>
-        </CircleMarker>
+        </Marker>
       </MapContainer>
     </div>
   );

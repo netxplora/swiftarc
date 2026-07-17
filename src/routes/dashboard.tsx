@@ -25,37 +25,25 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
 });
 
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+
 function DashboardLayout() {
-  const { user, loading } = useAuth();
-  const nav = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  useEffect(() => {
-    if (!loading && !user) nav({ to: "/login", search: { redirect: pathname }, replace: true });
-  }, [loading, user, nav, pathname]);
-
-  if (loading || !user) {
-    return (
-      <div className="grid min-h-[60vh] place-items-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
-    <SidebarProvider>
-      <div className="flex min-h-[calc(100dvh-4rem)] w-full">
-        <DashboardSidebar />
-        <SidebarInset>
-          <div className="sticky top-16 z-20 flex h-12 items-center gap-2 border-b border-border/60 bg-background/80 px-4 backdrop-blur">
-            <SidebarTrigger />
-            <span className="text-xs text-muted-foreground">Workspace</span>
-          </div>
-          <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-            <Outlet />
-          </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <ProtectedRoute>
+      <SidebarProvider>
+        <div className="flex min-h-[calc(100dvh-4rem)] w-full">
+          <DashboardSidebar />
+          <SidebarInset>
+            <div className="sticky top-16 z-20 flex h-12 items-center gap-2 border-b border-border/60 bg-background/80 px-4 backdrop-blur">
+              <SidebarTrigger />
+              <span className="text-xs text-muted-foreground">Workspace</span>
+            </div>
+            <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+              <Outlet />
+            </div>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </ProtectedRoute>
   );
 }

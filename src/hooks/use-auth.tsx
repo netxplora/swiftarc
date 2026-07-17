@@ -4,24 +4,85 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface AuthState {
   user: User | null;
+  profile: any | null;
+  roles: string[];
   loading: boolean;
   signedIn: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, loading: true, signedIn: false });
+  const [state, setState] = useState<AuthState>({ 
+    user: null, 
+    profile: null,
+    roles: [],
+    loading: true, 
+    signedIn: false,
+    refreshProfile: async () => {} 
+  });
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const [profileRes, rolesRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", userId)
+      ]);
+      
+      const profile = profileRes.data;
+      let userRoles = (rolesRes.data ?? []).map((r) => r.role);
+      
+      // Fallback and aliasing logic based on KI
+      if (userRoles.length === 0 && profile?.role) {
+        userRoles = [profile.role];
+      }
+      
+      userRoles = userRoles.map(r => r === "partner" ? "business" : r);
+
+      setState(prev => ({ ...prev, profile, roles: userRoles }));
+    } catch (error) {
+      console.error("Failed to fetch user profile", error);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (state.user) {
+      setState(prev => ({ ...prev, loading: true }));
+      await fetchUserProfile(state.user.id);
+      setState(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const initializeAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setState(prev => ({ ...prev, user: currentUser, signedIn: !!currentUser }));
+
+      if (currentUser) {
+        await fetchUserProfile(currentUser.id);
+      }
+    } finally {
+      setState(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setState({ user: data.session?.user ?? null, loading: false, signedIn: !!data.session?.user });
-    });
+    initializeAuth();
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setState({ user: session?.user ?? null, loading: false, signedIn: !!session?.user });
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      const currentUser = session?.user ?? null;
+      
+      if (event === "SIGNED_IN") {
+        setState(prev => ({ ...prev, user: currentUser, signedIn: !!currentUser, loading: true }));
+        if (currentUser) await fetchUserProfile(currentUser.id);
+        setState(prev => ({ ...prev, loading: false }));
+      } else if (event === "SIGNED_OUT") {
+        setState(prev => ({ ...prev, user: null, profile: null, roles: [], signedIn: false, loading: false }));
+      }
     });
 
     return () => {
@@ -30,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const value = useMemo(() => state, [state.user, state.loading, state.signedIn]);
+  const value = useMemo(() => ({ ...state, refreshProfile }), [state.user, state.profile, state.roles, state.loading, state.signedIn]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -38,8 +99,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (ctx === undefined) {
-    // Fallback for components rendered outside the provider (though they shouldn't be)
-    // Actually, throwing is better to catch bugs:
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return ctx;

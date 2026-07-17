@@ -127,9 +127,10 @@ function TrackingDetail() {
     shipment.currentLocation.lat,
     shipment.currentLocation.lng,
   ]);
-  const [lastPing, setLastPing] = useState<number>(Date.now());
+  const [lastPing, setLastPing] = useState<number | null>(null);
 
   useEffect(() => {
+    setLastPing(Date.now());
     if (shipment.status === "delivered" || shipment.status === "exception") return;
     const dest: [number, number] = [shipment.destination.lat, shipment.destination.lng];
     const t = setInterval(() => {
@@ -155,10 +156,13 @@ function TrackingDetail() {
               <p className="font-mono text-sm text-muted-foreground">{shipment.trackingNumber}</p>
               <StatusChip status={shipment.status} />
               <HealthChip score={shipment.healthScore} />
-              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-                <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-success pulse-dot" />
-                Live · pinged {timeAgo(lastPing)}
-              </span>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber">
+                <span className="relative flex h-2 w-2 items-center justify-center">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber" />
+                </span>
+                {lastPing !== null ? `Live · pinged ${timeAgo(lastPing)}` : "Live · locating..."}
+              </div>
             </div>
             <h1 className="mt-1 truncate font-display text-2xl font-bold tracking-tight sm:text-3xl">
               {shipment.origin.city} <span className="text-amber">→</span> {shipment.destination.city}

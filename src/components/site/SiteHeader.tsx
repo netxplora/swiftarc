@@ -20,9 +20,7 @@ const nav = [
   { to: "/tracking", label: "Tracking" },
   { to: "/rates", label: "Rates" },
   { to: "/pickup", label: "Pickup" },
-  { to: "/customs", label: "Customs" },
-  { to: "/locations", label: "Locations" },
-  { to: "/business", label: "Business" },
+  { to: "/about", label: "About Us" },
   { to: "/support", label: "Support" },
 ] as const;
 

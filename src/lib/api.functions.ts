@@ -222,15 +222,15 @@ const AddressSchema = z.object({
   id: z.string().uuid().optional(),
   label: z.string().min(1).max(80),
   contact_name: z.string().min(1).max(120),
-  company: z.string().max(120).optional().nullable(),
   phone: z.string().max(40).optional().nullable(),
   email: z.string().email().max(120).optional().nullable(),
   line1: z.string().min(1).max(200),
-  line2: z.string().max(200).optional().nullable(),
   city: z.string().min(1).max(80),
   region: z.string().max(80).optional().nullable(),
   postal_code: z.string().min(1).max(20),
   country_code: z.string().min(2).max(2),
+  lat: z.number().optional().nullable(),
+  lng: z.number().optional().nullable(),
   is_default_sender: z.boolean().optional(),
   is_default_recipient: z.boolean().optional(),
 });
@@ -248,7 +248,7 @@ export const upsertAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => AddressSchema.parse(i))
   .handler(async ({ data, context }) => {
-    const payload = { ...data, user_id: context.userId };
+    const payload = { ...data, user_id: context.userId } as any;
     if (data.id) {
       const { error } = await context.supabase.from("addresses").update(payload).eq("id", data.id).eq("user_id", context.userId);
       if (error) dbFail(error);
@@ -354,17 +354,17 @@ export const listPickups = createServerFn({ method: "GET" })
 
 // ---------- Shipment booking ----------
 
-const AddressSnapshot = z.object({
-  contact_name: z.string().min(1).max(120),
-  company: z.string().max(120).optional().nullable(),
-  phone: z.string().max(40).optional().nullable(),
-  email: z.string().max(120).optional().nullable(),
-  line1: z.string().min(1).max(200),
-  line2: z.string().max(200).optional().nullable(),
-  city: z.string().min(1).max(80),
+export const AddressSnapshot = z.object({
+  contact_name: z.string().min(2).max(100).regex(/^[a-zA-Z\s\-'.]+$/),
+  phone: z.string().max(20).regex(/^\+?[0-9\s\-()]+$/).optional().nullable(),
+  email: z.string().email().max(120).optional().nullable(),
+  line1: z.string().min(5).max(150),
+  city: z.string().min(2).max(80).regex(/^[a-zA-Z\s\-'.]+$/),
   region: z.string().max(80).optional().nullable(),
-  postal_code: z.string().min(1).max(20),
-  country_code: z.string().min(2).max(2),
+  postal_code: z.string().min(3).max(20).regex(/^[A-Za-z0-9\s\-]+$/),
+  country_code: z.string().length(2).regex(/^[A-Z]+$/),
+  lat: z.number().optional().nullable(),
+  lng: z.number().optional().nullable(),
 });
 
 export const bookShipment = createServerFn({ method: "POST" })
@@ -374,62 +374,59 @@ export const bookShipment = createServerFn({ method: "POST" })
     origin: AddressSnapshot,
     destination: AddressSnapshot,
     package: z.object({
-      weight_kg: z.number().positive().max(2000),
-      length_cm: z.number().positive().max(500).optional(),
-      width_cm: z.number().positive().max(500).optional(),
-      height_cm: z.number().positive().max(500).optional(),
-      pieces: z.number().int().min(1).max(999),
-      description: z.string().max(200).optional(),
-    }),
-    declared_value: z.number().nonnegative().max(1_000_000).default(0),
+      weight_kg: z.number().positive().max(1000), // Max 1000kg for standard LTL
+      length_cm: z.number().positive().max(300).optional(),
+      width_cm: z.number().positive().max(300).optional(),
+      height_cm: z.number().positive().max(300).optional(),
+      pieces: z.number().int().min(1).max(50), // Sane max pieces
+      description: z.string().max(100).optional(),
+    }).refine(p => !p.length_cm || !p.width_cm || !p.height_cm || (p.length_cm * p.width_cm * p.height_cm <= 10_000_000), "Package volume exceeds 10 cubic meters"),
+    declared_value: z.number().nonnegative().max(100_000).default(0), // Max $100k
     insurance: z.boolean().default(false),
     signature_required: z.boolean().default(false),
-    notes: z.string().max(500).optional(),
+    notes: z.string().max(250).optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
-    // Generate unique tracking number (server-side retry loop)
-    let trackingNumber = "";
-    for (let i = 0; i < 8; i++) {
-      const n = "SA" + Math.floor(Math.random() * 1e10).toString().padStart(10, "0");
-      const { data: exists } = await context.supabase
-        .from("shipments").select("id").eq("tracking_number", n).maybeSingle();
-      if (!exists) { trackingNumber = n; break; }
-    }
-    if (!trackingNumber) throw new Error("Could not allocate tracking number");
+    // Rate limit: Max 5 bookings per 60 seconds per user
+    const { data: isAllowed, error: rlError } = await context.supabase.rpc("check_rate_limit", {
+      p_user_id: context.userId,
+      p_endpoint: "bookShipment",
+      p_max_requests: 5,
+      p_window_seconds: 60
+    });
+    if (rlError) dbFail(rlError);
+    if (!isAllowed) throw new Error("Rate limit exceeded. Please try again later.");
 
     const etaDays = data.service === "Priority Overnight" ? 1 : data.service === "Express" ? 2 : data.service === "Standard Ground" ? 4 : 6;
     const eta = new Date(Date.now() + etaDays * 86400_000).toISOString().slice(0, 10);
 
-    const { data: row, error } = await context.supabase.from("shipments").insert({
-      user_id: context.userId,
-      tracking_number: trackingNumber,
-      status: "label_created",
-      service: data.service,
-      origin: data.origin,
-      destination: data.destination,
-      package: data.package,
-      declared_value: data.declared_value,
-      insurance: data.insurance,
-      signature_required: data.signature_required,
-      notes: data.notes ?? null,
-      estimated_delivery: eta,
-    }).select("*").single();
+    // Calculate rate server-side
+    const wt = Math.max(1, data.package.weight_kg);
+    const pieces = Math.max(1, data.package.pieces);
+    const baseRates: Record<string, number> = { "Priority Overnight": 89, "Express": 49, "Standard Ground": 24, "Freight LTL": 149 };
+    const base = baseRates[data.service] ?? 49;
+    const weightFee = wt * (data.service === "Freight LTL" ? 2 : data.service === "Standard Ground" ? 3 : 6);
+    const piecesFee = (pieces - 1) * (data.service === "Freight LTL" ? 40 : 12);
+    const insuranceFee = data.insurance ? Math.max(6, data.declared_value * 0.008) : 0;
+    const signatureFee = data.signature_required ? 4 : 0;
+    const totalAmount = Math.round((base + weightFee + piecesFee + insuranceFee + signatureFee) * 100) / 100;
+
+    const { data: result, error } = await context.supabase.rpc("create_shipment_with_payment", {
+      p_user_id: context.userId,
+      p_service: data.service,
+      p_origin: data.origin,
+      p_destination: data.destination,
+      p_package: data.package,
+      p_declared_value: data.declared_value,
+      p_insurance: data.insurance,
+      p_signature_required: data.signature_required,
+      p_notes: data.notes ?? null,
+      p_estimated_delivery: eta,
+      p_total_amount: totalAmount,
+    });
     if (error) dbFail(error);
 
-    await context.supabase.from("shipment_events").insert({
-      shipment_id: row.id, status: "label_created",
-      description: "Label created and shipment booked.",
-      location: `${data.origin.city}, ${data.origin.country_code}`,
-    });
-
-    await context.supabase.from("notifications").insert({
-      user_id: context.userId,
-      title: "Shipment booked",
-      body: `${trackingNumber} · ${data.service} · ETA ${eta}`,
-      category: "shipment", tone: "success",
-    });
-
-    return { trackingNumber, id: row.id, estimatedDelivery: eta };
+    return { trackingNumber: result.trackingNumber, id: result.id, estimatedDelivery: eta, transactionId: result.transactionId, amount: totalAmount };
   });
 
 // ---------- Invoices ----------
@@ -630,4 +627,114 @@ export const updateTelemetry = createServerFn({ method: "POST" })
 
     if (error) dbFail(error);
     return { ok: true };
+  });
+
+// ---------- Payment System ----------
+
+export const getCheckoutTransaction = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ transactionId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: txn, error } = await context.supabase
+      .from("payment_transactions")
+      .select("*, shipments!inner(tracking_number, service, status, origin, destination, user_id)")
+      .eq("id", data.transactionId)
+      .eq("shipments.user_id", context.userId)
+      .maybeSingle();
+    if (error) dbFail(error);
+    if (!txn) throw new Error("Transaction not found");
+    return txn;
+  });
+
+export const listPaymentMethods = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("payment_methods")
+      .select("*")
+      .eq("enabled", true)
+      .order("sort_order");
+    if (error) dbFail(error);
+    return data ?? [];
+  });
+
+export const listActiveWallets = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("wallets")
+      .select("*")
+      .eq("status", "active")
+      .order("sort_order");
+    if (error) dbFail(error);
+    return data ?? [];
+  });
+
+export const selectPaymentMethod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    transactionId: z.string().uuid(),
+    method: z.enum(["card", "bank_transfer", "crypto"]),
+    walletId: z.string().uuid().optional(),
+    cryptoCurrency: z.string().optional(),
+    cryptoNetwork: z.string().optional(),
+    cryptoAddress: z.string().optional(),
+    cryptoAmount: z.string().optional(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const updates: any = {
+      method: data.method,
+      updated_at: new Date().toISOString(),
+    };
+    if (data.method === "crypto") {
+      updates.wallet_id = data.walletId ?? null;
+      updates.crypto_currency = data.cryptoCurrency ?? null;
+      updates.crypto_network = data.cryptoNetwork ?? null;
+      updates.crypto_address = data.cryptoAddress ?? null;
+      updates.crypto_amount = data.cryptoAmount ?? null;
+      updates.expires_at = new Date(Date.now() + 30 * 60_000).toISOString(); // 30 min expiry
+    }
+    const { error } = await context.supabase
+      .from("payment_transactions")
+      .update(updates)
+      .eq("id", data.transactionId)
+      .eq("status", "pending");
+    if (error) dbFail(error);
+    return { ok: true };
+  });
+
+export const markTransactionPaid = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    transactionId: z.string().uuid(),
+    method: z.enum(["card", "bank_transfer", "crypto"]),
+    cardLast4: z.string().max(4).optional(),
+    bankReference: z.string().max(100).optional(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const updates: any = {
+      method: data.method,
+      status: "processing", // Real validation happens via webhooks now
+      updated_at: new Date().toISOString(),
+    };
+    if (data.cardLast4) updates.card_last4 = data.cardLast4;
+    if (data.bankReference) updates.bank_reference = data.bankReference;
+
+    // Verify ownership
+    const { data: txn, error: getErr } = await context.supabase
+      .from("payment_transactions")
+      .select("*, shipments!inner(user_id)")
+      .eq("id", data.transactionId)
+      .eq("shipments.user_id", context.userId)
+      .maybeSingle();
+    if (getErr || !txn) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("payment_transactions")
+      .update(updates)
+      .eq("id", data.transactionId);
+    if (error) dbFail(error);
+
+    return { ok: true, status: updates.status as string };
   });

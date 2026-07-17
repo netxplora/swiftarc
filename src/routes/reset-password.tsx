@@ -26,14 +26,37 @@ function ResetPassword() {
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+    
+    // First check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSessionChecked(true);
-      if (!session) {
+      if (!mounted) return;
+      if (session) setSessionChecked(true);
+    });
+
+    // Listen for the hash fragment parsing event
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY") {
+        setSessionChecked(true);
+      }
+    });
+
+    // Fallback timeout in case no session is ever found
+    const timer = setTimeout(() => {
+      if (mounted && !sessionChecked) {
+        setSessionChecked(true);
         toast.error("Invalid or expired password reset link.");
         nav({ to: "/login" });
       }
-    });
-  }, [nav]);
+    }, 2500);
+
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [nav, sessionChecked]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

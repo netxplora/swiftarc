@@ -113,6 +113,7 @@ function ShipmentForm({ mode, initial, onSuccess }: { mode: "create" | "edit"; i
   const [tracking, setTracking] = useState(initial?.tracking_number ?? "");
   const [service, setService] = useState(initial?.service ?? "Standard");
   const [status, setStatus] = useState(initial?.status ?? "label_created");
+  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,7 +123,7 @@ function ShipmentForm({ mode, initial, onSuccess }: { mode: "create" | "edit"; i
       if (mode === "create") {
         await createMut({ data: { tracking_number: tracking, service, status, origin: {}, destination: {} } });
       } else {
-        await updateMut({ data: { id: initial.id, tracking_number: tracking, service, status } });
+        await updateMut({ data: { id: initial.id, tracking_number: tracking, service, status, note } });
       }
       toast.success(`Shipment ${mode}d`);
       setOpen(false);
@@ -158,6 +159,10 @@ function ShipmentForm({ mode, initial, onSuccess }: { mode: "create" | "edit"; i
             <select value={status} onChange={e => setStatus(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Event Note (optional)</label>
+            <Input value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Arrived at facility" />
           </div>
           <Button type="submit" className="w-full bg-amber text-navy-deep hover:bg-amber-soft" disabled={loading}>
             {loading ? <Loader2 className="animate-spin h-4 w-4" /> : "Save"}

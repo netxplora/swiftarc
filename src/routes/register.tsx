@@ -51,7 +51,7 @@ function Register() {
     e.preventDefault();
     if (score < 2) return toast.error("Please choose a stronger password");
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email, password: pw,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -60,8 +60,13 @@ function Register() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Account created");
-    nav({ to: "/dashboard" });
+    
+    if (!data.session) {
+      toast.success("Account created! Please check your email to verify your account.");
+    } else {
+      toast.success("Account created");
+      nav({ to: "/dashboard" });
+    }
   };
 
   const google = async () => {

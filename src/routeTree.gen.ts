@@ -42,8 +42,10 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShipmentsRouteImport } from './routes/admin.shipments'
 import { Route as AdminPickupsRouteImport } from './routes/admin.pickups'
+import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
+import { Route as ShippingCheckoutTransactionIdRouteImport } from './routes/shipping.checkout.$transactionId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -210,6 +212,11 @@ const AdminPickupsRoute = AdminPickupsRouteImport.update({
   path: '/pickups',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
@@ -220,6 +227,12 @@ const AdminBroadcastRoute = AdminBroadcastRouteImport.update({
   path: '/broadcast',
   getParentRoute: () => AdminRoute,
 } as any)
+const ShippingCheckoutTransactionIdRoute =
+  ShippingCheckoutTransactionIdRouteImport.update({
+    id: '/checkout/$transactionId',
+    path: '/checkout/$transactionId',
+    getParentRoute: () => ShippingRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -239,11 +252,12 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/resources': typeof ResourcesRoute
-  '/shipping': typeof ShippingRoute
+  '/shipping': typeof ShippingRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/pickups': typeof AdminPickupsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -257,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/tracking/': typeof TrackingIndexRoute
+  '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -274,11 +289,12 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/resources': typeof ResourcesRoute
-  '/shipping': typeof ShippingRoute
+  '/shipping': typeof ShippingRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/pickups': typeof AdminPickupsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -292,6 +308,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/tracking': typeof TrackingIndexRoute
+  '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -312,11 +329,12 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/resources': typeof ResourcesRoute
-  '/shipping': typeof ShippingRoute
+  '/shipping': typeof ShippingRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
   '/admin/pickups': typeof AdminPickupsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -330,6 +348,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/tracking/': typeof TrackingIndexRoute
+  '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -356,6 +375,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/broadcast'
     | '/admin/invoices'
+    | '/admin/payments'
     | '/admin/pickups'
     | '/admin/shipments'
     | '/admin/support'
@@ -369,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/tracking/'
+    | '/shipping/checkout/$transactionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -391,6 +412,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/broadcast'
     | '/admin/invoices'
+    | '/admin/payments'
     | '/admin/pickups'
     | '/admin/shipments'
     | '/admin/support'
@@ -404,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/tracking'
+    | '/shipping/checkout/$transactionId'
   id:
     | '__root__'
     | '/'
@@ -428,6 +451,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/broadcast'
     | '/admin/invoices'
+    | '/admin/payments'
     | '/admin/pickups'
     | '/admin/shipments'
     | '/admin/support'
@@ -441,6 +465,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/tracking/'
+    | '/shipping/checkout/$transactionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -461,7 +486,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResourcesRoute: typeof ResourcesRoute
-  ShippingRoute: typeof ShippingRoute
+  ShippingRoute: typeof ShippingRouteWithChildren
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TrackingTrackingIdRoute: typeof TrackingTrackingIdRoute
@@ -701,6 +726,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPickupsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/invoices': {
       id: '/admin/invoices'
       path: '/invoices'
@@ -715,12 +747,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBroadcastRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/shipping/checkout/$transactionId': {
+      id: '/shipping/checkout/$transactionId'
+      path: '/checkout/$transactionId'
+      fullPath: '/shipping/checkout/$transactionId'
+      preLoaderRoute: typeof ShippingCheckoutTransactionIdRouteImport
+      parentRoute: typeof ShippingRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminPickupsRoute: typeof AdminPickupsRoute
   AdminShipmentsRoute: typeof AdminShipmentsRoute
   AdminSupportRoute: typeof AdminSupportRoute
@@ -731,6 +771,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminPaymentsRoute: AdminPaymentsRoute,
   AdminPickupsRoute: AdminPickupsRoute,
   AdminShipmentsRoute: AdminShipmentsRoute,
   AdminSupportRoute: AdminSupportRoute,
@@ -762,6 +803,18 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface ShippingRouteChildren {
+  ShippingCheckoutTransactionIdRoute: typeof ShippingCheckoutTransactionIdRoute
+}
+
+const ShippingRouteChildren: ShippingRouteChildren = {
+  ShippingCheckoutTransactionIdRoute: ShippingCheckoutTransactionIdRoute,
+}
+
+const ShippingRouteWithChildren = ShippingRoute._addFileChildren(
+  ShippingRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -780,7 +833,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResourcesRoute: ResourcesRoute,
-  ShippingRoute: ShippingRoute,
+  ShippingRoute: ShippingRouteWithChildren,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TrackingTrackingIdRoute: TrackingTrackingIdRoute,

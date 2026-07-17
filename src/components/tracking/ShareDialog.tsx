@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, Mail, QrCode, Link as LinkIcon, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 
 export function ShareDialog({ trackingNumber }: { trackingNumber: string }) {
   const [open, setOpen] = useState(false);
-  const url = useMemo(() => {
-    if (typeof window === "undefined") return `/tracking/${trackingNumber}`;
-    return `${window.location.origin}/tracking/${trackingNumber}`;
+  const [url, setUrl] = useState(`/tracking/${trackingNumber}`);
+  
+  useEffect(() => {
+    setUrl(`${window.location.origin}/tracking/${trackingNumber}`);
   }, [trackingNumber]);
 
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}`;

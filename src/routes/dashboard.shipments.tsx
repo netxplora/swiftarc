@@ -15,8 +15,8 @@ const statusFilters: Array<ShipmentStatus | "all"> = [
   "all", "in_transit", "out_for_delivery", "delivered", "exception",
 ];
 
-function formatRelative(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
+function formatRelative(iso: string, nowMs: number) {
+  const diff = nowMs - new Date(iso).getTime();
   const s = Math.round(Math.abs(diff) / 1000);
   const past = diff >= 0;
   if (s < 60) return past ? `${s}s ago` : `in ${s}s`;
@@ -31,7 +31,7 @@ function ShipmentsPage() {
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ShipmentStatus | "all">("all");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   const { data, isLoading, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ["shipments"],
@@ -41,6 +41,7 @@ function ShipmentsPage() {
   });
 
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
@@ -75,7 +76,7 @@ function ShipmentsPage() {
     const t = new Date(s.nextUpdateAt).getTime();
     return min == null || t < min ? t : min;
   }, null);
-  const nextIn = nextUpdateAt ? Math.max(0, Math.round((nextUpdateAt - now) / 1000)) : null;
+  const nextIn = nextUpdateAt && now !== null ? Math.max(0, Math.round((nextUpdateAt - now) / 1000)) : null;
 
   return (
     <div className="space-y-6">
@@ -84,7 +85,7 @@ function ShipmentsPage() {
           <h1 className="font-display text-3xl font-bold tracking-tight">Shipments</h1>
           <p className="text-sm text-muted-foreground">
             {isLoading ? "Loading…" : `${list.length} of ${data?.length ?? 0} shown`}
-            {dataUpdatedAt > 0 && <> · updated {formatRelative(new Date(dataUpdatedAt).toISOString())}</>}
+            {dataUpdatedAt > 0 && now !== null && <> · updated {formatRelative(new Date(dataUpdatedAt).toISOString(), now)}</>}
             {nextIn != null && <> · next refresh {nextIn}s</>}
           </p>
         </div>
@@ -134,7 +135,7 @@ function ShipmentsPage() {
           </thead>
           <tbody className="divide-y divide-border">
             {list.map((s) => {
-              const nextSec = Math.max(0, Math.round((new Date(s.nextUpdateAt).getTime() - now) / 1000));
+              const nextSec = now ? Math.max(0, Math.round((new Date(s.nextUpdateAt).getTime() - now) / 1000)) : null;
               return (
                 <tr key={s.id} className="hover:bg-secondary/40">
                   <td className="px-4 py-3 font-mono text-xs">
@@ -144,12 +145,14 @@ function ShipmentsPage() {
                   </td>
                   <td className="px-4 py-3">{s.origin} → {s.destination}</td>
                   <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{s.service}</td>
-                  <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">{formatRelative(s.lastUpdate)}</td>
+                  <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">{now ? formatRelative(s.lastUpdate, now) : "—"}</td>
                   <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">
-                    <span className="inline-flex items-center gap-1">
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-amber" />
-                      in {nextSec}s
-                    </span>
+                    {now !== null ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-amber" />
+                        in {nextSec}s
+                      </span>
+                    ) : "—"}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${

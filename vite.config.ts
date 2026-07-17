@@ -17,6 +17,9 @@ export default defineConfig({
     plugins: [
       VitePWA({
         registerType: "autoUpdate",
+        devOptions: {
+          enabled: true,
+        },
         manifest: {
           name: "SwiftArc Logistics",
           short_name: "SwiftArc",

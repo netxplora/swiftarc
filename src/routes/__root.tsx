@@ -106,16 +106,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "description",
         content: "Enterprise-grade logistics and shipment tracking platform.",
       },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/favicon.ico" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.googleapis.com",
-      },
-      { name: "theme-color", content: "#0B1220" },
       { property: "og:title", content: "SwiftArc — Engineered Global Logistics" },
       {
         property: "og:description",
@@ -123,6 +113,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "stylesheet", href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/favicon.ico" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
     ],
     scripts: [
       {
@@ -145,12 +145,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Force Vite cache invalidation to resolve tsd-source hydration mismatch
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>

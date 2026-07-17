@@ -7,7 +7,6 @@ import {
 import { Logo } from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
-import { useIsAdmin } from "@/hooks/use-role";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,9 +24,9 @@ export function DashboardSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const { theme, toggle } = useTheme();
-  const { isAdmin } = useIsAdmin();
+  const isAdmin = roles.includes("admin");
   const nav = useNavigate();
   const qc = useQueryClient();
 
