@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import type { LatLngExpression } from "leaflet";
-import type { Checkpoint } from "@/lib/mock-shipments";
+
+interface Checkpoint {
+  id: string;
+  timestamp: string;
+  facility: string;
+  city: string;
+  country: string;
+  status: string;
+  lat: number;
+  lng: number;
+}
 
 interface Props {
   origin: [number, number];

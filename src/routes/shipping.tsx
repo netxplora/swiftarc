@@ -55,6 +55,7 @@ type WizardState = {
   declared_value: number;
   insurance: boolean;
   signature_required: boolean;
+  is_hazmat: boolean;
   notes: string;
 };
 
@@ -73,6 +74,7 @@ const initial: WizardState = {
   declared_value: 0,
   insurance: false,
   signature_required: false,
+  is_hazmat: false,
   notes: "",
 };
 
@@ -211,6 +213,8 @@ function BookingWizard({ user }: { user: any }) {
         declared_value: s.declared_value,
         insurance: s.insurance,
         signature_required: s.signature_required,
+        is_hazmat: s.is_hazmat,
+        volumetric_weight: s.package.length_cm ? (s.package.length_cm * s.package.width_cm! * s.package.height_cm!) / 5000 : undefined,
         notes: s.notes || undefined,
       } as any,
     }),
@@ -255,13 +259,19 @@ function BookingWizard({ user }: { user: any }) {
   const rate = useMemo(() => {
     const svc = SERVICES.find((x) => x.id === s.service)!;
     const wt = Math.max(1, s.package.weight_kg);
+    let volWt = 0;
+    if (s.package.length_cm && s.package.width_cm && s.package.height_cm) {
+      volWt = (s.package.length_cm * s.package.width_cm * s.package.height_cm) / 5000;
+    }
+    const chargeableWt = Math.max(wt, volWt);
     const pieces = Math.max(1, s.package.pieces);
     const base = svc.from;
-    const weightFee = wt * (s.service === "Freight LTL" ? 2 : s.service === "Standard Ground" ? 3 : 6);
+    const weightFee = chargeableWt * (s.service === "Freight LTL" ? 2 : s.service === "Standard Ground" ? 3 : 6);
     const piecesFee = (pieces - 1) * (s.service === "Freight LTL" ? 40 : 12);
     const insurance = s.insurance ? Math.max(6, s.declared_value * 0.008) : 0;
     const signature = s.signature_required ? 4 : 0;
-    return { base, weightFee, piecesFee, insurance, signature, total: base + weightFee + piecesFee + insurance + signature };
+    const hazmatFee = s.is_hazmat ? 25 : 0;
+    return { base, weightFee, piecesFee, insurance, signature, hazmatFee, chargeableWt, volWt, total: base + weightFee + piecesFee + insurance + signature + hazmatFee };
   }, [s]);
 
   return (
@@ -376,6 +386,7 @@ function BookingWizard({ user }: { user: any }) {
             <Row k="Pieces fee" v={fmt(rate.piecesFee)} />
             {rate.insurance > 0 && <Row k="Insurance" v={fmt(rate.insurance)} />}
             {rate.signature > 0 && <Row k="Signature" v={fmt(rate.signature)} />}
+            {rate.hazmatFee > 0 && <Row k="Hazmat / DG" v={fmt(rate.hazmatFee)} />}
             <div className="mt-2 flex items-center justify-between border-t border-border pt-2 font-display text-lg">
               <span>Total</span><span>{fmt(rate.total)}</span>
             </div>
@@ -419,9 +430,10 @@ function StepPackage({ s, dispatch }: { s: WizardState; dispatch: React.Dispatch
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <FF label="Declared value (USD)" type="number" inputMode="decimal" v={String(s.declared_value)} on={(x) => dispatch({ type: "set", patch: { declared_value: Number(x) || 0 } })} />
-        <div className="grid grid-cols-2 gap-3 sm:col-start-1 sm:row-start-2">
+        <div className="grid grid-cols-2 gap-3 sm:col-start-1 sm:col-span-2 sm:row-start-2 lg:grid-cols-3">
           <Toggle checked={s.insurance} onChange={(v) => dispatch({ type: "set", patch: { insurance: v } })} label="Insurance" Icon={ShieldCheck} />
           <Toggle checked={s.signature_required} onChange={(v) => dispatch({ type: "set", patch: { signature_required: v } })} label="Signature" Icon={Signature} />
+          <Toggle checked={s.is_hazmat} onChange={(v) => dispatch({ type: "set", patch: { is_hazmat: v } })} label="Hazmat (DG)" Icon={Zap} />
         </div>
       </div>
     </div>

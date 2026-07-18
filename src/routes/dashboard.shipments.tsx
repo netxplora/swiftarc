@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, Filter, Download, RefreshCw, Loader2 } from "lucide-react";
+import { Search, Filter, Download, RefreshCw, Loader2, Printer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { listMyShipments } from "@/lib/api.functions";
-import { statusLabels, type ShipmentStatus } from "@/lib/mock-shipments";
+import { statusLabels, type ShipmentStatus } from "@/lib/types";
+import { generateShippingLabel } from "@/lib/pdf";
 
 export const Route = createFileRoute("/dashboard/shipments")({
   component: ShipmentsPage,
@@ -131,6 +132,7 @@ function ShipmentsPage() {
               <th className="hidden px-4 py-3 lg:table-cell">Last update</th>
               <th className="hidden px-4 py-3 lg:table-cell">Next update</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -160,6 +162,20 @@ function ShipmentsPage() {
                       s.status === "delivered" ? "bg-success/15 text-success" :
                       "bg-secondary"
                     }`}>{s.statusLabel}</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => generateShippingLabel({
+                        ...s,
+                        tracking_number: s.trackingNumber,
+                        origin: s.origin_raw,
+                        destination: s.destination_raw
+                      })}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-navy-deep"
+                      title="Print Waybill"
+                    >
+                      <Printer className="h-4 w-4" />
+                    </button>
                   </td>
                 </tr>
               );

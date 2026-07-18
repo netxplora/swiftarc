@@ -1,8 +1,9 @@
+// @ts-ignore - Module might not be properly typed in this version
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const APIRoute = createAPIFileRoute("/api/webhooks/stripe")({
-  POST: async ({ request }) => {
+  POST: async ({ request }: { request: Request }) => {
     try {
       // In a real application, we would use stripe.webhooks.constructEvent
       // with the raw body and the STRIPE_WEBHOOK_SECRET to verify the signature.

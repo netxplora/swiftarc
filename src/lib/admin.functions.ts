@@ -90,7 +90,7 @@ export const adminListUsers = createServerFn({ method: "GET" })
 
 export const adminSetRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     userId: z.string().uuid(),
     role: z.enum(["admin", "moderator", "user"]),
     grant: z.boolean(),
@@ -115,7 +115,7 @@ export const adminSetRole = createServerFn({ method: "POST" })
   });
 export const adminDeleteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -141,7 +141,7 @@ export const adminListShipments = createServerFn({ method: "GET" })
 
 export const adminUpdateShipmentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     id: z.string().uuid(),
     status: z.string().min(1).max(40),
     note: z.string().max(500).optional(),
@@ -165,7 +165,7 @@ export const adminUpdateShipmentStatus = createServerFn({ method: "POST" })
 
 export const adminCreateShipment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     tracking_number: z.string(),
     service: z.string(),
     status: z.string(),
@@ -191,7 +191,7 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
 
 export const adminUpdateShipment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     id: z.string().uuid(),
     tracking_number: z.string(),
     service: z.string(),
@@ -222,7 +222,7 @@ export const adminUpdateShipment = createServerFn({ method: "POST" })
 
 export const adminDeleteShipment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -249,7 +249,7 @@ export const adminListPickups = createServerFn({ method: "GET" })
 
 export const adminSetPickupStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid(), status: z.enum(["pending","confirmed","completed","cancelled"]) }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid(), status: z.enum(["pending","confirmed","completed","cancelled"]) }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -260,7 +260,7 @@ export const adminSetPickupStatus = createServerFn({ method: "POST" })
 
 export const adminCreatePickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     contact_name: z.string(),
     company: z.string().optional(),
     address: z.string(),
@@ -293,7 +293,7 @@ export const adminCreatePickup = createServerFn({ method: "POST" })
 
 export const adminUpdatePickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     id: z.string().uuid(),
     contact_name: z.string(),
     company: z.string().optional(),
@@ -317,7 +317,7 @@ export const adminUpdatePickup = createServerFn({ method: "POST" })
 
 export const adminDeletePickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -344,7 +344,7 @@ export const adminListInvoices = createServerFn({ method: "GET" })
 
 export const adminSetInvoiceStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid(), status: z.enum(["draft","sent","paid","overdue","void"]) }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid(), status: z.enum(["draft","sent","paid","overdue","void"]) }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -355,7 +355,7 @@ export const adminSetInvoiceStatus = createServerFn({ method: "POST" })
 
 export const adminCreateInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     number: z.string(),
     total: z.number(),
     due_date: z.string(),
@@ -379,7 +379,7 @@ export const adminCreateInvoice = createServerFn({ method: "POST" })
 
 export const adminDeleteInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -392,7 +392,7 @@ export const adminDeleteInvoice = createServerFn({ method: "POST" })
 
 export const adminBroadcastNotification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     title: z.string().min(1).max(200),
     body: z.string().min(1).max(2000),
     category: z.string().max(40).default("announcement"),
@@ -434,7 +434,7 @@ export const adminListPaymentMethods = createServerFn({ method: "GET" })
 
 export const adminTogglePaymentMethod = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid(), enabled: z.boolean() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid(), enabled: z.boolean() }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -455,7 +455,7 @@ export const adminListWallets = createServerFn({ method: "GET" })
 
 export const adminUpsertWallet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     id: z.string().uuid().optional(),
     currency: z.string().min(1).max(10),
     network: z.string().min(1).max(60),
@@ -481,7 +481,7 @@ export const adminUpsertWallet = createServerFn({ method: "POST" })
 
 export const adminDeleteWallet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -506,7 +506,7 @@ export const adminListTransactions = createServerFn({ method: "GET" })
 
 export const adminVerifyTransaction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     id: z.string().uuid(),
     action: z.enum(["verify", "reject"]),
     note: z.string().max(500).optional(),

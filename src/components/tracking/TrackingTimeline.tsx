@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Check, PackageCheck, PackageSearch, Plane, Truck, Home } from "lucide-react";
-import type { ShipmentStatus } from "@/lib/mock-shipments";
+import type { ShipmentStatus } from "@/lib/types";
 
 const steps: { key: ShipmentStatus; label: string; Icon: typeof Check }[] = [
   { key: "picked_up", label: "Picked up", Icon: PackageCheck },

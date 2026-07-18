@@ -31,11 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]);
       
       const profile = profileRes.data;
-      let userRoles = (rolesRes.data ?? []).map((r) => r.role);
+      let userRoles = (rolesRes.data ?? []).map((r) => r.role as string);
       
       // Fallback and aliasing logic based on KI
-      if (userRoles.length === 0 && profile?.role) {
-        userRoles = [profile.role];
+      if (userRoles.length === 0 && (profile as any)?.role) {
+        userRoles = [(profile as any).role];
       }
       
       userRoles = userRoles.map(r => r === "partner" ? "business" : r);

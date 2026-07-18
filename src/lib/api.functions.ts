@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { shipments as mockShipments, statusLabels, type ShipmentStatus } from "@/lib/mock-shipments";
+import { statusLabels, type ShipmentStatus } from "@/lib/types";
 
 // Sanitize DB errors before returning to the client. Raw Supabase/Postgres
 // error messages leak schema, constraint, and column names.
@@ -12,43 +12,13 @@ function dbFail(error: unknown, message = "Operation failed. Please try again.")
 }
 
 
-// ---------- Shipments (mock catalog + user-owned) ----------
-
-export const listShipments = createServerFn({ method: "GET" }).handler(async () => {
-  const now = Date.now();
-  return Object.values(mockShipments).map((s) => {
-    const cadenceMs =
-      s.status === "out_for_delivery" ? 45_000 :
-      s.status === "exception" ? 30_000 :
-      s.status === "in_transit" ? 60_000 :
-      s.status === "delivered" ? 15 * 60_000 :
-      120_000;
-    return {
-      id: s.id,
-      trackingNumber: s.trackingNumber,
-      status: s.status as ShipmentStatus,
-      statusLabel: statusLabels[s.status],
-      service: s.service,
-      origin: `${s.origin.city}, ${s.origin.country}`,
-      destination: `${s.destination.city}, ${s.destination.country}`,
-      recipient: s.recipient,
-      estimatedDelivery: s.estimatedDelivery,
-      progress: s.progress,
-      onTimeConfidence: s.onTimeConfidence,
-      lastUpdate: new Date(now - Math.random() * cadenceMs).toISOString(),
-      nextUpdateAt: new Date(now + cadenceMs).toISOString(),
-      exceptionNote: s.exceptionNote,
-      source: "sample" as const,
-    };
-  });
-});
-
+// ---------- Shipments (user-owned) ----------
 export const listMyShipments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("shipments")
-      .select("id, tracking_number, status, service, origin, destination, package, estimated_delivery, created_at, updated_at")
+      .select("id, tracking_number, status, service, origin, destination, package, estimated_delivery, created_at, updated_at, is_hazmat, volumetric_weight")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(200);
@@ -72,6 +42,11 @@ export const listMyShipments = createServerFn({ method: "GET" })
         nextUpdateAt: new Date(Date.now() + 90_000).toISOString(),
         exceptionNote: undefined,
         source: "user" as const,
+        package: r.package,
+        origin_raw: o,
+        destination_raw: d,
+        is_hazmat: r.is_hazmat,
+        volumetric_weight: r.volumetric_weight,
       };
     });
   });
@@ -80,10 +55,8 @@ export const listMyShipments = createServerFn({ method: "GET" })
 // server-side to look up a shipment by known ID (standard courier pattern),
 // returns only shareable columns.
 export const resolveTracking = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({ trackingNumber: z.string().min(4).max(64) }).parse(i))
+  .validator((i) => z.object({ trackingNumber: z.string().min(4).max(64) }).parse(i))
   .handler(async ({ data }) => {
-    const mock = mockShipments[data.trackingNumber];
-    if (mock) return { kind: "mock" as const, trackingNumber: mock.trackingNumber };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const query = supabaseAdmin
       .from("shipments")
@@ -149,7 +122,7 @@ export const getMyProfile = createServerFn({ method: "GET" })
 
 export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ display_name: z.string().min(1).max(120) }).parse(i))
+  .validator((i) => z.object({ display_name: z.string().min(1).max(120) }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("profiles").update({ display_name: data.display_name }).eq("id", context.userId);
     if (error) dbFail(error);
@@ -158,7 +131,7 @@ export const updateProfile = createServerFn({ method: "POST" })
 
 export const updateTheme = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ theme: z.enum(["light", "dark", "system"]) }).parse(i))
+  .validator((i) => z.object({ theme: z.enum(["light", "dark", "system"]) }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("profiles").update({ theme: data.theme }).eq("id", context.userId);
@@ -168,7 +141,7 @@ export const updateTheme = createServerFn({ method: "POST" })
 
 export const updateNotifPrefs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     notif_email: z.boolean().optional(),
     notif_sms: z.boolean().optional(),
     notif_push: z.boolean().optional(),
@@ -197,7 +170,7 @@ export const listNotifications = createServerFn({ method: "GET" })
 
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid(), read: z.boolean().default(true) }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid(), read: z.boolean().default(true) }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("notifications").update({ read: data.read })
@@ -246,7 +219,7 @@ export const listAddresses = createServerFn({ method: "GET" })
 
 export const upsertAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => AddressSchema.parse(i))
+  .validator((i) => AddressSchema.parse(i))
   .handler(async ({ data, context }) => {
     const payload = { ...data, user_id: context.userId } as any;
     if (data.id) {
@@ -261,7 +234,7 @@ export const upsertAddress = createServerFn({ method: "POST" })
 
 export const deleteAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("addresses").delete().eq("id", data.id).eq("user_id", context.userId);
     if (error) dbFail(error);
@@ -270,7 +243,7 @@ export const deleteAddress = createServerFn({ method: "POST" })
 
 export const setDefaultAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid(), role: z.enum(["sender", "recipient"]) }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid(), role: z.enum(["sender", "recipient"]) }).parse(i))
   .handler(async ({ data, context }) => {
     if (data.role === "sender") {
       await context.supabase.from("addresses").update({ is_default_sender: false }).eq("user_id", context.userId);
@@ -289,7 +262,7 @@ export const setDefaultAddress = createServerFn({ method: "POST" })
 const SLOTS = ["09:00 – 12:00", "12:00 – 15:00", "15:00 – 18:00", "18:00 – 20:00"] as const;
 
 export const getPickupSlots = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(i))
+  .validator((i) => z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(i))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin.rpc("get_pickup_slot_counts", { target_date: data.date });
@@ -313,7 +286,7 @@ export const getPickupSlots = createServerFn({ method: "POST" })
 
 export const createPickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     contact_name: z.string().min(1).max(120),
     company: z.string().max(120).optional(),
     address: z.string().min(1).max(200),
@@ -369,7 +342,7 @@ export const AddressSnapshot = z.object({
 
 export const bookShipment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     service: z.enum(["Priority Overnight", "Express", "Standard Ground", "Freight LTL"]),
     origin: AddressSnapshot,
     destination: AddressSnapshot,
@@ -384,6 +357,8 @@ export const bookShipment = createServerFn({ method: "POST" })
     declared_value: z.number().nonnegative().max(100_000).default(0), // Max $100k
     insurance: z.boolean().default(false),
     signature_required: z.boolean().default(false),
+    is_hazmat: z.boolean().default(false),
+    volumetric_weight: z.number().optional(),
     notes: z.string().max(250).optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
@@ -402,14 +377,20 @@ export const bookShipment = createServerFn({ method: "POST" })
 
     // Calculate rate server-side
     const wt = Math.max(1, data.package.weight_kg);
+    let volWt = 0;
+    if (data.package.length_cm && data.package.width_cm && data.package.height_cm) {
+      volWt = (data.package.length_cm * data.package.width_cm * data.package.height_cm) / 5000;
+    }
+    const chargeableWt = Math.max(wt, volWt);
     const pieces = Math.max(1, data.package.pieces);
     const baseRates: Record<string, number> = { "Priority Overnight": 89, "Express": 49, "Standard Ground": 24, "Freight LTL": 149 };
     const base = baseRates[data.service] ?? 49;
-    const weightFee = wt * (data.service === "Freight LTL" ? 2 : data.service === "Standard Ground" ? 3 : 6);
+    const weightFee = chargeableWt * (data.service === "Freight LTL" ? 2 : data.service === "Standard Ground" ? 3 : 6);
     const piecesFee = (pieces - 1) * (data.service === "Freight LTL" ? 40 : 12);
     const insuranceFee = data.insurance ? Math.max(6, data.declared_value * 0.008) : 0;
     const signatureFee = data.signature_required ? 4 : 0;
-    const totalAmount = Math.round((base + weightFee + piecesFee + insuranceFee + signatureFee) * 100) / 100;
+    const hazmatFee = data.is_hazmat ? 25 : 0;
+    const totalAmount = Math.round((base + weightFee + piecesFee + insuranceFee + signatureFee + hazmatFee) * 100) / 100;
 
     const { data: result, error } = await context.supabase.rpc("create_shipment_with_payment", {
       p_user_id: context.userId,
@@ -423,6 +404,8 @@ export const bookShipment = createServerFn({ method: "POST" })
       p_notes: data.notes ?? null,
       p_estimated_delivery: eta,
       p_total_amount: totalAmount,
+      p_is_hazmat: data.is_hazmat,
+      p_volumetric_weight: data.volumetric_weight ?? null,
     });
     if (error) dbFail(error);
 
@@ -473,7 +456,7 @@ export const listInvoices = createServerFn({ method: "GET" })
 
 export const getInvoiceById = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("invoices").select("*").eq("id", data.id).eq("user_id", context.userId).maybeSingle();
@@ -500,7 +483,7 @@ const DOCS_BY_CATEGORY: Record<string, string[]> = {
 };
 
 export const estimateCustoms = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     country: z.string(),
     category: z.string(),
     value: z.number().nonnegative(),
@@ -540,7 +523,7 @@ export const estimateCustoms = createServerFn({ method: "POST" })
 // ---------- Rating Engine ----------
 
 export const calculateRates = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     weight: z.number().positive().max(10000),
     zone: z.enum(["regional", "international", "intercontinental"])
   }).parse(i))
@@ -566,7 +549,7 @@ export const calculateRates = createServerFn({ method: "POST" })
 // ---------- Fleet & Courier ----------
 
 export const submitProofOfDelivery = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     trackingNumber: z.string().min(4).max(64),
     signedBy: z.string().min(1).max(120),
     signatureSvgPath: z.string().min(1),
@@ -603,7 +586,7 @@ export const submitProofOfDelivery = createServerFn({ method: "POST" })
   });
 
 export const updateTelemetry = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     trackingNumber: z.string().min(4).max(64),
     healthScore: z.number().min(0).max(100),
     temperatureC: z.number(),
@@ -633,7 +616,7 @@ export const updateTelemetry = createServerFn({ method: "POST" })
 
 export const getCheckoutTransaction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ transactionId: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ transactionId: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { data: txn, error } = await context.supabase
       .from("payment_transactions")
@@ -672,7 +655,7 @@ export const listActiveWallets = createServerFn({ method: "GET" })
 
 export const selectPaymentMethod = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     transactionId: z.string().uuid(),
     method: z.enum(["card", "bank_transfer", "crypto"]),
     walletId: z.string().uuid().optional(),
@@ -705,7 +688,7 @@ export const selectPaymentMethod = createServerFn({ method: "POST" })
 
 export const markTransactionPaid = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     transactionId: z.string().uuid(),
     method: z.enum(["card", "bank_transfer", "crypto"]),
     cardLast4: z.string().max(4).optional(),

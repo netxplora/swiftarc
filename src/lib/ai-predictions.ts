@@ -1,4 +1,4 @@
-import { statusLabels } from "./mock-shipments";
+import { statusLabels } from "./types";
 
 /**
  * AI heuristics engine that evaluates shipments for potential delays.

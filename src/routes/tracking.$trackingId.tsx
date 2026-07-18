@@ -13,7 +13,7 @@ import {
 import { TrackingTimeline } from "@/components/tracking/TrackingTimeline";
 import { EtaCountdown } from "@/components/tracking/EtaCountdown";
 import { ShareDialog } from "@/components/tracking/ShareDialog";
-import { getShipment, statusLabels } from "@/lib/mock-shipments";
+import { statusLabels } from "@/lib/types";
 import { resolveTracking } from "@/lib/api.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { generateShippingLabel } from "@/lib/pdf";
@@ -24,11 +24,6 @@ export const Route = createFileRoute("/tracking/$trackingId")({
   loader: async ({ params }) => {
     const res = await resolveTracking({ data: { trackingNumber: params.trackingId } });
     if (res.kind === "none") throw notFound();
-    if (res.kind === "mock") {
-      const shipment = getShipment(params.trackingId);
-      if (!shipment) throw notFound();
-      return { kind: "mock" as const, shipment };
-    }
     return res;
   },
   head: ({ loaderData }) => ({
@@ -72,31 +67,32 @@ function NotFound() {
 
 function TrackingDetail() {
   const data = Route.useLoaderData();
-  const shipment = data.kind === "mock" ? data.shipment : {
-    id: data.shipment.trackingNumber,
-    trackingNumber: data.shipment.trackingNumber,
-    service: data.shipment.service,
-    status: data.shipment.status as any,
-    progress: data.shipment.status === "delivered" ? 100 : data.shipment.status === "out_for_delivery" ? 88 : data.shipment.status === "in_transit" ? 55 : data.shipment.status === "picked_up" ? 25 : 8,
-    origin: { city: data.shipment.origin?.city ?? "Origin", country: data.shipment.origin?.country_code ?? "", lat: 37.7749, lng: -122.4194 },
-    destination: { city: data.shipment.destination?.city ?? "Destination", country: data.shipment.destination?.country_code ?? "", lat: 40.7128, lng: -74.0060 },
-    currentLocation: { lat: 39.0, lng: -98.0, label: data.events[0]?.location ?? "Processing" },
-    weightKg: (data.shipment.package as any)?.weight_kg ?? 0,
-    dimensions: `${(data.shipment.package as any)?.length_cm ?? 0} × ${(data.shipment.package as any)?.width_cm ?? 0} × ${(data.shipment.package as any)?.height_cm ?? 0} cm`,
-    pieces: (data.shipment.package as any)?.pieces ?? 1,
-    shipDate: data.shipment.createdAt,
-    estimatedDelivery: data.shipment.estimatedDelivery ?? new Date().toISOString(),
-    recipient: "Recipient (Secured)",
-    sender: "Sender",
+  const s = data.shipment as any;
+  const shipment = {
+    id: s.id ?? s.trackingNumber,
+    trackingNumber: s.trackingNumber,
+    service: s.service,
+    status: s.status as any,
+    progress: s.status === "delivered" ? 100 : s.status === "out_for_delivery" ? 88 : s.status === "in_transit" ? 55 : s.status === "picked_up" ? 25 : 8,
+    origin: { city: s.origin?.city ?? "Origin", country: s.origin?.country_code ?? s.origin?.country ?? "", lat: s.origin?.lat ?? 0, lng: s.origin?.lng ?? 0 },
+    destination: { city: s.destination?.city ?? "Destination", country: s.destination?.country_code ?? s.destination?.country ?? "", lat: s.destination?.lat ?? 0, lng: s.destination?.lng ?? 0 },
+    currentLocation: { lat: (data as any).events?.[0]?.lat ?? s.destination?.lat ?? 0, lng: (data as any).events?.[0]?.lng ?? s.destination?.lng ?? 0, label: (data as any).events?.[0]?.location ?? "Processing" },
+    weightKg: s.package?.weight_kg ?? 0,
+    dimensions: `${s.package?.length_cm ?? 0} × ${s.package?.width_cm ?? 0} × ${s.package?.height_cm ?? 0} cm`,
+    pieces: s.package?.pieces ?? 1,
+    shipDate: s.createdAt ?? s.created_at ?? new Date().toISOString(),
+    estimatedDelivery: s.estimatedDelivery ?? s.estimated_delivery ?? new Date(Date.now() + 3 * 86400_000).toISOString(),
+    recipient: s.destination?.contact_name ?? "Recipient",
+    sender: s.origin?.contact_name ?? "Sender",
     reference: "-",
-    onTimeConfidence: (data.shipment as any).onTimeConfidence ?? 90,
-    aiNote: (data.shipment as any).aiNote ?? "Standard DB tracking",
-    healthScore: (data.shipment as any).telemetry?.healthScore ?? 100,
-    temperatureC: (data.shipment as any).telemetry?.temperatureC ?? 20,
-    shockEvents: (data.shipment as any).telemetry?.shockEvents ?? 0,
-    proofOfDelivery: (data.shipment as any).proof_of_delivery,
-    exceptionNote: undefined,
-    checkpoints: data.events.map((e, i) => ({
+    onTimeConfidence: s.onTimeConfidence ?? 90,
+    aiNote: s.aiNote ?? "Route analysis in progress.",
+    healthScore: s.telemetry?.healthScore ?? 100,
+    temperatureC: s.telemetry?.temperatureC ?? 20,
+    shockEvents: s.telemetry?.shockEvents ?? 0,
+    proofOfDelivery: s.proof_of_delivery ?? s.proofOfDelivery,
+    exceptionNote: s.exceptionNote,
+    checkpoints: ((data as any).events ?? []).map((e: any) => ({
       id: e.id, timestamp: e.occurred_at, facility: e.location ?? "Facility", city: "", country: "", status: e.description, lat: 0, lng: 0
     })),
   };
@@ -105,13 +101,15 @@ function TrackingDetail() {
 
   useEffect(() => {
     if (data.kind !== "db") return;
-    const ch = supabase.channel(`tracking_${data.shipment.id}`)
+    const shipId = (data.shipment as any).id;
+    if (!shipId) return;
+    const ch = supabase.channel(`tracking_${shipId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "shipment_events", filter: `shipment_id=eq.${data.shipment.id}` },
+        { event: "INSERT", schema: "public", table: "shipment_events", filter: `shipment_id=eq.${shipId}` },
         (payload) => {
           const e = payload.new as any;
-          setRealtimeCheckpoints((prev) => [
+          setRealtimeCheckpoints((prev: any[]) => [
             { id: e.id, timestamp: e.occurred_at, facility: e.location ?? "Facility", city: "", country: "", status: e.description, lat: 0, lng: 0 },
             ...prev,
           ]);

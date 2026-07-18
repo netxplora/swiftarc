@@ -16,7 +16,6 @@ import { Counter } from "@/components/animated/Counter";
 import { UpdatesTicker } from "@/components/home/UpdatesTicker";
 import { PartnerMarquee } from "@/components/home/PartnerMarquee";
 import { CoverageMap } from "@/components/home/CoverageMap";
-import { sampleTrackingIds } from "@/lib/mock-shipments";
 import heroArc from "@/assets/hero-bg.jpg";
 import warehouse from "@/assets/warehouse.jpg";
 import delivery from "@/assets/delivery.jpg";
@@ -136,20 +135,6 @@ function Hero() {
               Track shipment <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </motion.form>
-
-          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-cream/60">
-            <span>Try:</span>
-            {sampleTrackingIds.map((id) => (
-              <Link
-                key={id}
-                to="/tracking/$trackingId"
-                params={{ trackingId: id }}
-                className="font-mono text-amber hover:underline"
-              >
-                {id}
-              </Link>
-            ))}
-          </div>
 
           <div className="mt-10 grid max-w-lg grid-cols-3 gap-6">
             {[

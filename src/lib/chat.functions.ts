@@ -38,7 +38,7 @@ export const getOrCreateConversation = createServerFn({ method: "POST" })
 
 export const listMessages = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ conversationId: z.string().uuid() }).parse(i))
+  .validator((i) => z.object({ conversationId: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("chat_messages")
@@ -52,7 +52,7 @@ export const listMessages = createServerFn({ method: "POST" })
 
 export const sendMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({
+  .validator((i) => z.object({
     conversationId: z.string().uuid(),
     body: z.string().min(1).max(4000),
   }).parse(i))

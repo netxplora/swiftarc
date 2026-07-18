@@ -8,7 +8,6 @@ import {
   Home, PackageSearch, Calculator, MapPin, Building2, LifeBuoy,
   BookOpen, LogIn, UserPlus, Truck, Info, Mail,
 } from "lucide-react";
-import { sampleTrackingIds } from "@/lib/mock-shipments";
 
 const routes = [
   { to: "/", label: "Home", Icon: Home },
@@ -41,7 +40,6 @@ export function CommandPalette() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const trimmed = query.trim().toUpperCase();
   const isTrackingLike = /^SA[-\s]?/i.test(query.trim()) || /^\w{2,}-?\d/.test(query.trim());
 
   const go = (to: string) => {
@@ -63,7 +61,7 @@ export function CommandPalette() {
       />
       <CommandList>
         <CommandEmpty>No results.</CommandEmpty>
-        {isTrackingLike && trimmed.length >= 4 && (
+        {isTrackingLike && query.trim().length >= 4 && (
           <>
             <CommandGroup heading="Track">
               <CommandItem onSelect={() => goTrack(query.trim())}>
@@ -79,15 +77,6 @@ export function CommandPalette() {
             <CommandItem key={r.to} onSelect={() => go(r.to)}>
               <r.Icon className="mr-2 h-4 w-4" />
               {r.label}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup heading="Sample shipments">
-          {sampleTrackingIds.map((id) => (
-            <CommandItem key={id} onSelect={() => goTrack(id)}>
-              <PackageSearch className="mr-2 h-4 w-4 text-amber" />
-              <span className="font-mono">{id}</span>
             </CommandItem>
           ))}
         </CommandGroup>

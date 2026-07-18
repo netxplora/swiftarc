@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck, Loader2 } from "lucide-react";
-import { statusLabels } from "@/lib/mock-shipments";
+import { statusLabels } from "@/lib/types";
 import { Counter } from "@/components/animated/Counter";
 import { listMyShipments, listInvoices, getMyProfile } from "@/lib/api.functions";
 

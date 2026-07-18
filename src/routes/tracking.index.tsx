@@ -5,8 +5,7 @@ import { PackageSearch, Bell, ShieldCheck, Zap, ArrowRight, XCircle, Search } fr
 import { PageHero } from "@/components/site/PageHero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getShipment, sampleTrackingIds, statusLabels } from "@/lib/mock-shipments";
-import type { Shipment } from "@/lib/mock-shipments";
+import { statusLabels } from "@/lib/types";
 import { resolveTracking } from "@/lib/api.functions";
 import { useServerFn } from "@tanstack/react-start";
 
@@ -24,9 +23,18 @@ export const Route = createFileRoute("/tracking/")({
   component: TrackingLanding,
 });
 
+interface TrackingResult {
+  id: string;
+  trackingNumber?: string;
+  originCity?: string;
+  destCity?: string;
+  status?: string;
+  service?: string;
+}
+
 function TrackingLanding() {
   const [ids, setIds] = useState("");
-  const [results, setResults] = useState<Array<{ id: string; shipment?: Shipment }>>([]);
+  const [results, setResults] = useState<TrackingResult[]>([]);
   const navigate = useNavigate();
 
   const lookupFn = useServerFn(resolveTracking);
@@ -42,18 +50,24 @@ function TrackingLanding() {
       return;
     }
     
-    const results = await Promise.all(parsed.map(async (id) => {
+    const lookupResults = await Promise.all(parsed.map(async (id) => {
       try {
         const res = await lookupFn({ data: { trackingNumber: id } });
         if (res.kind === "db") {
-          return { id, shipment: { ...res.shipment, origin: res.shipment.origin as any, destination: res.shipment.destination as any } };
-        } else if (res.kind === "mock") {
-          return { id, shipment: getShipment(id) };
+          const s = res.shipment as any;
+          return {
+            id,
+            trackingNumber: s.trackingNumber,
+            originCity: s.origin?.city ?? "",
+            destCity: s.destination?.city ?? "",
+            status: s.status,
+            service: s.service,
+          };
         }
       } catch (e) {}
-      return { id };
+      return { id } as TrackingResult;
     }));
-    setResults(results as any);
+    setResults(lookupResults);
   };
 
   return (
@@ -89,14 +103,9 @@ function TrackingLanding() {
           </div>
         </form>
 
-        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-cream/60">
-          <span>Sample numbers:</span>
-          {sampleTrackingIds.map((sid) => (
-            <Link key={sid} to="/tracking/$trackingId" params={{ trackingId: sid }} className="font-mono text-amber hover:underline">
-              {sid}
-            </Link>
-          ))}
-        </div>
+        <p className="mt-4 text-xs text-cream/60">
+          Enter a SwiftArc tracking number (e.g. SA followed by 10 digits) to get started.
+        </p>
       </PageHero>
       <div className="bg-navy-deep text-cream -mt-px pt-4">
         {results.length > 0 && (
@@ -110,22 +119,22 @@ function TrackingLanding() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
                 >
-                  {r.shipment ? (
+                  {r.trackingNumber ? (
                     <Link
                       to="/tracking/$trackingId"
-                      params={{ trackingId: r.shipment.trackingNumber }}
+                      params={{ trackingId: r.trackingNumber }}
                       className="grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-cream/10 bg-cream/5 p-4 transition-colors hover:bg-cream/10"
                     >
                       <span className="grid h-10 w-10 place-items-center rounded-full bg-amber text-navy-deep">
                         <PackageSearch className="h-4 w-4" />
                       </span>
                       <div className="min-w-0">
-                        <p className="font-mono text-sm text-amber">{r.shipment.trackingNumber}</p>
+                        <p className="font-mono text-sm text-amber">{r.trackingNumber}</p>
                         <p className="truncate font-display text-base">
-                          {r.shipment.origin.city} → {r.shipment.destination.city}
+                          {r.originCity} → {r.destCity}
                         </p>
                         <p className="text-xs text-cream/60">
-                          {statusLabels[r.shipment.status]} · {r.shipment.service}
+                          {statusLabels[r.status ?? ""] ?? r.status} · {r.service}
                         </p>
                       </div>
                       <ArrowRight className="h-4 w-4 text-cream/60" />
