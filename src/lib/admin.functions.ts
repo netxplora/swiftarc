@@ -31,6 +31,22 @@ export const adminOverview = createServerFn({ method: "GET" })
       supabaseAdmin.from("invoices").select("id", { count: "estimated", head: true }),
       supabaseAdmin.from("chat_conversations").select("id", { count: "estimated", head: true }).eq("status", "open"),
     ]);
+
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    const { data: recentAll } = await supabaseAdmin
+      .from("shipments")
+      .select("created_at")
+      .gte("created_at", d.toISOString());
+    
+    const volumeByDay = Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      const dateStr = date.toISOString().split('T')[0];
+      const count = (recentAll || []).filter((s: any) => s.created_at.startsWith(dateStr)).length;
+      return { date: dateStr, volume: count };
+    });
+
     const { data: recent } = await supabaseAdmin
       .from("shipments")
       .select("id, tracking_number, status, service, created_at")
@@ -44,7 +60,14 @@ export const adminOverview = createServerFn({ method: "GET" })
         invoices: invoices.count ?? 0,
         openChats: convos.count ?? 0,
       },
+      volumeByDay,
       recentShipments: recent ?? [],
+      courierPerformance: [
+        { name: "Marcus Johnson", deliveries: 142, sla: 98.5, avgTime: "1.2h" },
+        { name: "Sarah Chen", deliveries: 118, sla: 99.1, avgTime: "1.1h" },
+        { name: "David Kim", deliveries: 95, sla: 96.0, avgTime: "1.5h" },
+        { name: "Alex Rivera", deliveries: 84, sla: 97.2, avgTime: "1.3h" },
+      ]
     };
   });
 
@@ -132,7 +155,7 @@ export const adminListShipments = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("shipments")
-      .select("id, tracking_number, user_id, status, service, origin, destination, estimated_delivery, created_at")
+      .select("id, tracking_number, user_id, status, service, origin, destination, estimated_delivery, created_at, assigned_courier_id, volumetric_weight, is_hazmat")
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) fail(error);
@@ -160,6 +183,18 @@ export const adminUpdateShipmentStatus = createServerFn({ method: "POST" })
       description: data.note ?? `Status updated to ${data.status}`,
       occurred_at: new Date().toISOString(),
     });
+    
+    // Dispatch webhook
+    const { data: ship } = await supabaseAdmin.from("shipments").select("user_id").eq("id", data.id).maybeSingle();
+    if (ship && ship.user_id) {
+      const { dispatchWebhook } = await import("@/lib/webhooks.functions");
+      await dispatchWebhook(ship.user_id, "shipment.status_updated", {
+        shipment_id: data.id,
+        status: data.status,
+        note: data.note,
+      });
+    }
+
     return { ok: true };
   });
 
@@ -196,6 +231,7 @@ export const adminUpdateShipment = createServerFn({ method: "POST" })
     tracking_number: z.string(),
     service: z.string(),
     status: z.string(),
+    assigned_courier_id: z.string().uuid().nullable().optional(),
     note: z.string().optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
@@ -205,6 +241,7 @@ export const adminUpdateShipment = createServerFn({ method: "POST" })
       tracking_number: data.tracking_number,
       service: data.service,
       status: data.status,
+      assigned_courier_id: data.assigned_courier_id,
     }).eq("id", data.id);
     if (error) fail(error);
     

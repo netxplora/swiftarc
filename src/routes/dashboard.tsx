@@ -3,8 +3,12 @@ import { createFileRoute, Outlet, useNavigate, useRouterState, redirect } from "
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export const Route = createFileRoute("/dashboard")({
   ssr: false,
@@ -22,24 +26,23 @@ export const Route = createFileRoute("/dashboard")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  pendingComponent: DashboardSkeleton,
+  pendingMs: 150,
   component: DashboardLayout,
 });
-
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function DashboardLayout() {
   return (
     <ProtectedRoute>
       <SidebarProvider>
-        <div className="flex min-h-[calc(100dvh-4rem)] w-full">
+        <div className="flex min-h-dvh w-full">
           <DashboardSidebar />
-          <SidebarInset>
-            <div className="sticky top-16 z-20 flex h-12 items-center gap-2 border-b border-border/60 bg-background/80 px-4 backdrop-blur">
-              <SidebarTrigger />
-              <span className="text-xs text-muted-foreground">Workspace</span>
-            </div>
-            <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-              <Outlet />
+          <SidebarInset className="flex flex-col flex-1 min-w-0">
+            <DashboardHeader />
+            <div className="flex-1 w-full p-4 sm:p-6 lg:p-8">
+              <div className="mx-auto w-full max-w-7xl">
+                <Outlet />
+              </div>
             </div>
           </SidebarInset>
         </div>

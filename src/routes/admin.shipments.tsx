@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { adminListShipments, adminUpdateShipmentStatus, adminDeleteShipment, adminCreateShipment, adminUpdateShipment } from "@/lib/admin.functions";
-import { Loader2, Trash2, Plus, Edit2 } from "lucide-react";
+import { adminListShipments, adminUpdateShipmentStatus, adminDeleteShipment, adminCreateShipment, adminUpdateShipment, adminListUsers } from "@/lib/admin.functions";
+import { Loader2, Trash2, Plus, Edit2, User } from "lucide-react";
 
 const STATUSES = ["label_created","picked_up","in_transit","out_for_delivery","delivered","exception"] as const;
 
@@ -25,6 +25,7 @@ function AdminShipments() {
   const [filter, setFilter] = useState<string>("all");
 
   const q = useQuery({ queryKey: ["admin-shipments"], queryFn: () => list() });
+  const usersQ = useQuery({ queryKey: ["admin-users"], queryFn: () => useServerFn(adminListUsers)() });
 
   const updateMut = useMutation({
     mutationFn: (v: { id: string; status: string }) => update({ data: v }),
@@ -46,7 +47,7 @@ function AdminShipments() {
           <h1 className="font-display text-3xl">Shipments</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage network shipments.</p>
         </div>
-        <ShipmentForm mode="create" onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-shipments"] })} />
+        <ShipmentForm mode="create" onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-shipments"] })} users={usersQ.data ?? []} />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -66,6 +67,7 @@ function AdminShipments() {
                 <tr className="border-b border-border">
                   <th className="p-3">Tracking</th>
                   <th className="p-3">Service</th>
+                  <th className="p-3">Courier</th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Created</th>
                   <th className="p-3 text-right">Actions</th>
@@ -76,6 +78,13 @@ function AdminShipments() {
                   <tr key={r.id} className="border-b border-border last:border-0">
                     <td className="p-3 font-mono text-xs">{r.tracking_number}</td>
                     <td className="p-3">{r.service}</td>
+                    <td className="p-3">
+                      {r.assigned_courier_id ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-navy-deep bg-navy/10 px-2 py-1 rounded-full"><User className="h-3 w-3" /> {(usersQ.data ?? []).find((u:any) => u.id === r.assigned_courier_id)?.displayName ?? "Assigned"}</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">Unassigned</span>
+                      )}
+                    </td>
                     <td className="p-3">
                       <select
                         value={r.status ?? ""}
@@ -88,7 +97,7 @@ function AdminShipments() {
                     <td className="p-3 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
                     <td className="p-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <ShipmentForm mode="edit" initial={r} onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-shipments"] })} />
+                        <ShipmentForm mode="edit" initial={r} onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-shipments"] })} users={usersQ.data ?? []} />
                         <Button size="sm" variant="ghost" onClick={() => { if (confirm("Delete shipment?")) delMut.mutate(r.id); }}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -106,13 +115,14 @@ function AdminShipments() {
   );
 }
 
-function ShipmentForm({ mode, initial, onSuccess }: { mode: "create" | "edit"; initial?: any; onSuccess: () => void }) {
+function ShipmentForm({ mode, initial, onSuccess, users }: { mode: "create" | "edit"; initial?: any; onSuccess: () => void; users: any[] }) {
   const [open, setOpen] = useState(false);
   const createMut = useServerFn(adminCreateShipment);
   const updateMut = useServerFn(adminUpdateShipment);
   const [tracking, setTracking] = useState(initial?.tracking_number ?? "");
   const [service, setService] = useState(initial?.service ?? "Standard");
   const [status, setStatus] = useState(initial?.status ?? "label_created");
+  const [courierId, setCourierId] = useState(initial?.assigned_courier_id ?? "");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -123,7 +133,7 @@ function ShipmentForm({ mode, initial, onSuccess }: { mode: "create" | "edit"; i
       if (mode === "create") {
         await createMut({ data: { tracking_number: tracking, service, status, origin: {}, destination: {} } });
       } else {
-        await updateMut({ data: { id: initial.id, tracking_number: tracking, service, status, note } });
+        await updateMut({ data: { id: initial.id, tracking_number: tracking, service, status, note, assigned_courier_id: courierId || undefined } });
       }
       toast.success(`Shipment ${mode}d`);
       setOpen(false);
@@ -160,6 +170,15 @@ function ShipmentForm({ mode, initial, onSuccess }: { mode: "create" | "edit"; i
               {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
+          {mode === "edit" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Assigned Courier</label>
+              <select value={courierId} onChange={e => setCourierId(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <option value="">-- Unassigned --</option>
+                {users.map(u => <option key={u.id} value={u.id}>{u.displayName} ({u.id.substring(0,8)})</option>)}
+              </select>
+            </div>
+          )}
           <div className="space-y-2">
             <label className="text-sm font-medium">Event Note (optional)</label>
             <Input value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Arrived at facility" />

@@ -6,6 +6,8 @@ import {
   ShieldCheck, Clock, Sparkles, MapPin, Building2, Users, Star,
   Smartphone, ChevronRight, Zap,
 } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
+import { SectionHead } from "@/components/site/SectionHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -34,7 +36,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Ship, track, and optimize freight across 220+ countries with SwiftArc's engineered logistics network and AI-powered delivery intelligence.",
+          "Ship, track, and optimize freight across 220+ countries with SwiftArc's engineered logistics network and predictive delivery intelligence.",
       },
       { property: "og:title", content: "SwiftArc — Engineered Global Logistics" },
       {
@@ -81,7 +83,7 @@ function Hero() {
         className="absolute inset-0 h-full w-full object-cover opacity-70"
       />
       <div className="absolute inset-0 arc-grid opacity-20" aria-hidden />
-      <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 via-navy-deep/40 to-transparent" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-tr from-navy-deep via-navy-deep/60 to-navy-deep/20" aria-hidden />
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.3fr_1fr] lg:gap-16 lg:px-8 lg:py-28">
         <div>
@@ -201,7 +203,7 @@ function Hero() {
             </div>
             <div className="mt-4 flex items-center gap-3 text-xs text-cream/60">
               <Sparkles className="h-4 w-4 text-amber" />
-              AI: 6-minute buffer over ETA. High confidence.
+              Predictive ETA: 6-minute buffer. High confidence.
             </div>
           </div>
         </motion.div>
@@ -348,8 +350,9 @@ function BusinessSolutions() {
     { icon: Users, title: "SMB", desc: "Flat pricing, one-click booking, no monthly minimums." },
   ];
   return (
-    <section className="bg-navy-deep text-cream">
-      <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden bg-navy-deep text-cream">
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-deep to-navy opacity-50" aria-hidden />
+      <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <SectionHead
           tone="light"
           eyebrow="Business solutions"
@@ -456,7 +459,7 @@ function Testimonials() {
 function LatestNews() {
   const news = [
     { tag: "Network", title: "SwiftArc opens new Frankfurt air gateway", date: "Jul 3, 2026" },
-    { tag: "Product", title: "AI delivery predictions expand to freight lanes", date: "Jun 24, 2026" },
+    { tag: "Product", title: "Predictive routing expands to freight lanes", date: "Jun 24, 2026" },
     { tag: "Sustainability", title: "80% of last-mile fleet now electric in EU", date: "Jun 12, 2026" },
   ];
   return (
@@ -492,7 +495,7 @@ function AppPromo() {
             Ship and track from your pocket.
           </h2>
           <p className="mt-4 max-w-md text-cream/70">
-            Real-time push updates, AI ETAs, one-tap redirects, and offline label
+            Real-time push updates, predictive ETAs, one-tap redirects, and offline label
             preview. Available on iOS and Android.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -521,35 +524,6 @@ function AppPromo() {
   );
 }
 
-function SectionHead({
-  eyebrow, title, link, tone = "dark",
-}: {
-  eyebrow: string;
-  title: string;
-  link?: { to: string; label: string };
-  tone?: "light" | "dark";
-}) {
-  return (
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p className={`text-xs font-semibold uppercase tracking-widest ${tone === "light" ? "text-amber" : "text-amber"}`}>
-          {eyebrow}
-        </p>
-        <h2 className={`mt-2 max-w-2xl font-display text-4xl font-bold tracking-tight sm:text-5xl ${tone === "light" ? "text-cream" : ""}`}>
-          {title}
-        </h2>
-      </div>
-      {link && (
-        <Link
-          to={link.to}
-          className={`group inline-flex items-center gap-1 text-sm font-medium ${tone === "light" ? "text-cream" : "text-navy-deep"}`}
-        >
-          {link.label} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </Link>
-      )}
-    </div>
-  );
-}
 
 // ----- NEW SECTIONS -----
 

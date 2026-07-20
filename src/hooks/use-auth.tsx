@@ -29,6 +29,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", userId)
       ]);
+
+      // Detect expired/invalid sessions via HTTP status (401/403) or JWT error messages.
+      // Note: error.code contains PostgreSQL codes (e.g. "PGRST301"), NOT HTTP status.
+      // The HTTP status is on the response object's .status field.
+      const isUnauthorized =
+        profileRes.status === 401 || rolesRes.status === 401 ||
+        profileRes.status === 403 || rolesRes.status === 403 ||
+        profileRes.error?.message?.includes("JWT") || rolesRes.error?.message?.includes("JWT");
+
+      if (isUnauthorized) {
+        console.warn("[Auth] Session expired or invalid — signing out.");
+        await supabase.auth.signOut();
+        setState(prev => ({ ...prev, user: null, profile: null, roles: [], signedIn: false, loading: false }));
+        return;
+      }
       
       const profile = profileRes.data;
       let userRoles = (rolesRes.data ?? []).map((r) => r.role as string);

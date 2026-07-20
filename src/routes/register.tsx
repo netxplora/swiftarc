@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -39,6 +40,7 @@ const strengthColors = ["bg-destructive", "bg-destructive", "bg-amber", "bg-succ
 function Register() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState<"create" | "join">("create");
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [company, setCompany] = useState("");
@@ -105,43 +107,76 @@ function Register() {
           <span className="h-px flex-1 bg-border" /> or with email <span className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div><Label>First name</Label><Input required value={first} onChange={(e) => setFirst(e.target.value)} className="mt-1.5 h-11" /></div>
-          <div><Label>Last name</Label><Input required value={last} onChange={(e) => setLast(e.target.value)} className="mt-1.5 h-11" /></div>
-          <div className="sm:col-span-2"><Label>Company</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} className="mt-1.5 h-11" /></div>
-          <div className="sm:col-span-2"><Label>Work email</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 h-11" /></div>
-          <div className="sm:col-span-2">
-            <Label>Password</Label>
-            <div className="relative mt-1.5">
-              <Input 
-                type={showPassword ? "text" : "password"} 
-                required 
-                value={pw} 
-                onChange={(e) => setPw(e.target.value)} 
-                className="h-11 pr-10" 
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+        <div className="flex gap-2 mb-6 p-1 bg-secondary/50 rounded-lg">
+          <button type="button" onClick={() => setMode("create")} className={cn("flex-1 text-sm font-medium py-2 px-3 rounded-md transition-all", mode === "create" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground")}>Create Workspace</button>
+          <button type="button" onClick={() => setMode("join")} className={cn("flex-1 text-sm font-medium py-2 px-3 rounded-md transition-all", mode === "join" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground")}>Join Team</button>
+        </div>
+
+        {mode === "join" && (
+          <div className="mb-6 space-y-4 rounded-xl border border-amber/20 bg-amber/5 p-4">
+            <h3 className="font-semibold text-amber-deep">Got an invite?</h3>
+            <p className="text-sm text-amber-deep/80">Enter your company's secure invite code to automatically link your account to their workspace.</p>
+            <div className="space-y-2">
+              <Label>Invite Code</Label>
+              <Input placeholder="e.g. SWIFT-8X92-AL" className="font-mono uppercase bg-background" />
             </div>
-            {pw && (
-              <div className="mt-2">
-                <div className="flex gap-1">
-                  {[0, 1, 2, 3].map((i) => (
-                    <span key={i} className={`h-1.5 flex-1 rounded-full ${i < score ? strengthColors[score] : "bg-secondary"}`} />
-                  ))}
-                </div>
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  Password strength: <span className="font-medium text-foreground">{strengthLabels[score]}</span>
-                </p>
-              </div>
-            )}
           </div>
+        )}
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="first">First name</Label>
+            <Input id="first" required value={first} onChange={e=>setFirst(e.target.value)} className="h-11" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="last">Last name</Label>
+            <Input id="last" required value={last} onChange={e=>setLast(e.target.value)} className="h-11" />
+          </div>
+        </div>
+        
+        {mode === "create" && (
+          <div className="mt-4 space-y-2">
+            <Label htmlFor="company">Company / Workspace Name</Label>
+            <Input id="company" placeholder="Acme Logistics Corp" required value={company} onChange={e=>setCompany(e.target.value)} className="h-11" />
+          </div>
+        )}
+
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="email">Work Email</Label>
+          <Input id="email" type="email" placeholder="you@company.com" required value={email} onChange={e=>setEmail(e.target.value)} className="h-11" />
+        </div>
+
+        <div className="mt-4 space-y-2">
+          <Label>Password</Label>
+          <div className="relative">
+            <Input 
+              type={showPassword ? "text" : "password"} 
+              required 
+              value={pw} 
+              onChange={(e) => setPw(e.target.value)} 
+              className="h-11 pr-10" 
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {pw && (
+            <div className="mt-2">
+              <div className="flex gap-1">
+                {[0, 1, 2, 3].map((i) => (
+                  <span key={i} className={`h-1.5 flex-1 rounded-full ${i < score ? strengthColors[score] : "bg-secondary"}`} />
+                ))}
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Password strength: <span className="font-medium text-foreground">{strengthLabels[score]}</span>
+              </p>
+            </div>
+          )}
         </div>
 
         <Button disabled={busy || score < 2} type="submit" className="mt-6 h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft disabled:opacity-60">

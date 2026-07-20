@@ -37,15 +37,19 @@ import { Route as DashboardShipmentsRouteImport } from './routes/dashboard.shipm
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardNotificationsRouteImport } from './routes/dashboard.notifications'
 import { Route as DashboardInvoicesRouteImport } from './routes/dashboard.invoices'
+import { Route as DashboardApiKeysRouteImport } from './routes/dashboard.api-keys'
 import { Route as DashboardAddressBookRouteImport } from './routes/dashboard.address-book'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShipmentsRouteImport } from './routes/admin.shipments'
 import { Route as AdminPickupsRouteImport } from './routes/admin.pickups'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as AdminMapRouteImport } from './routes/admin.map'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
 import { Route as ShippingCheckoutTransactionIdRouteImport } from './routes/shipping.checkout.$transactionId'
+import { Route as DashboardNotificationsIdRouteImport } from './routes/dashboard.notifications.$id'
+import { Route as DashboardInvoicesInvoiceIdRouteImport } from './routes/dashboard.invoices.$invoiceId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -187,6 +191,11 @@ const DashboardInvoicesRoute = DashboardInvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardApiKeysRoute = DashboardApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAddressBookRoute = DashboardAddressBookRouteImport.update({
   id: '/address-book',
   path: '/address-book',
@@ -217,6 +226,11 @@ const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMapRoute = AdminMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
@@ -232,6 +246,18 @@ const ShippingCheckoutTransactionIdRoute =
     id: '/checkout/$transactionId',
     path: '/checkout/$transactionId',
     getParentRoute: () => ShippingRoute,
+  } as any)
+const DashboardNotificationsIdRoute =
+  DashboardNotificationsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => DashboardNotificationsRoute,
+  } as any)
+const DashboardInvoicesInvoiceIdRoute =
+  DashboardInvoicesInvoiceIdRouteImport.update({
+    id: '/$invoiceId',
+    path: '/$invoiceId',
+    getParentRoute: () => DashboardInvoicesRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -257,20 +283,24 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/map': typeof AdminMapRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/pickups': typeof AdminPickupsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/address-book': typeof DashboardAddressBookRoute
-  '/dashboard/invoices': typeof DashboardInvoicesRoute
-  '/dashboard/notifications': typeof DashboardNotificationsRoute
+  '/dashboard/api-keys': typeof DashboardApiKeysRoute
+  '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
+  '/dashboard/notifications': typeof DashboardNotificationsRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/shipments': typeof DashboardShipmentsRoute
   '/tracking/$trackingId': typeof TrackingTrackingIdRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/tracking/': typeof TrackingIndexRoute
+  '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
+  '/dashboard/notifications/$id': typeof DashboardNotificationsIdRoute
   '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
 }
 export interface FileRoutesByTo {
@@ -294,20 +324,24 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/map': typeof AdminMapRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/pickups': typeof AdminPickupsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/address-book': typeof DashboardAddressBookRoute
-  '/dashboard/invoices': typeof DashboardInvoicesRoute
-  '/dashboard/notifications': typeof DashboardNotificationsRoute
+  '/dashboard/api-keys': typeof DashboardApiKeysRoute
+  '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
+  '/dashboard/notifications': typeof DashboardNotificationsRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/shipments': typeof DashboardShipmentsRoute
   '/tracking/$trackingId': typeof TrackingTrackingIdRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/tracking': typeof TrackingIndexRoute
+  '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
+  '/dashboard/notifications/$id': typeof DashboardNotificationsIdRoute
   '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
 }
 export interface FileRoutesById {
@@ -334,20 +368,24 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
+  '/admin/map': typeof AdminMapRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/pickups': typeof AdminPickupsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/address-book': typeof DashboardAddressBookRoute
-  '/dashboard/invoices': typeof DashboardInvoicesRoute
-  '/dashboard/notifications': typeof DashboardNotificationsRoute
+  '/dashboard/api-keys': typeof DashboardApiKeysRoute
+  '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
+  '/dashboard/notifications': typeof DashboardNotificationsRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/shipments': typeof DashboardShipmentsRoute
   '/tracking/$trackingId': typeof TrackingTrackingIdRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/tracking/': typeof TrackingIndexRoute
+  '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
+  '/dashboard/notifications/$id': typeof DashboardNotificationsIdRoute
   '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
 }
 export interface FileRouteTypes {
@@ -375,12 +413,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/broadcast'
     | '/admin/invoices'
+    | '/admin/map'
     | '/admin/payments'
     | '/admin/pickups'
     | '/admin/shipments'
     | '/admin/support'
     | '/admin/users'
     | '/dashboard/address-book'
+    | '/dashboard/api-keys'
     | '/dashboard/invoices'
     | '/dashboard/notifications'
     | '/dashboard/settings'
@@ -389,6 +429,8 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/tracking/'
+    | '/dashboard/invoices/$invoiceId'
+    | '/dashboard/notifications/$id'
     | '/shipping/checkout/$transactionId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -412,12 +454,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/broadcast'
     | '/admin/invoices'
+    | '/admin/map'
     | '/admin/payments'
     | '/admin/pickups'
     | '/admin/shipments'
     | '/admin/support'
     | '/admin/users'
     | '/dashboard/address-book'
+    | '/dashboard/api-keys'
     | '/dashboard/invoices'
     | '/dashboard/notifications'
     | '/dashboard/settings'
@@ -426,6 +470,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/tracking'
+    | '/dashboard/invoices/$invoiceId'
+    | '/dashboard/notifications/$id'
     | '/shipping/checkout/$transactionId'
   id:
     | '__root__'
@@ -451,12 +497,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/broadcast'
     | '/admin/invoices'
+    | '/admin/map'
     | '/admin/payments'
     | '/admin/pickups'
     | '/admin/shipments'
     | '/admin/support'
     | '/admin/users'
     | '/dashboard/address-book'
+    | '/dashboard/api-keys'
     | '/dashboard/invoices'
     | '/dashboard/notifications'
     | '/dashboard/settings'
@@ -465,6 +513,8 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/tracking/'
+    | '/dashboard/invoices/$invoiceId'
+    | '/dashboard/notifications/$id'
     | '/shipping/checkout/$transactionId'
   fileRoutesById: FileRoutesById
 }
@@ -691,6 +741,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardInvoicesRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/api-keys': {
+      id: '/dashboard/api-keys'
+      path: '/api-keys'
+      fullPath: '/dashboard/api-keys'
+      preLoaderRoute: typeof DashboardApiKeysRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/address-book': {
       id: '/dashboard/address-book'
       path: '/address-book'
@@ -733,6 +790,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPaymentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/map': {
+      id: '/admin/map'
+      path: '/map'
+      fullPath: '/admin/map'
+      preLoaderRoute: typeof AdminMapRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/invoices': {
       id: '/admin/invoices'
       path: '/invoices'
@@ -754,12 +818,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShippingCheckoutTransactionIdRouteImport
       parentRoute: typeof ShippingRoute
     }
+    '/dashboard/notifications/$id': {
+      id: '/dashboard/notifications/$id'
+      path: '/$id'
+      fullPath: '/dashboard/notifications/$id'
+      preLoaderRoute: typeof DashboardNotificationsIdRouteImport
+      parentRoute: typeof DashboardNotificationsRoute
+    }
+    '/dashboard/invoices/$invoiceId': {
+      id: '/dashboard/invoices/$invoiceId'
+      path: '/$invoiceId'
+      fullPath: '/dashboard/invoices/$invoiceId'
+      preLoaderRoute: typeof DashboardInvoicesInvoiceIdRouteImport
+      parentRoute: typeof DashboardInvoicesRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
+  AdminMapRoute: typeof AdminMapRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminPickupsRoute: typeof AdminPickupsRoute
   AdminShipmentsRoute: typeof AdminShipmentsRoute
@@ -771,6 +850,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
+  AdminMapRoute: AdminMapRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminPickupsRoute: AdminPickupsRoute,
   AdminShipmentsRoute: AdminShipmentsRoute,
@@ -781,10 +861,36 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface DashboardInvoicesRouteChildren {
+  DashboardInvoicesInvoiceIdRoute: typeof DashboardInvoicesInvoiceIdRoute
+}
+
+const DashboardInvoicesRouteChildren: DashboardInvoicesRouteChildren = {
+  DashboardInvoicesInvoiceIdRoute: DashboardInvoicesInvoiceIdRoute,
+}
+
+const DashboardInvoicesRouteWithChildren =
+  DashboardInvoicesRoute._addFileChildren(DashboardInvoicesRouteChildren)
+
+interface DashboardNotificationsRouteChildren {
+  DashboardNotificationsIdRoute: typeof DashboardNotificationsIdRoute
+}
+
+const DashboardNotificationsRouteChildren: DashboardNotificationsRouteChildren =
+  {
+    DashboardNotificationsIdRoute: DashboardNotificationsIdRoute,
+  }
+
+const DashboardNotificationsRouteWithChildren =
+  DashboardNotificationsRoute._addFileChildren(
+    DashboardNotificationsRouteChildren,
+  )
+
 interface DashboardRouteChildren {
   DashboardAddressBookRoute: typeof DashboardAddressBookRoute
-  DashboardInvoicesRoute: typeof DashboardInvoicesRoute
-  DashboardNotificationsRoute: typeof DashboardNotificationsRoute
+  DashboardApiKeysRoute: typeof DashboardApiKeysRoute
+  DashboardInvoicesRoute: typeof DashboardInvoicesRouteWithChildren
+  DashboardNotificationsRoute: typeof DashboardNotificationsRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardShipmentsRoute: typeof DashboardShipmentsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -792,8 +898,9 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAddressBookRoute: DashboardAddressBookRoute,
-  DashboardInvoicesRoute: DashboardInvoicesRoute,
-  DashboardNotificationsRoute: DashboardNotificationsRoute,
+  DashboardApiKeysRoute: DashboardApiKeysRoute,
+  DashboardInvoicesRoute: DashboardInvoicesRouteWithChildren,
+  DashboardNotificationsRoute: DashboardNotificationsRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardShipmentsRoute: DashboardShipmentsRoute,
   DashboardIndexRoute: DashboardIndexRoute,

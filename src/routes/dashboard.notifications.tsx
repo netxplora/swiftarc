@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -50,8 +51,19 @@ function Notifications() {
 
   const [filter, setFilter] = useState<F>("all");
 
-  const notifs = useQuery({ queryKey: ["notifications"], queryFn: () => fetchNotifs() });
-  const profile = useQuery({ queryKey: ["profile"], queryFn: () => fetchProfile() });
+  const notifs = useQuery({ queryKey: ["notifications"], queryFn: () => fetchNotifs(), staleTime: Infinity });
+  const profile = useQuery({ queryKey: ["profile"], queryFn: () => fetchProfile(), staleTime: Infinity });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes-notifs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => qc.invalidateQueries({ queryKey: ["notifications"] }))
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   const items = useMemo(() => {
     const list = notifs.data ?? [];

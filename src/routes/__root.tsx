@@ -116,7 +116,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "stylesheet", href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" },
+      { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/favicon.ico" },
       {
@@ -159,6 +159,34 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function GlobalLoading() {
+  const isNavigating = useRouterState({ select: (s) => s.status === "pending" });
+
+  return (
+    <AnimatePresence>
+      {isNavigating && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed left-0 top-0 z-[100] h-1 w-full overflow-hidden bg-navy/20"
+        >
+          <motion.div
+            className="h-full w-1/2 bg-amber"
+            initial={{ x: "-100%" }}
+            animate={{ x: "200%" }}
+            transition={{
+              repeat: Infinity,
+              duration: 1,
+              ease: "linear",
+            }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -175,13 +203,17 @@ function RootComponent() {
     });
   }, [queryClient]);
 
+  const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>
-          <div className="flex min-h-dvh flex-col bg-background pb-16 lg:pb-0">
-            <SiteHeader />
-            <main className="flex-1">
+          <div suppressHydrationWarning className={`flex min-h-dvh flex-col bg-background ${isDashboard ? "" : "pb-16 lg:pb-0"}`}>
+            <GlobalLoading />
+            {!isDashboard && <SiteHeader />}
+            <main className="flex-1 flex flex-col">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={pathname}
@@ -189,16 +221,17 @@ function RootComponent() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="flex-1 flex flex-col"
                 >
                   <Outlet />
                 </motion.div>
               </AnimatePresence>
             </main>
-            <SiteFooter />
-            <MobileTabBar />
+            {!isDashboard && <SiteFooter />}
+            {!isDashboard && <MobileTabBar />}
             <Suspense fallback={null}>
               <CommandPalette />
-              <ChatWidget />
+              {!isAdmin && <ChatWidget />}
             </Suspense>
             <Toaster richColors position="top-right" />
           </div>

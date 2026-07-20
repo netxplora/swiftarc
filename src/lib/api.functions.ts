@@ -39,7 +39,7 @@ export const listMyShipments = createServerFn({ method: "GET" })
         progress: status === "delivered" ? 100 : status === "out_for_delivery" ? 88 : status === "in_transit" ? 55 : status === "picked_up" ? 25 : 8,
         onTimeConfidence: 96,
         lastUpdate: r.updated_at,
-        nextUpdateAt: new Date(Date.now() + 90_000).toISOString(),
+        createdAt: r.created_at,
         exceptionNote: undefined,
         source: "user" as const,
         package: r.package,
@@ -581,6 +581,17 @@ export const submitProofOfDelivery = createServerFn({ method: "POST" })
       description: `Delivered and signed by ${data.signedBy}`,
       location: data.location ?? "Destination point",
     });
+    
+    // Dispatch webhook
+    const { data: fullShip } = await supabaseAdmin.from("shipments").select("user_id").eq("id", ship.id).maybeSingle();
+    if (fullShip && fullShip.user_id) {
+      const { dispatchWebhook } = await import("@/lib/webhooks.functions");
+      await dispatchWebhook(fullShip.user_id, "shipment.status_updated", {
+        shipment_id: ship.id,
+        status: "delivered",
+        proof_of_delivery: pod
+      });
+    }
 
     return { ok: true };
   });
@@ -693,6 +704,7 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
     method: z.enum(["card", "bank_transfer", "crypto"]),
     cardLast4: z.string().max(4).optional(),
     bankReference: z.string().max(100).optional(),
+    cryptoTxHash: z.string().max(255).optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
     const updates: any = {
@@ -702,6 +714,7 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
     };
     if (data.cardLast4) updates.card_last4 = data.cardLast4;
     if (data.bankReference) updates.bank_reference = data.bankReference;
+    if (data.cryptoTxHash) updates.crypto_tx_hash = data.cryptoTxHash;
 
     // Verify ownership
     const { data: txn, error: getErr } = await context.supabase
@@ -720,4 +733,25 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
     if (error) dbFail(error);
 
     return { ok: true, status: updates.status as string };
+  });
+
+export const getCourierManifest = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("shipments")
+      .select("id, tracking_number, status, service, origin, destination, package, is_hazmat")
+      .eq("assigned_courier_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) dbFail(error);
+    return data ?? [];
+  });
+
+export const sendEmailReceipt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) => z.object({ transactionId: z.string().uuid() }).parse(i))
+  .handler(async ({ data }) => {
+    // Mock sending email via Resend
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return { ok: true, message: "Receipt sent successfully" };
   });

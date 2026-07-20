@@ -1,11 +1,15 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
-import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck, Loader2 } from "lucide-react";
+import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck, PlusCircle } from "lucide-react";
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { format, subDays, startOfDay, isSameDay } from "date-fns";
 import { statusLabels } from "@/lib/types";
 import { Counter } from "@/components/animated/Counter";
-import { listMyShipments, listInvoices, getMyProfile } from "@/lib/api.functions";
+import { listMyShipments, listInvoices, getMyProfile, listPickups } from "@/lib/api.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard/")({
   component: Overview,
@@ -14,11 +18,40 @@ export const Route = createFileRoute("/dashboard/")({
 function Overview() {
   const fetchShipments = useServerFn(listMyShipments);
   const fetchInvoices = useServerFn(listInvoices);
+  const fetchPickups = useServerFn(listPickups);
   const fetchProfile = useServerFn(getMyProfile);
 
-  const { data: list = [], isLoading } = useQuery({ queryKey: ["my-shipments"], queryFn: () => fetchShipments() });
-  const { data: invoices = [] } = useQuery({ queryKey: ["my-invoices"], queryFn: () => fetchInvoices() });
-  const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
+  const { data: list = [] } = useQuery({ queryKey: ["my-shipments"], queryFn: () => fetchShipments(), staleTime: Infinity });
+  const { data: invoices = [] } = useQuery({ queryKey: ["my-invoices"], queryFn: () => fetchInvoices(), staleTime: Infinity });
+  const { data: pickups = [] } = useQuery({ queryKey: ["my-pickups"], queryFn: () => fetchPickups(), staleTime: Infinity });
+  const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile(), staleTime: Infinity });
+
+  const qc = useQueryClient();
+  useEffect(() => {
+    // Sync Shipments
+    const shipChannel = supabase
+      .channel('schema-db-changes-shipments')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments' }, () => qc.invalidateQueries({ queryKey: ["my-shipments"] }))
+      .subscribe();
+
+    // Sync Invoices
+    const invChannel = supabase
+      .channel('schema-db-changes-invoices')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => qc.invalidateQueries({ queryKey: ["my-invoices"] }))
+      .subscribe();
+
+    // Sync Pickups
+    const puChannel = supabase
+      .channel('schema-db-changes-pickups')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pickups' }, () => qc.invalidateQueries({ queryKey: ["my-pickups"] }))
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(shipChannel);
+      supabase.removeChannel(invChannel);
+      supabase.removeChannel(puChannel);
+    };
+  }, [qc]);
 
   const active = list.filter((s) => s.status !== "delivered").length;
   const spend = invoices.reduce((sum, inv) => sum + (inv.status !== "void" ? inv.total : 0), 0);
@@ -32,27 +65,31 @@ function Overview() {
   }, 0) / delivered.length);
 
   const kpis = [
-    { label: "Active shipments", value: active, suffix: "", icon: Package, delta: "Live Data" },
-    { label: "On-time rate", value: onTimeRate, suffix: "%", icon: TrendingUp, delta: "Live Data" },
-    { label: "Avg transit", value: avgTransit, suffix: "h", icon: Clock, delta: "Live Data" },
-    { label: "Spend MTD", value: spend, suffix: " USD", icon: DollarSign, delta: "Live Data" },
+    { label: "Active shipments", value: active, suffix: "", icon: Package, delta: "Live Tracker" },
+    { label: "On-time rate", value: onTimeRate, suffix: "%", icon: TrendingUp, delta: "Live Tracker" },
+    { label: "Avg transit", value: avgTransit, suffix: "h", icon: Clock, delta: "Live Tracker" },
+    { label: "Spend MTD", value: spend, suffix: " USD", icon: DollarSign, delta: "Live Tracker" },
   ];
+
+  // Generate chart data for the last 7 days
+  const chartData = Array.from({ length: 7 }).map((_, i) => {
+    const d = startOfDay(subDays(new Date(), 6 - i));
+    const count = list.filter((s) => isSameDay(new Date((s as any).created_at || s.lastUpdate), d)).length;
+    return { date: format(d, "MMM dd"), volume: count };
+  });
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Overview</p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
             Welcome back, {profile?.display_name ?? "User"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Here's what's moving on your network today.</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/pickup" className="inline-flex h-10 items-center rounded-md border border-border px-4 text-sm font-medium hover:bg-secondary">
-            Schedule pickup
-          </Link>
-          <Link to="/shipping" className="inline-flex h-10 items-center rounded-md bg-navy-deep px-4 text-sm font-medium text-cream hover:bg-navy">
-            New shipment
+          <Link to="/shipping" className="inline-flex h-10 items-center gap-2 rounded-md bg-navy-deep px-4 text-sm font-medium text-cream hover:bg-navy transition-colors">
+            <PlusCircle className="h-4 w-4" /> Book Shipment
           </Link>
         </div>
       </header>
@@ -64,7 +101,7 @@ function Overview() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="rounded-2xl border border-border bg-card p-5"
+            className="rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="text-xs uppercase tracking-widest">{k.label}</span>
@@ -73,52 +110,120 @@ function Overview() {
             <div className="mt-3 font-display text-3xl font-bold text-navy-deep">
               <Counter to={k.value} />{k.suffix}
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">{k.delta}</p>
+            <div className="mt-2 flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.delta}</p>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      <section className="rounded-2xl border border-border bg-card">
-        <div className="flex items-center justify-between border-b border-border p-5">
-          <div>
-            <h2 className="font-display text-xl">Recent shipments</h2>
-            <p className="text-xs text-muted-foreground">Latest activity across your account</p>
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <section className="rounded-2xl border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border p-5">
+            <div>
+              <h2 className="font-display text-lg font-bold">Recent Shipments</h2>
+              <p className="text-xs text-muted-foreground">Latest tracking activity across your account</p>
+            </div>
+            <Link to="/dashboard/shipments" className="inline-flex items-center gap-1 text-sm font-medium text-amber hover:underline">
+              View all <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </div>
-          <Link to="/dashboard/shipments" className="inline-flex items-center gap-1 text-sm font-medium text-amber hover:underline">
-            View all <ArrowUpRight className="h-3 w-3" />
-          </Link>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Tracking</th>
+                  <th className="px-5 py-3 font-medium">Service</th>
+                  <th className="px-5 py-3 font-medium">Route</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {list.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">
+                      No recent shipments found.
+                    </td>
+                  </tr>
+                ) : (
+                  list.slice(0, 5).map((s) => (
+                    <tr key={s.id} className="hover:bg-secondary/50 transition-colors group">
+                      <td className="px-5 py-3">
+                        <Link to="/tracking/$trackingId" params={{ trackingId: s.trackingNumber }} className="font-mono font-medium text-navy-deep group-hover:text-amber">
+                          {s.trackingNumber}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">{s.service}</td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        <span className="truncate max-w-[150px] inline-block">{s.origin}</span>
+                        <span className="mx-2 text-border">→</span>
+                        <span className="truncate max-w-[150px] inline-block">{s.destination}</span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${s.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' : s.status === 'exception' ? 'bg-red-100 text-red-800' : 'bg-amber/10 text-amber'}`}>
+                          {statusLabels[s.status]}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-border bg-card p-5">
+            <h2 className="font-display text-lg font-bold mb-4">Volume (7 Days)</h2>
+            <div className="h-[180px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#1E293B" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#1E293B" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} dy={10} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ color: '#1E293B', fontWeight: 600 }}
+                  />
+                  <Area type="monotone" dataKey="volume" stroke="#1E293B" strokeWidth={2} fillOpacity={1} fill="url(#colorVolume)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <h2 className="font-display text-sm font-bold">Upcoming Pickups</h2>
+            </div>
+            <ul className="divide-y divide-border">
+              {pickups.length === 0 ? (
+                <li className="p-4 text-sm text-center text-muted-foreground">No pickups scheduled.</li>
+              ) : (
+                pickups.slice(0,3).map((p) => (
+                  <li key={p.id} className="p-4 flex flex-col gap-1 text-sm hover:bg-secondary/50 transition-colors">
+                    <div className="flex justify-between font-medium">
+                      <span>{p.pickup_date}</span>
+                      <span className="text-amber">{p.slot}</span>
+                    </div>
+                    <div className="text-muted-foreground flex justify-between">
+                      <span className="truncate max-w-[150px]">{p.address}</span>
+                      <span>{p.package_count} pkgs</span>
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          </section>
         </div>
-        <ul className="divide-y divide-border">
-          {list.slice(0, 4).map((s) => (
-            <li key={s.id} className="flex items-center gap-4 p-5">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-navy-deep">
-                <Truck className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <Link
-                    to="/tracking/$trackingId"
-                    params={{ trackingId: s.trackingNumber }}
-                    className="font-mono text-sm hover:text-amber"
-                  >
-                    {s.trackingNumber}
-                  </Link>
-                  <span className="text-xs text-muted-foreground">· {s.service}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {s.origin} → {s.destination}
-                </p>
-              </div>
-              <span className="hidden text-xs text-muted-foreground sm:block">
-                ETA {new Date(s.estimatedDelivery).toLocaleDateString()}
-              </span>
-              <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold">
-                {statusLabels[s.status]}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      </div>
     </div>
   );
 }

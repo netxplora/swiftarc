@@ -376,6 +376,9 @@ export type Database = {
           tracking_number: string
           updated_at: string
           user_id: string
+          assigned_courier_id: string | null
+          is_hazmat: boolean
+          volumetric_weight: number | null
         }
         Insert: {
           created_at?: string
@@ -393,6 +396,9 @@ export type Database = {
           tracking_number: string
           updated_at?: string
           user_id: string
+          assigned_courier_id?: string | null
+          is_hazmat?: boolean
+          volumetric_weight?: number | null
         }
         Update: {
           created_at?: string
@@ -410,6 +416,9 @@ export type Database = {
           tracking_number?: string
           updated_at?: string
           user_id?: string
+          assigned_courier_id?: string | null
+          is_hazmat?: boolean
+          volumetric_weight?: number | null
         }
         Relationships: []
       }

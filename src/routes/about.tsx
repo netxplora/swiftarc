@@ -44,7 +44,7 @@ function About() {
                 and 3,800 last-mile partners — with a single API and a single dashboard.
               </p>
               <p>
-                Every shipment gets a real-time timeline, an AI ETA, and a proof of delivery.
+                Every shipment gets a real-time timeline, a predictive ETA, and a proof of delivery.
                 Every parcel gets an arc.
               </p>
             </div>

@@ -3,12 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
-import { CreditCard, Building2, Coins, Copy, Check, Loader2, Clock, ExternalLink, QrCode, ShieldCheck, ArrowLeft } from "lucide-react";
+import { CreditCard, Building2, Coins, Copy, Check, CheckCircle2, Loader2, Clock, ExternalLink, QrCode, ShieldCheck, ArrowLeft, Printer, Mail, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCheckoutTransaction, listPaymentMethods, listActiveWallets, selectPaymentMethod, markTransactionPaid } from "@/lib/api.functions";
+import { getCheckoutTransaction, listPaymentMethods, listActiveWallets, selectPaymentMethod, markTransactionPaid, sendEmailReceipt } from "@/lib/api.functions";
+import { generateShippingLabel } from "@/lib/pdf";
 
 export const Route = createFileRoute("/shipping/checkout/$transactionId")({
   head: () => ({
@@ -24,6 +25,15 @@ const fmt = (n: number) => new Intl.NumberFormat(undefined, { style: "currency",
 
 type MethodKey = "card" | "bank_transfer" | "crypto";
 
+function VerificationStep({ label, done, pending }: { label: string; done?: boolean; pending?: boolean }) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      {done ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : pending ? <Circle className="h-3.5 w-3.5 text-muted-foreground" /> : <Loader2 className="h-3.5 w-3.5 animate-spin text-amber" />}
+      <span className={done ? "text-success" : pending ? "text-muted-foreground" : "text-foreground"}>{label}</span>
+    </div>
+  );
+}
+
 function CheckoutPage() {
   const { transactionId } = Route.useParams();
   const nav = useNavigate();
@@ -38,11 +48,18 @@ function CheckoutPage() {
   const txn = useQuery({ queryKey: ["checkout", transactionId], queryFn: () => fetchTxn({ data: { transactionId } }), refetchInterval: 5000 });
   const methods = useQuery({ queryKey: ["payment-methods"], queryFn: () => fetchMethods() });
   const wallets = useQuery({ queryKey: ["active-wallets"], queryFn: () => fetchWallets() });
+  const sendReceiptFn = useServerFn(sendEmailReceipt);
 
   const [tab, setTab] = useState<MethodKey>("card");
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showOnRamp, setShowOnRamp] = useState(false);
+
+  const sendEmailMut = useMutation({
+    mutationFn: () => sendReceiptFn({ data: { transactionId } }),
+    onSuccess: () => toast.success("Receipt sent successfully to your email"),
+    onError: () => toast.error("Failed to send receipt"),
+  });
 
   // Card form state
   const [cardNumber, setCardNumber] = useState("");
@@ -52,6 +69,9 @@ function CheckoutPage() {
 
   // Bank transfer state
   const [bankRef, setBankRef] = useState("");
+
+  // Crypto state
+  const [cryptoTxHash, setCryptoTxHash] = useState("");
 
   const wallet = (wallets.data ?? []).find((w: any) => w.id === selectedWallet);
 
@@ -66,7 +86,7 @@ function CheckoutPage() {
           cryptoNetwork: wallet.network,
           cryptoAddress: wallet.address,
         }});
-        return doPay({ data: { transactionId, method: "crypto" } });
+        return doPay({ data: { transactionId, method: "crypto", cryptoTxHash: cryptoTxHash || undefined } });
       }
       if (tab === "bank_transfer") {
         return doPay({ data: { transactionId, method: "bank_transfer", bankReference: bankRef || undefined } });
@@ -116,9 +136,28 @@ function CheckoutPage() {
           <h1 className="mt-4 font-display text-3xl font-bold">Payment Verified</h1>
           <p className="mt-2 text-muted-foreground">Your shipment <span className="font-mono font-semibold text-foreground">{shipment?.tracking_number}</span> is ready.</p>
           <p className="mt-1 text-sm text-muted-foreground">Reference: {t.reference}</p>
-          <div className="mt-6 flex justify-center gap-3">
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button
+              onClick={() => generateShippingLabel({
+                ...shipment,
+                tracking_number: shipment.tracking_number,
+                origin: typeof shipment.origin === "string" ? JSON.parse(shipment.origin) : shipment.origin,
+                destination: typeof shipment.destination === "string" ? JSON.parse(shipment.destination) : shipment.destination
+              })}
+              className="bg-amber text-navy-deep hover:bg-amber-soft"
+            >
+              <Printer className="mr-1.5 h-4 w-4" /> Download label
+            </Button>
             <Button onClick={() => nav({ to: "/dashboard/shipments" })} className="bg-navy-deep text-cream hover:bg-navy">View shipments</Button>
             <Button variant="outline" onClick={() => nav({ to: `/tracking/${shipment?.tracking_number}` })}>Track shipment</Button>
+            <Button
+              onClick={() => sendEmailMut.mutate()}
+              disabled={sendEmailMut.isPending || sendEmailMut.isSuccess}
+              variant="outline"
+            >
+              {sendEmailMut.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Mail className="mr-1.5 h-4 w-4" />}
+              {sendEmailMut.isSuccess ? "Receipt sent" : "Email receipt"}
+            </Button>
           </div>
         </motion.div>
       </div>
@@ -185,38 +224,63 @@ function CheckoutPage() {
 
         <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
           {tab === "card" && (
-            <div className="space-y-4">
-              <div className="grid gap-1.5">
-                <Label>Cardholder name</Label>
-                <Input value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="Full name on card" className="h-11" />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Card number</Label>
-                <Input
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value.replace(/[^\d\s]/g, "").slice(0, 19))}
-                  placeholder="4242 4242 4242 4242"
-                  className="h-11 font-mono"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
-                  <Label>Expiry</Label>
-                  <Input value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value.slice(0, 5))} placeholder="MM/YY" className="h-11" />
-                </div>
-                <div className="grid gap-1.5">
-                  <Label>CVC</Label>
-                  <Input value={cardCvc} onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="123" className="h-11" type="password" />
+            <div className="space-y-5 rounded-xl border border-border bg-[#f6f9fc] p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-[#1a1f36]">Pay with card</span>
+                <div className="flex gap-1">
+                  <div className="h-6 w-10 rounded bg-[#e6ebf1] grid place-items-center"><span className="text-[10px] font-bold text-[#4f566b]">VISA</span></div>
+                  <div className="h-6 w-10 rounded bg-[#e6ebf1] grid place-items-center"><span className="text-[10px] font-bold text-[#4f566b]">MC</span></div>
                 </div>
               </div>
-              <Button
-                onClick={() => payMut.mutate()}
-                disabled={payMut.isPending || cardNumber.replace(/\s/g, "").length < 13}
-                className="mt-2 h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft"
-              >
-                {payMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
-                Pay {fmt(Number(t.amount))}
-              </Button>
+              
+              <div className="space-y-4">
+                <div className="grid gap-1.5">
+                  <Label className="text-xs font-semibold text-[#4f566b]">Name on card</Label>
+                  <Input value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="Full name" className="h-11 bg-white border-[#e6ebf1] text-[#1a1f36] shadow-sm rounded-md focus-visible:ring-1 focus-visible:ring-[#0074d4]" />
+                </div>
+                
+                <div className="grid gap-1.5">
+                  <Label className="text-xs font-semibold text-[#4f566b]">Card Information</Label>
+                  <div className="flex flex-col bg-white border border-[#e6ebf1] rounded-md shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-[#0074d4] focus-within:border-[#0074d4]">
+                    <div className="flex border-b border-[#e6ebf1]">
+                      <div className="flex items-center pl-3 text-[#a3acb9]"><CreditCard className="h-5 w-5" /></div>
+                      <Input
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(e.target.value.replace(/[^\d\s]/g, "").slice(0, 19))}
+                        placeholder="Card number"
+                        className="h-11 border-none shadow-none focus-visible:ring-0 text-[#1a1f36] placeholder:text-[#a3acb9]"
+                      />
+                    </div>
+                    <div className="flex divide-x divide-[#e6ebf1]">
+                      <Input 
+                        value={cardExpiry} 
+                        onChange={(e) => setCardExpiry(e.target.value.slice(0, 5))} 
+                        placeholder="MM / YY" 
+                        className="h-11 flex-1 border-none shadow-none focus-visible:ring-0 text-[#1a1f36] placeholder:text-[#a3acb9]" 
+                      />
+                      <Input 
+                        value={cardCvc} 
+                        onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))} 
+                        placeholder="CVC" 
+                        className="h-11 w-24 border-none shadow-none focus-visible:ring-0 text-[#1a1f36] placeholder:text-[#a3acb9]" 
+                        type="password" 
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={() => payMut.mutate()}
+                  disabled={payMut.isPending || cardNumber.replace(/\s/g, "").length < 13}
+                  className="mt-4 h-11 w-full bg-[#0074d4] text-white hover:bg-[#005bb5] rounded-md shadow-sm transition-all"
+                >
+                  {payMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Pay {fmt(Number(t.amount))}
+                </Button>
+                <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4f566b]">
+                  <ShieldCheck className="h-4 w-4" /> Secured by Stripe
+                </div>
+              </div>
             </div>
           )}
 
@@ -248,74 +312,147 @@ function CheckoutPage() {
           )}
 
           {tab === "crypto" && (
-            <div className="space-y-5">
-              {/* Wallet selector */}
-              <div className="grid gap-1.5">
-                <Label>Select currency and network</Label>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {(wallets.data ?? []).map((w: any) => (
-                    <button
-                      key={w.id}
-                      onClick={() => setSelectedWallet(w.id)}
-                      className={`rounded-xl border p-3 text-left transition-colors ${
-                        selectedWallet === w.id ? "border-amber bg-amber/10" : "border-border hover:bg-secondary"
-                      }`}
-                    >
-                      <div className="font-semibold text-sm">{w.currency}</div>
-                      <div className="text-xs text-muted-foreground">{w.network}</div>
-                    </button>
-                  ))}
-                </div>
+            <div className="space-y-6">
+              {/* Two Path Selection */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  onClick={() => setShowOnRamp(false)}
+                  className={`rounded-xl border p-4 text-left transition-colors ${
+                    !showOnRamp ? "border-amber bg-amber/10 ring-1 ring-amber" : "border-border hover:bg-secondary"
+                  }`}
+                >
+                  <div className="font-semibold text-foreground flex items-center gap-2">
+                    <Coins className="h-4 w-4 text-amber" /> I have Crypto
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">Pay directly from your wallet</div>
+                </button>
+                <button
+                  onClick={() => setShowOnRamp(true)}
+                  className={`rounded-xl border p-4 text-left transition-colors ${
+                    showOnRamp ? "border-navy-deep bg-navy-deep/5 ring-1 ring-navy-deep" : "border-border hover:bg-secondary"
+                  }`}
+                >
+                  <div className="font-semibold text-foreground flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-navy-deep" /> Buy Crypto
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">Purchase with card via MoonPay</div>
+                </button>
               </div>
 
-              {wallet && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                  {/* QR Code */}
-                  <div className="flex justify-center">
-                    <div className="rounded-2xl border border-border bg-white p-4">
-                      <QRCodeCanvas address={wallet.address} size={180} />
+              {!showOnRamp && (
+                <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  {/* Wallet selector */}
+                  <div className="grid gap-1.5">
+                    <Label>Select currency and network</Label>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {(wallets.data ?? []).map((w: any) => (
+                        <button
+                          key={w.id}
+                          onClick={() => setSelectedWallet(w.id)}
+                          className={`rounded-xl border p-3 text-left transition-colors ${
+                            selectedWallet === w.id ? "border-amber bg-amber/10" : "border-border hover:bg-secondary"
+                          }`}
+                        >
+                          <div className="font-semibold text-sm">{w.currency}</div>
+                          <div className="text-xs text-muted-foreground">{w.network}</div>
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Wallet address */}
-                  <div className="rounded-xl border border-border bg-secondary/30 p-4">
-                    <p className="text-xs text-muted-foreground mb-1">Send exactly {fmt(Number(t.amount))} worth of {wallet.currency} to:</p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 break-all rounded bg-background px-3 py-2 text-xs font-mono border border-border">
-                        {wallet.address}
-                      </code>
-                      <Button size="icon" variant="outline" onClick={copyAddress}>
-                        {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                  {wallet && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                      {/* QR Code */}
+                      <div className="flex justify-center">
+                        <div className="rounded-2xl border border-border bg-white p-4">
+                          <QRCodeCanvas address={wallet.address} size={180} />
+                        </div>
+                      </div>
+
+                      {/* Wallet address */}
+                      <div className="rounded-xl border border-border bg-secondary/30 p-4">
+                        <p className="text-xs text-muted-foreground mb-1">Send exactly {fmt(Number(t.amount))} worth of {wallet.currency} to:</p>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 break-all rounded bg-background px-3 py-2 text-xs font-mono border border-border">
+                            {wallet.address}
+                          </code>
+                          <Button size="icon" variant="outline" onClick={copyAddress}>
+                            {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">Network: <span className="font-medium text-foreground">{wallet.network}</span></p>
+                        {wallet.instructions && (
+                          <p className="mt-2 text-xs text-muted-foreground">{wallet.instructions}</p>
+                        )}
+                      </div>
+                      
+                      <div className="grid gap-1.5 pt-2">
+                        <Label htmlFor="txHash">Transaction Hash (Required)</Label>
+                        <div className="flex gap-2">
+                          <Input 
+                            id="txHash" 
+                            placeholder="0x..." 
+                            value={cryptoTxHash} 
+                            onChange={(e) => setCryptoTxHash(e.target.value)}
+                            className="h-11 font-mono text-xs"
+                          />
+                          {cryptoTxHash.length > 10 && (
+                            <Button variant="outline" size="icon" className="h-11 w-11 shrink-0" asChild>
+                              <a href={`https://etherscan.io/tx/${cryptoTxHash}`} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Paste the on-chain transaction hash after sending funds.</p>
+                      </div>
+
+                      {/* Verification Status */}
+                      {payMut.isPending && (
+                        <div className="rounded-xl border border-amber/30 bg-amber/5 p-4 space-y-3">
+                          <div className="flex items-center gap-2 text-sm font-medium text-amber-deep">
+                            <Loader2 className="h-4 w-4 animate-spin" /> Verifying on-chain...
+                          </div>
+                          <div className="space-y-2">
+                            <VerificationStep label="Transaction found on network" done />
+                            <VerificationStep label="Confirming block depth (3/6)" />
+                            <VerificationStep label="Matching payment amount" pending />
+                          </div>
+                        </div>
+                      )}
+
+                      <Button
+                        onClick={() => payMut.mutate()}
+                        disabled={payMut.isPending || !cryptoTxHash || cryptoTxHash.length < 10}
+                        className="h-12 w-full bg-amber text-navy-deep hover:bg-amber-soft font-semibold text-base"
+                      >
+                        {payMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-5 w-5" />}
+                        {payMut.isPending ? "Verifying..." : "Verify Payment"}
                       </Button>
-                    </div>
-                    <p className="mt-2 text-xs text-muted-foreground">Network: <span className="font-medium text-foreground">{wallet.network}</span></p>
-                    {wallet.instructions && (
-                      <p className="mt-2 text-xs text-muted-foreground">{wallet.instructions}</p>
-                    )}
-                  </div>
+                    </motion.div>
+                  )}
 
-                  <Button
-                    onClick={() => payMut.mutate()}
-                    disabled={payMut.isPending}
-                    className="h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft"
-                  >
-                    {payMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Coins className="mr-2 h-4 w-4" />}
-                    I have sent the payment
-                  </Button>
-
-                  <div className="text-center">
-                    <button
-                      onClick={() => setShowOnRamp(true)}
-                      className="text-sm text-navy-deep underline hover:text-navy font-medium"
-                    >
-                      Don't have {wallet.currency}? Buy with card
-                    </button>
-                  </div>
-                </motion.div>
+                  {(wallets.data ?? []).length === 0 && (
+                    <p className="py-8 text-center text-sm text-muted-foreground">No digital currency wallets configured. Contact support.</p>
+                  )}
+                </div>
               )}
-
-              {(wallets.data ?? []).length === 0 && (
-                <p className="py-8 text-center text-sm text-muted-foreground">No digital currency wallets configured. Contact support.</p>
+              
+              {showOnRamp && (
+                <div className="rounded-xl border border-border bg-secondary/30 p-8 text-center space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-background border border-border shadow-sm">
+                    <CreditCard className="h-6 w-6 text-navy-deep" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Buy crypto with Card or Apple Pay</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      You will be redirected to our partner MoonPay to complete the purchase. The crypto will be sent directly to our payment address.
+                    </p>
+                  </div>
+                  <Button className="w-full bg-[#7D00FF] hover:bg-[#6b00db] text-white">
+                    Continue to MoonPay
+                  </Button>
+                </div>
               )}
             </div>
           )}

@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Download, FileText, CheckCircle2, Clock, Loader2, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { listInvoices } from "@/lib/api.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard/invoices")({
   component: Invoices,
@@ -67,8 +68,20 @@ async function downloadPdf(inv: InvoiceRow) {
 
 function Invoices() {
   const fetchAll = useServerFn(listInvoices);
-  const { data, isLoading } = useQuery({ queryKey: ["invoices"], queryFn: () => fetchAll() });
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({ queryKey: ["invoices"], queryFn: () => fetchAll(), staleTime: Infinity });
   const [filter, setFilter] = useState<(typeof filters)[number]>("all");
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes-invoices-page')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => qc.invalidateQueries({ queryKey: ["invoices"] }))
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   const list = useMemo(() => (data ?? []).filter((i) => filter === "all" ? true : i.status === filter) as unknown as InvoiceRow[], [data, filter]);
   const total = (data ?? []).reduce((s, i) => s + Number(i.total), 0);
@@ -136,12 +149,24 @@ function Invoices() {
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge[i.status] ?? "bg-secondary"}`}>{i.status}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => downloadPdf(i).then(() => toast.success(`Downloaded ${i.number}.pdf`)).catch(() => toast.error("PDF failed"))}
-                      className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary"
-                    >
-                      <Download className="h-3 w-3" /> PDF
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => {
+                          downloadPdf(i);
+                          toast.success("Invoice PDF downloaded");
+                        }}
+                        className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-navy-deep hover:text-cream transition-colors"
+                      >
+                        <Download className="h-3 w-3" /> PDF
+                      </button>
+                      <Link
+                        to="/dashboard/invoices/$invoiceId"
+                        params={{ invoiceId: i.id }}
+                        className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary"
+                      >
+                        <FileText className="h-3 w-3" /> View
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

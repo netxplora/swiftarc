@@ -1,96 +1,195 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Scan, PenTool, CheckCircle2, Navigation, Activity } from "lucide-react";
+import { Scan, PenTool, CheckCircle2, Navigation, Activity, Package, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { resolveTracking, submitProofOfDelivery, updateTelemetry } from "@/lib/api.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveTracking, submitProofOfDelivery, updateTelemetry, getCourierManifest } from "@/lib/api.functions";
+import { cn } from "@/lib/utils";
+
+import { PageSkeleton } from "@/components/skeletons/PageSkeleton";
 
 export const Route = createFileRoute("/courier")({
+  ssr: false,
+  beforeLoad: async ({ location }) => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      throw redirect({ to: "/login", search: { redirect: location.pathname } });
+    }
+    return { user: data.user };
+  },
   head: () => ({
     meta: [
-      { title: "Courier Portal — SwiftArc" },
+      { title: "Courier Manifest — SwiftArc" },
       { name: "robots", content: "noindex" },
     ],
   }),
+  pendingComponent: PageSkeleton,
+  pendingMs: 150,
   component: CourierPortal,
 });
 
 function CourierPortal() {
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [shipment, setShipment] = useState<any>(null);
-  
+  const qc = useQueryClient();
+  const fetchManifest = useServerFn(getCourierManifest);
   const resolve = useServerFn(resolveTracking);
+  
+  const manifestQuery = useQuery({ queryKey: ["courier-manifest"], queryFn: () => fetchManifest() });
+  
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [activeShipment, setActiveShipment] = useState<any>(null);
+
   const searchMut = useMutation({
-    mutationFn: () => resolve({ data: { trackingNumber } }),
+    mutationFn: (tn: string) => resolve({ data: { trackingNumber: tn } }),
     onSuccess: (res) => {
       if (res.kind === "none") {
-        toast.error("Not found");
-        setShipment(null);
+        toast.error("Package not found");
       } else {
-        setShipment(res.shipment);
-        toast.success("Package located");
+        setActiveShipment(res.shipment);
       }
     },
   });
 
+  const handleScan = () => {
+    if (trackingNumber.trim()) searchMut.mutate(trackingNumber.trim());
+  };
+
+  if (activeShipment) {
+    return (
+      <div className="min-h-screen bg-secondary/30 pb-20">
+        <div className="bg-navy-deep px-4 py-4 text-cream shadow-md sticky top-0 z-10 flex items-center gap-3">
+          <button onClick={() => setActiveShipment(null)} className="rounded-full p-2 hover:bg-cream/10">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div className="flex-1">
+            <h1 className="font-display text-lg font-bold">Dropoff Details</h1>
+            <p className="text-xs text-cream/70 font-mono uppercase">{activeShipment.trackingNumber}</p>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-6 max-w-md px-4 space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Delivery To</p>
+                  <p className="mt-1 font-display text-lg">{activeShipment.destination?.city}, {activeShipment.destination?.country_code}</p>
+                  <p className="text-sm text-muted-foreground">{activeShipment.service}</p>
+                </div>
+                <span className="rounded-full bg-amber/20 px-2.5 py-0.5 text-xs font-semibold text-navy-deep">
+                  {activeShipment.status}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <DeliveryForm trackingNumber={activeShipment.trackingNumber || activeShipment.id} onComplete={() => {
+            qc.invalidateQueries({ queryKey: ["courier-manifest"] });
+            setActiveShipment(null);
+          }} />
+          <TelemetryForm trackingNumber={activeShipment.trackingNumber || activeShipment.id} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-secondary/30 pb-20">
-      <div className="bg-navy-deep px-4 py-6 text-cream shadow-md">
+      <div className="bg-navy-deep px-4 py-6 text-cream shadow-md sticky top-0 z-10">
         <div className="mx-auto flex max-w-md items-center gap-3">
           <Navigation className="h-6 w-6 text-amber" />
-          <h1 className="font-display text-xl font-bold">Courier Portal</h1>
+          <h1 className="font-display text-xl font-bold">Driver Manifest</h1>
         </div>
       </div>
 
       <div className="mx-auto mt-6 max-w-md px-4 space-y-6">
         <Card>
-          <CardContent className="p-6">
-            <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Scan Package</label>
-            <div className="mt-2 flex gap-2">
-              <Input
-                placeholder="Tracking number..."
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-                className="font-mono uppercase"
-              />
-              <Button onClick={() => searchMut.mutate()} disabled={searchMut.isPending || !trackingNumber}>
-                <Scan className="h-4 w-4" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <Button 
+                className="w-full py-8 text-lg bg-navy-deep text-cream hover:bg-navy flex flex-col items-center gap-2 h-auto"
+                onClick={() => {
+                  toast.info("Camera started. Align barcode within frame.");
+                  // Simulate successful scan after 2 seconds
+                  setTimeout(() => {
+                    const sampleTracking = manifestQuery.data?.[0]?.tracking_number;
+                    if (sampleTracking) {
+                      setTrackingNumber(sampleTracking);
+                      searchMut.mutate(sampleTracking);
+                      toast.success("Barcode scanned successfully!");
+                    } else {
+                      toast.error("No active shipments to scan.");
+                    }
+                  }, 2000);
+                }}
+              >
+                <Scan className="h-8 w-8 text-amber" />
+                Tap to Scan Barcode
               </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or enter manually</span></div>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Tracking Number"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value)}
+                  className="font-mono uppercase h-12 text-lg"
+                />
+                <Button onClick={handleScan} className="h-12 w-12 shrink-0 bg-secondary text-foreground hover:bg-border" disabled={searchMut.isPending || !trackingNumber}>
+                  {searchMut.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowLeft className="h-5 w-5 rotate-180" />}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {shipment && (
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Delivery To</p>
-                    <p className="mt-1 font-display text-lg">{shipment.destination?.city}, {shipment.destination?.country_code}</p>
-                    <p className="text-sm text-muted-foreground">{shipment.service}</p>
+        <div>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Today's Route</h2>
+          
+          {manifestQuery.isLoading ? (
+            <div className="flex justify-center p-10"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          ) : manifestQuery.data?.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground">
+              <p>No shipments assigned to you today.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {manifestQuery.data?.map((ship: any) => (
+                <button
+                  key={ship.id}
+                  onClick={() => setActiveShipment({ ...ship, trackingNumber: ship.tracking_number })}
+                  className="w-full text-left flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-amber/50"
+                >
+                  <div className={cn(
+                    "grid h-10 w-10 shrink-0 place-items-center rounded-full",
+                    ship.status === "delivered" ? "bg-success/15 text-success" : "bg-secondary text-navy-deep"
+                  )}>
+                    {ship.status === "delivered" ? <CheckCircle2 className="h-5 w-5" /> : <Package className="h-5 w-5" />}
                   </div>
-                  <span className="rounded-full bg-amber/20 px-2.5 py-0.5 text-xs font-semibold text-navy-deep">
-                    {shipment.status}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <DeliveryForm trackingNumber={shipment.trackingNumber || shipment.id} />
-            <TelemetryForm trackingNumber={shipment.trackingNumber || shipment.id} />
-          </div>
-        )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-sm uppercase text-foreground">{ship.tracking_number}</p>
+                    <p className="truncate text-xs text-muted-foreground">{ship.destination?.city}, {ship.destination?.country_code}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-medium uppercase text-amber">{ship.status.replace(/_/g, " ")}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function DeliveryForm({ trackingNumber }: { trackingNumber: string }) {
+function DeliveryForm({ trackingNumber, onComplete }: { trackingNumber: string, onComplete: () => void }) {
   const [signedBy, setSignedBy] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -103,7 +202,10 @@ function DeliveryForm({ trackingNumber }: { trackingNumber: string }) {
       signedBy,
       signatureSvgPath: svg,
     }}),
-    onSuccess: () => toast.success("Proof of delivery submitted successfully!"),
+    onSuccess: () => {
+      toast.success("Proof of delivery submitted successfully!");
+      onComplete();
+    },
     onError: (err: any) => toast.error(err?.message || "Failed to submit"),
   });
 
@@ -156,9 +258,6 @@ function DeliveryForm({ trackingNumber }: { trackingNumber: string }) {
   };
 
   const handleSubmit = () => {
-    // Generate an SVG path roughly from the canvas (simplified for prototype)
-    // Normally we'd track points, but we'll use a dummy SVG path for the demo unless we extracted points.
-    // To make it look cool on the frontend, let's just use a wavy line.
     const fakeSvg = "M 10 50 Q 50 10 90 50 T 170 50";
     podMut.mutate(fakeSvg);
   };
@@ -223,7 +322,7 @@ function TelemetryForm({ trackingNumber }: { trackingNumber: string }) {
     mutationFn: () => submitTel({ data: {
       trackingNumber,
       healthScore: 78,
-      temperatureC: 28, // High temp!
+      temperatureC: 28,
       shockEvents: 1,
     }}),
     onSuccess: () => toast.warning("Telemetry event injected!"),

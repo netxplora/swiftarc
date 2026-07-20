@@ -68,7 +68,7 @@ const industries = [
       { v: 2.4, s: "h", l: "Median air ETA" },
       { v: 220, s: "+", l: "Countries" },
     ],
-    case: "An automotive supplier cut unplanned downtime 41% by wiring SwiftArc AI ETAs into their MES.",
+    case: "An automotive supplier cut unplanned downtime 41% by wiring SwiftArc predictive ETAs into their MES.",
   },
   {
     id: "ecommerce",
@@ -101,7 +101,7 @@ function Business() {
         <div className="grid gap-6 md:grid-cols-2">
           {solutions.map((s, i) => (
             <ScrollReveal key={s.name} delay={i * 0.05}>
-              <Card className="h-full border-border">
+              <Card className="h-full border-border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-amber/40">
                 <CardContent className="p-8">
                   <div className="grid h-12 w-12 place-items-center rounded-xl bg-navy-deep text-amber">
                     <s.Icon className="h-6 w-6" />
