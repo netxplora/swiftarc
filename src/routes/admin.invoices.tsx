@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { adminListInvoices, adminSetInvoiceStatus, adminCreateInvoice, adminDeleteInvoice } from "@/lib/admin.functions";
-import { Loader2, Trash2, Plus } from "lucide-react";
+import { Loader2, Trash2, Plus, Download } from "lucide-react";
 
 const STATUSES = ["draft","sent","paid","overdue","void"] as const;
 
@@ -16,6 +16,30 @@ export const Route = createFileRoute("/admin/invoices")({
   head: () => ({ meta: [{ title: "Admin — Invoices" }, { name: "robots", content: "noindex" }] }),
   component: AdminInvoices,
 });
+
+async function downloadPdf(inv: any) {
+  const { generateBillingInvoice } = await import("@/lib/pdf");
+  generateBillingInvoice({
+    invoiceNumber: inv.number,
+    issueDate: inv.issue_date,
+    dueDate: inv.due_date,
+    status: inv.status,
+    currency: inv.currency,
+    subtotal: inv.subtotal,
+    tax: inv.tax,
+    total: inv.total,
+    lineItems: (inv.line_items ?? []).length > 0 
+      ? inv.line_items.map((li: any) => ({ label: li.label, qty: li.qty, unitPrice: li.unit_price, amount: li.qty * li.unit_price }))
+      : [{ label: "Logistics Service", qty: 1, unitPrice: inv.total, amount: inv.total }],
+    billTo: { 
+      contact: "Account Holder", 
+      line1: "Client Address", 
+      city: "City", 
+      zip: "00000", 
+      country: "US" 
+    },
+  });
+}
 
 function AdminInvoices() {
   const qc = useQueryClient();
@@ -70,14 +94,19 @@ function AdminInvoices() {
                       </select>
                     </td>
                     <td className="p-3 text-right">
-                      <Button size="sm" variant="ghost" onClick={async () => {
-                        if (confirm("Delete invoice?")) {
-                          const del = (await import("@/lib/admin.functions")).adminDeleteInvoice;
-                          del({ data: { id: i.id } }).then(() => qc.invalidateQueries({ queryKey: ["admin-invoices"] }));
-                        }
-                      }}>
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => downloadPdf(i)} className="text-amber-deep hover:text-amber hover:bg-amber/10 h-8 px-2" title="Download PDF">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 px-2 text-destructive hover:bg-destructive/10" onClick={async () => {
+                          if (confirm("Delete invoice?")) {
+                            const del = (await import("@/lib/admin.functions")).adminDeleteInvoice;
+                            del({ data: { id: i.id } }).then(() => qc.invalidateQueries({ queryKey: ["admin-invoices"] }));
+                          }
+                        }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

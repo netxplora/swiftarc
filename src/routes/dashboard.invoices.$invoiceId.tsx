@@ -62,38 +62,27 @@ function InvoiceDetail() {
               <Printer className="mr-2 h-4 w-4" /> Print
             </Button>
             <Button onClick={async () => {
-              const { jsPDF } = await import("jspdf");
-              const doc = new jsPDF({ unit: "pt", format: "a4" });
-              doc.setFont("helvetica", "bold").setFontSize(22).text("SwiftArc", 40, 60);
-              doc.setFont("helvetica", "normal").setFontSize(10).setTextColor("#64748b")
-                .text("Global logistics · billing statement", 40, 78);
-              doc.setTextColor("#0b1220").setFontSize(14).text(`Invoice ${invoice.number}`, 40, 120);
-              doc.setFontSize(10).setTextColor("#475569");
-              doc.text(`Issue date: ${invoice.issue_date}`, 40, 140);
-              doc.text(`Due date:   ${invoice.due_date}`, 40, 156);
-              doc.text(`Status:     ${invoice.status.toUpperCase()}`, 40, 172);
-
-              doc.setDrawColor("#e2e8f0").line(40, 190, 555, 190);
-              doc.setTextColor("#0b1220").setFontSize(11).setFont("helvetica", "bold");
-              doc.text("Description", 40, 210); doc.text("Qty", 380, 210); doc.text("Unit", 430, 210); doc.text("Amount", 500, 210);
-              doc.setFont("helvetica", "normal");
-              let y = 232;
-              for (const li of (invoice.line_items as any[]) ?? []) {
-                doc.text(String(li.label).slice(0, 60), 40, y);
-                doc.text(String(li.qty), 380, y);
-                doc.text(fmt(Number(li.unit_price), invoice.currency), 430, y);
-                doc.text(fmt(Number(li.qty) * Number(li.unit_price), invoice.currency), 500, y);
-                y += 18;
-              }
-              y += 10; doc.line(40, y, 555, y); y += 20;
-              doc.text("Subtotal", 430, y); doc.text(fmt(Number(invoice.subtotal), invoice.currency), 500, y); y += 16;
-              doc.text("Tax",      430, y); doc.text(fmt(Number(invoice.tax), invoice.currency), 500, y); y += 16;
-              doc.setFont("helvetica", "bold");
-              doc.text("Total",    430, y); doc.text(fmt(Number(invoice.total), invoice.currency), 500, y);
-
-              doc.setFontSize(9).setTextColor("#94a3b8").setFont("helvetica", "normal")
-                .text("SwiftArc Logistics — thank you for shipping with us.", 40, 780);
-              doc.save(`${invoice.number}.pdf`);
+              const { generateBillingInvoice } = await import("@/lib/pdf");
+              generateBillingInvoice({
+                invoiceNumber: invoice.number,
+                issueDate: invoice.issue_date,
+                dueDate: invoice.due_date,
+                status: invoice.status as any,
+                currency: invoice.currency,
+                subtotal: Number(invoice.subtotal),
+                tax: Number(invoice.tax),
+                total: Number(invoice.total),
+                lineItems: (invoice.line_items as any[] ?? []).length > 0 
+                  ? (invoice.line_items as any[]).map((li: any) => ({ label: li.label, qty: li.qty, unitPrice: li.unit_price, amount: li.qty * li.unit_price }))
+                  : [{ label: "Logistics Service", qty: 1, unitPrice: Number(invoice.total), amount: Number(invoice.total) }],
+                billTo: { 
+                  contact: customerName, 
+                  line1: "123 Logistics Way", 
+                  city: "San Francisco", 
+                  zip: "94107", 
+                  country: "US" 
+                },
+              });
             }} className="bg-navy-deep text-cream hover:bg-navy">
               <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>

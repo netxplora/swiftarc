@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { adminListUsers, adminSetRole, adminDeleteUser } from "@/lib/admin.functions";
-import { Loader2, Shield, ShieldOff, Trash2 } from "lucide-react";
+import { Loader2, Shield, ShieldOff, Trash2, Users, Search, Download } from "lucide-react";
 
 export const Route = createFileRoute("/admin/users")({
   head: () => ({ meta: [{ title: "Admin — Users" }, { name: "robots", content: "noindex" }] }),
@@ -29,17 +29,43 @@ function AdminUsers() {
   });
 
   const filtered = (q.data ?? []).filter((u) =>
-    !search || u.displayName?.toLowerCase().includes(search.toLowerCase()) || u.id.includes(search),
+    !search || u.displayName?.toLowerCase().includes(search.toLowerCase()) || u.id.includes(search) || u.email?.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const adminCount = (q.data ?? []).filter(u => u.roles.includes("admin")).length;
+  const totalCount = q.data?.length ?? 0;
+
+  const exportCsv = () => {
+    const rows = [["Name", "Email", "Roles", "Joined"]].concat(
+      (q.data ?? []).map((u) => [
+        u.displayName || "—",
+        u.email || "—",
+        u.roles.join(", ") || "user",
+        new Date(u.createdAt).toLocaleDateString(),
+      ])
+    );
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `users-${Date.now()}.csv`; a.click(); URL.revokeObjectURL(a.href);
+    toast.success("CSV exported");
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl">Users</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage account roles and access.</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight">Users</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Manage account roles and access. <span className="font-medium text-navy-deep">{totalCount}</span> total · <span className="font-medium text-amber">{adminCount}</span> admin{adminCount !== 1 ? "s" : ""}.</p>
         </div>
-        <Input placeholder="Search by name or ID…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Search name, email, or ID…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 max-w-xs" />
+          </div>
+          <Button variant="outline" size="sm" onClick={exportCsv}>
+            <Download className="h-4 w-4 mr-2" /> Export
+          </Button>
+        </div>
       </div>
 
       <Card><CardContent className="p-0">
@@ -48,32 +74,49 @@ function AdminUsers() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+              <thead className="bg-secondary/50 text-left text-[11px] uppercase tracking-widest text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Roles</th>
-                  <th className="p-3">Joined</th>
-                  <th className="p-3 text-right">Actions</th>
+                  <th className="px-4 py-3 font-medium">User</th>
+                  <th className="px-4 py-3 font-medium hidden md:table-cell">Email</th>
+                  <th className="px-4 py-3 font-medium">Roles</th>
+                  <th className="px-4 py-3 font-medium hidden sm:table-cell">Joined</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((u) => {
                   const isAdmin = u.roles.includes("admin");
+                  const roleColors: Record<string, string> = {
+                    admin: "bg-amber/15 text-amber-deep border-amber/30",
+                    moderator: "bg-violet-500/15 text-violet-700 border-violet-300",
+                    business: "bg-sky-500/15 text-sky-700 border-sky-300",
+                    courier: "bg-emerald-500/15 text-emerald-700 border-emerald-300",
+                  };
                   return (
-                    <tr key={u.id} className="border-b border-border last:border-0">
-                      <td className="p-3">
-                        <p className="font-medium">{u.displayName || "—"}</p>
-                        <p className="font-mono text-[10px] text-muted-foreground">{u.id}</p>
+                    <tr key={u.id} className="border-b border-border last:border-0 hover:bg-secondary/40 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-8 w-8 place-items-center rounded-full bg-navy-deep/10 text-navy-deep text-xs font-bold shrink-0">
+                            {(u.displayName || "U").slice(0, 1).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-navy-deep">{u.displayName || "—"}</p>
+                            <p className="font-mono text-[10px] text-muted-foreground">{u.id.slice(0, 8)}…</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="p-3">
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className="text-xs text-muted-foreground">{u.email || "—"}</span>
+                      </td>
+                      <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {u.roles.length === 0 && <span className="text-xs text-muted-foreground">user</span>}
+                          {u.roles.length === 0 && <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">user</span>}
                           {u.roles.map((r) => (
-                            <span key={r} className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${r === "admin" ? "bg-amber text-navy-deep" : "bg-secondary"}`}>{r}</span>
+                            <span key={r} className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${roleColors[r] ?? "bg-secondary border-border"}`}>{r}</span>
                           ))}
                         </div>
                       </td>
-                      <td className="p-3 text-xs text-muted-foreground">{new Date(u.createdAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td className="p-3 text-right">
                         <div className="flex justify-end gap-2">
                           <Button

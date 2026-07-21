@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 const mainNav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/dashboard/shipments", label: "Shipments", icon: Package2 },
+  { to: "/dashboard/address-book", label: "Address Book", icon: BookUser },
   { to: "/tracking", label: "Tracking", icon: Map },
   { to: "/shipping", label: "Book Shipment", icon: PlusCircle },
   { to: "/dashboard/invoices", label: "Invoices", icon: Receipt },
@@ -33,7 +34,8 @@ const adminNav = [
   { to: "/admin/pickups", label: "Couriers", icon: Truck },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
   { to: "/admin/invoices", label: "All Invoices", icon: Receipt },
-  { to: "/admin/broadcast", label: "Broadcasts", icon: MessageSquare },
+  { to: "/admin/support", label: "Support Tickets", icon: MessageSquare },
+  { to: "/admin/broadcast", label: "Broadcasts", icon: Activity },
 ];
 
 const bottomNav = [

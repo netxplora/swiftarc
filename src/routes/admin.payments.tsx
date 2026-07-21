@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CreditCard, Wallet, Settings2, Plus, Loader2, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { CreditCard, Wallet, Settings2, Plus, Loader2, CheckCircle2, XCircle, Trash2, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -123,7 +123,7 @@ function TransactionsTab() {
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    {t.status === "processing" && (
+                    {t.status === "processing" ? (
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
@@ -148,7 +148,29 @@ function TransactionsTab() {
                           <XCircle className="h-4 w-4" />
                         </Button>
                       </div>
-                    )}
+                    ) : t.status === "verified" ? (
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={async () => {
+                            const { generatePaymentReceipt } = await import("@/lib/pdf");
+                            generatePaymentReceipt({
+                              id: t.reference || t.id,
+                              date: t.created_at,
+                              method: t.method.replace("_", " "),
+                              amount: t.amount,
+                              status: t.status,
+                              invoiceId: t.shipments?.tracking_number
+                            });
+                          }}
+                          className="h-8 px-2 text-amber-deep hover:text-amber hover:bg-amber/10"
+                          title="Download Receipt"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
               ))}

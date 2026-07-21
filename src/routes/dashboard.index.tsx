@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
-import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck, PlusCircle } from "lucide-react";
+import { Package, TrendingUp, Clock, DollarSign, ArrowUpRight, Truck, PlusCircle, AlertCircle, Receipt, Search, CalendarPlus } from "lucide-react";
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { format, subDays, startOfDay, isSameDay } from "date-fns";
 import { statusLabels } from "@/lib/types";
@@ -94,6 +94,64 @@ function Overview() {
         </div>
       </header>
 
+      {/* Alerts & Exceptions */}
+      {(list.some(s => s.status === 'exception') || invoices.some(i => i.status !== 'paid' && i.status !== 'void')) && (
+        <div className="flex flex-col gap-3">
+          {list.filter(s => s.status === 'exception').length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-semibold text-red-800">Action Required: Shipment Exceptions</h3>
+                <p className="text-sm text-red-700 mt-1">
+                  You have {list.filter(s => s.status === 'exception').length} shipment(s) currently experiencing an exception. Please review them immediately.
+                </p>
+                <div className="mt-2">
+                  <Link to="/dashboard/shipments" className="text-sm font-medium text-red-800 hover:underline">
+                    View exceptions &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+          {invoices.filter(i => i.status !== 'paid' && i.status !== 'void').length > 0 && (
+            <div className="rounded-lg border border-amber/30 bg-amber/10 p-4 flex items-start gap-3">
+              <Receipt className="h-5 w-5 text-amber-deep shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-semibold text-amber-deep">Unpaid Invoices</h3>
+                <p className="text-sm text-amber-900/80 mt-1">
+                  You have {invoices.filter(i => i.status !== 'paid' && i.status !== 'void').length} unpaid invoice(s) requiring your attention.
+                </p>
+                <div className="mt-2">
+                  <Link to="/dashboard/invoices" className="text-sm font-medium text-amber-deep hover:underline">
+                    View billing &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Link to="/shipping" className="rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group">
+          <div className="h-10 w-10 rounded-full bg-navy-deep/10 text-navy-deep grid place-items-center group-hover:scale-110 transition-transform"><PlusCircle className="h-5 w-5" /></div>
+          <span className="text-sm font-semibold">Book Shipment</span>
+        </Link>
+        <Link to="/pickup" className="rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group">
+          <div className="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-600 grid place-items-center group-hover:scale-110 transition-transform"><CalendarPlus className="h-5 w-5" /></div>
+          <span className="text-sm font-semibold">Schedule Pickup</span>
+        </Link>
+        <Link to="/tracking" className="rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group">
+          <div className="h-10 w-10 rounded-full bg-amber/10 text-amber-deep grid place-items-center group-hover:scale-110 transition-transform"><Search className="h-5 w-5" /></div>
+          <span className="text-sm font-semibold">Track Package</span>
+        </Link>
+        <Link to="/dashboard/invoices" className="rounded-xl border border-border bg-card p-4 hover:shadow-md transition-all flex flex-col items-center justify-center text-center gap-2 group">
+          <div className="h-10 w-10 rounded-full bg-purple-500/10 text-purple-600 grid place-items-center group-hover:scale-110 transition-transform"><Receipt className="h-5 w-5" /></div>
+          <span className="text-sm font-semibold">View Invoices</span>
+        </Link>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k, i) => (
           <motion.div
@@ -177,6 +235,49 @@ function Overview() {
         </section>
 
         <div className="space-y-6">
+          <section className="rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border p-5">
+              <div>
+                <h2 className="font-display text-lg font-bold">Recent Invoices</h2>
+              </div>
+              <Link to="/dashboard/invoices" className="inline-flex items-center gap-1 text-sm font-medium text-amber hover:underline">
+                All billing <ArrowUpRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Invoice</th>
+                    <th className="px-5 py-3 font-medium text-right">Amount</th>
+                    <th className="px-5 py-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {invoices.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-5 py-6 text-center text-muted-foreground">
+                        No invoices found.
+                      </td>
+                    </tr>
+                  ) : (
+                    invoices.slice(0, 4).map((inv: any) => (
+                      <tr key={inv.id} className="hover:bg-secondary/50 transition-colors">
+                        <td className="px-5 py-3 font-mono font-medium text-navy-deep">{inv.number}</td>
+                        <td className="px-5 py-3 text-right font-medium">{new Intl.NumberFormat(undefined, { style: "currency", currency: inv.currency }).format(inv.total)}</td>
+                        <td className="px-5 py-3">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${inv.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : inv.status === 'void' ? 'bg-secondary text-muted-foreground' : 'bg-amber/10 text-amber'}`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="font-display text-lg font-bold mb-4">Volume (7 Days)</h2>
             <div className="h-[180px] w-full">
@@ -199,28 +300,19 @@ function Overview() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border bg-card">
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <h2 className="font-display text-sm font-bold">Upcoming Pickups</h2>
+          <section className="rounded-2xl border border-border bg-card p-5 flex flex-col justify-between items-center text-center">
+            <div>
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-secondary">
+                <Truck className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="mt-4 font-display text-lg font-bold">Schedule a Pickup</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Need a driver to collect your packages? Schedule a pickup from your location.
+              </p>
             </div>
-            <ul className="divide-y divide-border">
-              {pickups.length === 0 ? (
-                <li className="p-4 text-sm text-center text-muted-foreground">No pickups scheduled.</li>
-              ) : (
-                pickups.slice(0,3).map((p) => (
-                  <li key={p.id} className="p-4 flex flex-col gap-1 text-sm hover:bg-secondary/50 transition-colors">
-                    <div className="flex justify-between font-medium">
-                      <span>{p.pickup_date}</span>
-                      <span className="text-amber">{p.slot}</span>
-                    </div>
-                    <div className="text-muted-foreground flex justify-between">
-                      <span className="truncate max-w-[150px]">{p.address}</span>
-                      <span>{p.package_count} pkgs</span>
-                    </div>
-                  </li>
-                ))
-              )}
-            </ul>
+            <Link to="/pickup" className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-navy-deep px-4 text-sm font-medium text-cream hover:bg-navy w-full transition-colors">
+              Schedule Pickup
+            </Link>
           </section>
         </div>
       </div>

@@ -7,13 +7,17 @@ import {
   Search, Filter, Download, RefreshCw, Loader2, Printer,
   Package, Truck, CheckCircle2, AlertTriangle, MapPin,
   ArrowRight, Calendar, Clock, Eye, ChevronDown, BarChart3,
-  FileText
+  FileText, MoreHorizontal
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { listMyShipments } from "@/lib/api.functions";
 import { statusLabels, type ShipmentStatus } from "@/lib/types";
-import { generateShippingLabel, generateCommercialInvoice, generateCustomsDeclaration } from "@/lib/pdf";
+import {
+  generateShippingLabel, generateCommercialInvoice, generateCustomsDeclaration,
+  generateShippingReceipt, generateDeliveryConfirmation, generateShipmentCertificate
+} from "@/lib/pdf";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -460,6 +464,22 @@ function ShipmentsPage() {
                             >
                               <Printer className="h-3.5 w-3.5" />
                             </button>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-navy-deep transition-colors"
+                                  title="More Documents"
+                                >
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent align="end" className="w-48 p-1">
+                                <button onClick={() => { generateShippingReceipt({ ...s, tracking_number: s.trackingNumber, origin: s.origin_raw, destination: s.destination_raw }); toast.success("Shipping receipt downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Shipping Receipt</button>
+                                <button onClick={() => { generateDeliveryConfirmation({ ...s, tracking_number: s.trackingNumber, destination: s.destination_raw }); toast.success("Delivery confirmation downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Delivery Confirmation</button>
+                                <button onClick={() => { generateCustomsDeclaration({ trackingNumber: s.trackingNumber, weightKg: s.package?.weight_kg ?? 1, pieces: s.package?.pieces ?? 1, declaredValue: 0, origin: buildPdfInput(s).origin, destination: buildPdfInput(s).destination }); toast.success("Customs declaration downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Customs Declaration</button>
+                                <button onClick={() => { generateShipmentCertificate({ ...s, tracking_number: s.trackingNumber, origin: s.origin_raw, destination: s.destination_raw }); toast.success("Certificate downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Shipment Certificate</button>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                         </td>
                       </motion.tr>
@@ -614,6 +634,22 @@ function ShipmentsPage() {
                       >
                         <Printer className="h-3.5 w-3.5" />
                       </button>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-navy-deep transition-colors"
+                            title="More Documents"
+                          >
+                            <MoreHorizontal className="h-3.5 w-3.5" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-48 p-1">
+                          <button onClick={() => { generateShippingReceipt({ ...s, tracking_number: s.trackingNumber, origin: s.origin_raw, destination: s.destination_raw }); toast.success("Shipping receipt downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Shipping Receipt</button>
+                          <button onClick={() => { generateDeliveryConfirmation({ ...s, tracking_number: s.trackingNumber, destination: s.destination_raw }); toast.success("Delivery confirmation downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Delivery Confirmation</button>
+                          <button onClick={() => { generateCustomsDeclaration({ trackingNumber: s.trackingNumber, weightKg: s.package?.weight_kg ?? 1, pieces: s.package?.pieces ?? 1, declaredValue: 0, origin: buildPdfInput(s).origin, destination: buildPdfInput(s).destination }); toast.success("Customs declaration downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Customs Declaration</button>
+                          <button onClick={() => { generateShipmentCertificate({ ...s, tracking_number: s.trackingNumber, origin: s.origin_raw, destination: s.destination_raw }); toast.success("Certificate downloaded"); }} className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary">Shipment Certificate</button>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 </motion.div>

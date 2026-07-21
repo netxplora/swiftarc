@@ -52,6 +52,25 @@ export const adminOverview = createServerFn({ method: "GET" })
       .select("id, tracking_number, status, service, created_at")
       .order("created_at", { ascending: false })
       .limit(8);
+
+    const { data: exceptions } = await supabaseAdmin
+      .from("shipments")
+      .select("id, tracking_number, status, service, created_at")
+      .eq("status", "exception")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    const { data: invoiceTotals } = await supabaseAdmin
+      .from("invoices")
+      .select("status, total");
+    
+    let grossRevenue = 0;
+    let outstandingRevenue = 0;
+    (invoiceTotals || []).forEach((inv: any) => {
+      if (inv.status === "paid") grossRevenue += Number(inv.total);
+      else if (inv.status !== "void") outstandingRevenue += Number(inv.total);
+    });
+
     return {
       counts: {
         users: users.count ?? 0,
@@ -60,8 +79,13 @@ export const adminOverview = createServerFn({ method: "GET" })
         invoices: invoices.count ?? 0,
         openChats: convos.count ?? 0,
       },
+      revenue: {
+        gross: grossRevenue,
+        outstanding: outstandingRevenue
+      },
       volumeByDay,
       recentShipments: recent ?? [],
+      criticalExceptions: exceptions ?? [],
       courierPerformance: [
         { name: "Marcus Johnson", deliveries: 142, sla: 98.5, avgTime: "1.2h" },
         { name: "Sarah Chen", deliveries: 118, sla: 99.1, avgTime: "1.1h" },

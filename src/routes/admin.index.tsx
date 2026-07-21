@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminOverview } from "@/lib/admin.functions";
-import { Users, Package2, Truck, Receipt, MessageSquare, ArrowUpRight, ArrowDownRight, CreditCard, Activity } from "lucide-react";
+import { Users, Package2, Truck, Receipt, MessageSquare, ArrowUpRight, ArrowDownRight, CreditCard, Activity, AlertCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabels } from "@/lib/types";
@@ -39,17 +39,19 @@ function AdminOverview() {
     };
   }, [qc]);
 
+  const fmt = (n: number) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+
   const stats = [
-    { label: "Total Users", value: adminData?.counts.users ?? 0, Icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Active Shipments", value: adminData?.counts.shipments ?? 0, Icon: Package2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Open Pickups", value: adminData?.counts.pickups ?? 0, Icon: Truck, color: "text-amber", bg: "bg-amber/10" },
-    { label: "Total Invoices", value: adminData?.counts.invoices ?? 0, Icon: Receipt, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { label: "Live Chats", value: adminData?.counts.openChats ?? 0, Icon: MessageSquare, color: "text-red-500", bg: "bg-red-500/10" },
+    { label: "Gross Revenue", value: fmt(adminData?.revenue.gross ?? 0), Icon: Activity, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+    { label: "Outstanding", value: fmt(adminData?.revenue.outstanding ?? 0), Icon: CreditCard, color: "text-amber", bg: "bg-amber/10" },
+    { label: "Total Users", value: (adminData?.counts.users ?? 0).toLocaleString(), Icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Active Shipments", value: (adminData?.counts.shipments ?? 0).toLocaleString(), Icon: Package2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Live Chats", value: (adminData?.counts.openChats ?? 0).toLocaleString(), Icon: MessageSquare, color: "text-red-500", bg: "bg-red-500/10" },
   ];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold tracking-tight">Admin Control Center</h1>
           <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
@@ -59,6 +61,17 @@ function AdminOverview() {
             </span>
             System-wide activity synced in real-time
           </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to="/admin/invoices" className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80">
+            <Receipt className="mr-2 h-4 w-4" /> Issue Invoice
+          </Link>
+          <Link to="/admin/broadcast" className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80">
+            <MessageSquare className="mr-2 h-4 w-4" /> Broadcast
+          </Link>
+          <Link to="/admin/shipments" className="inline-flex h-9 items-center justify-center rounded-md bg-navy-deep px-3 text-sm font-medium text-cream hover:bg-navy transition-colors">
+            <Package2 className="mr-2 h-4 w-4" /> All Shipments
+          </Link>
         </div>
       </div>
 
@@ -147,6 +160,40 @@ function AdminOverview() {
           </div>
         </div>
       </div>
+
+      {(adminData?.criticalExceptions ?? []).length > 0 && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg font-bold flex items-center gap-2 text-red-700">
+              <AlertCircle className="h-5 w-5" />
+              Critical Exceptions
+            </h2>
+            <Link to="/admin/shipments" className="inline-flex items-center gap-1 text-sm font-medium text-red-700 hover:underline">
+              Resolve issues <ArrowUpRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs uppercase tracking-widest text-red-800/60 border-b border-red-200">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Tracking</th>
+                  <th className="px-5 py-3 font-medium">Service</th>
+                  <th className="px-5 py-3 font-medium text-right">Created</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-red-200">
+                {(adminData?.criticalExceptions ?? []).map((r: any) => (
+                  <tr key={r.id} className="hover:bg-red-100/50 transition-colors">
+                    <td className="px-5 py-3 font-mono font-medium text-red-900">{r.tracking_number}</td>
+                    <td className="px-5 py-3 text-red-800">{r.service}</td>
+                    <td className="px-5 py-3 text-right text-red-800 text-xs">{new Date(r.created_at).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between mb-4">

@@ -5,10 +5,11 @@ import { statusLabels, type ShipmentStatus } from "@/lib/types";
 
 // Sanitize DB errors before returning to the client. Raw Supabase/Postgres
 // error messages leak schema, constraint, and column names.
-function dbFail(error: unknown, message = "Operation failed. Please try again."): never {
+function dbFail(error: any, message = "Operation failed. Please try again."): never {
   // eslint-disable-next-line no-console
   console.error("[db error]", error);
-  throw new Error(message);
+  const errMsg = error?.message || error?.details || JSON.stringify(error);
+  throw new Error(`${message} (Details: ${errMsg})`);
 }
 
 
@@ -122,9 +123,12 @@ export const getMyProfile = createServerFn({ method: "GET" })
 
 export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ display_name: z.string().min(1).max(120) }).parse(i))
+  .validator((i) => z.object({ display_name: z.string().min(1).max(120).optional() }).parse(i))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("profiles").update({ display_name: data.display_name }).eq("id", context.userId);
+    const updates: { display_name?: string } = {};
+    if (data.display_name !== undefined) updates.display_name = data.display_name;
+    if (Object.keys(updates).length === 0) return { ok: true };
+    const { error } = await context.supabase.from("profiles").update(updates).eq("id", context.userId);
     if (error) dbFail(error);
     return { ok: true };
   });
@@ -352,14 +356,14 @@ export const bookShipment = createServerFn({ method: "POST" })
       width_cm: z.number().positive().max(300).optional(),
       height_cm: z.number().positive().max(300).optional(),
       pieces: z.number().int().min(1).max(50), // Sane max pieces
-      description: z.string().max(100).optional(),
+      description: z.string().max(1000).optional(),
     }).refine(p => !p.length_cm || !p.width_cm || !p.height_cm || (p.length_cm * p.width_cm * p.height_cm <= 10_000_000), "Package volume exceeds 10 cubic meters"),
     declared_value: z.number().nonnegative().max(100_000).default(0), // Max $100k
     insurance: z.boolean().default(false),
     signature_required: z.boolean().default(false),
     is_hazmat: z.boolean().default(false),
     volumetric_weight: z.number().optional(),
-    notes: z.string().max(250).optional(),
+    notes: z.string().max(2000).optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
     // Rate limit: Max 5 bookings per 60 seconds per user

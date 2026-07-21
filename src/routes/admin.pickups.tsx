@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { adminListPickups, adminSetPickupStatus, adminCreatePickup, adminUpdatePickup, adminDeletePickup } from "@/lib/admin.functions";
-import { Loader2, Trash2, Edit2, Plus } from "lucide-react";
+import { Loader2, Trash2, Edit2, Plus, Download } from "lucide-react";
 
 const STATUSES = ["pending","confirmed","completed","cancelled"] as const;
 
@@ -74,6 +74,13 @@ function AdminPickups() {
                     </td>
                     <td className="p-3 text-right">
                       <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          const { generatePickupReceipt } = await import("@/lib/pdf");
+                          generatePickupReceipt(p);
+                          toast.success("Pickup receipt downloaded");
+                        }}>
+                          <Download className="h-3 w-3 mr-1" /> Receipt
+                        </Button>
                         <PickupForm mode="edit" initial={p} onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-pickups"] })} />
                         <Button size="sm" variant="ghost" onClick={async () => {
                           if (confirm("Delete pickup?")) {

@@ -32,38 +32,27 @@ function fmt(n: number, cur = "USD") {
 }
 
 async function downloadPdf(inv: InvoiceRow) {
-  const { jsPDF } = await import("jspdf");
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  doc.setFont("helvetica", "bold").setFontSize(22).text("SwiftArc", 40, 60);
-  doc.setFont("helvetica", "normal").setFontSize(10).setTextColor("#64748b")
-    .text("Global logistics · billing statement", 40, 78);
-  doc.setTextColor("#0b1220").setFontSize(14).text(`Invoice ${inv.number}`, 40, 120);
-  doc.setFontSize(10).setTextColor("#475569");
-  doc.text(`Issue date: ${inv.issue_date}`, 40, 140);
-  doc.text(`Due date:   ${inv.due_date}`, 40, 156);
-  doc.text(`Status:     ${inv.status.toUpperCase()}`, 40, 172);
-
-  doc.setDrawColor("#e2e8f0").line(40, 190, 555, 190);
-  doc.setTextColor("#0b1220").setFontSize(11).setFont("helvetica", "bold");
-  doc.text("Description", 40, 210); doc.text("Qty", 380, 210); doc.text("Unit", 430, 210); doc.text("Amount", 500, 210);
-  doc.setFont("helvetica", "normal");
-  let y = 232;
-  for (const li of inv.line_items ?? []) {
-    doc.text(String(li.label).slice(0, 60), 40, y);
-    doc.text(String(li.qty), 380, y);
-    doc.text(fmt(Number(li.unit_price), inv.currency), 430, y);
-    doc.text(fmt(Number(li.qty) * Number(li.unit_price), inv.currency), 500, y);
-    y += 18;
-  }
-  y += 10; doc.line(40, y, 555, y); y += 20;
-  doc.text("Subtotal", 430, y); doc.text(fmt(Number(inv.subtotal), inv.currency), 500, y); y += 16;
-  doc.text("Tax",      430, y); doc.text(fmt(Number(inv.tax), inv.currency), 500, y); y += 16;
-  doc.setFont("helvetica", "bold");
-  doc.text("Total",    430, y); doc.text(fmt(Number(inv.total), inv.currency), 500, y);
-
-  doc.setFontSize(9).setTextColor("#94a3b8").setFont("helvetica", "normal")
-    .text("SwiftArc Logistics — thank you for shipping with us.", 40, 780);
-  doc.save(`${inv.number}.pdf`);
+  const { generateBillingInvoice } = await import("@/lib/pdf");
+  generateBillingInvoice({
+    invoiceNumber: inv.number,
+    issueDate: inv.issue_date,
+    dueDate: inv.due_date,
+    status: inv.status,
+    currency: inv.currency,
+    subtotal: inv.subtotal,
+    tax: inv.tax,
+    total: inv.total,
+    lineItems: (inv.line_items ?? []).length > 0 
+      ? inv.line_items.map(li => ({ label: li.label, qty: li.qty, unitPrice: li.unit_price, amount: li.qty * li.unit_price }))
+      : [{ label: "Logistics Service", qty: 1, unitPrice: inv.total, amount: inv.total }],
+    billTo: { 
+      contact: "Account Holder", 
+      line1: "Client Address", 
+      city: "City", 
+      zip: "00000", 
+      country: "US" 
+    },
+  });
 }
 
 function Invoices() {
@@ -150,15 +139,9 @@ function Invoices() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => {
-                          downloadPdf(i);
-                          toast.success("Invoice PDF downloaded");
-                        }}
-                        className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-navy-deep hover:text-cream transition-colors"
-                      >
-                        <Download className="h-3 w-3" /> PDF
-                      </button>
+                      <Button size="sm" variant="ghost" onClick={() => downloadPdf(i)} className="text-amber-deep hover:text-amber hover:bg-amber/10">
+                        <Download className="h-4 w-4 mr-1" /> PDF
+                      </Button>
                       <Link
                         to="/dashboard/invoices/$invoiceId"
                         params={{ invoiceId: i.id }}

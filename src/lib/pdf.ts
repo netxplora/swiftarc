@@ -102,6 +102,113 @@ function drawFooter(doc: jsPDF, pageW: number, pageH: number, includeLegal = tru
   }
 }
 
+// ---------- Generic Factory ----------
+
+export interface BusinessDocumentOptions {
+  type: string; // e.g. "PROOF OF DELIVERY"
+  referenceLabel: string; // e.g. "Tracking Number"
+  referenceValue: string; // e.g. "SW123456"
+  date: string;
+  sender?: { contact?: string; line1?: string; city?: string; zip?: string; country?: string; phone?: string; email?: string };
+  recipient?: { contact?: string; line1?: string; city?: string; zip?: string; country?: string; phone?: string; email?: string };
+  details: { label: string; value: string }[];
+  stamp?: { text: string; color: string };
+  requiresSignature?: boolean;
+}
+
+function generateBusinessDocument(opts: BusinessDocumentOptions) {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pw = 595.28;
+  const ph = 841.89;
+
+  // Header
+  drawLogo(doc, 40, 40, 1.2);
+  doc.setFont("helvetica", "bold").setFontSize(22).setTextColor(BRAND_NAVY);
+  doc.text(opts.type.toUpperCase(), pw - 40, 60, { align: "right" });
+  doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(TEXT_MUTED);
+  doc.text(`${opts.referenceLabel}: ${opts.referenceValue}`, pw - 40, 78, { align: "right" });
+  doc.text(`Date: ${opts.date}`, pw - 40, 92, { align: "right" });
+
+  if (opts.referenceValue) {
+    drawQRCode(doc, pw - 90, 110, 50, `https://swiftarc.app/tracking/${opts.referenceValue}`);
+  }
+
+  // Parties Box
+  let contentY = 110;
+  
+  if (opts.sender) {
+    doc.setDrawColor("#e2e8f0").setFillColor("#f8fafc").rect(40, contentY, 240, 110, "FD");
+    doc.setTextColor(BRAND_NAVY).setFontSize(11).setFont("helvetica", "bold").text("Sender:", 50, contentY + 20);
+    doc.setFontSize(10).setFont("helvetica", "normal").setTextColor(TEXT_MUTED);
+    doc.text([
+      opts.sender.contact,
+      opts.sender.line1,
+      [opts.sender.city, opts.sender.zip, opts.sender.country].filter(Boolean).join(", "),
+      opts.sender.phone ? `Phone: ${opts.sender.phone}` : "",
+      opts.sender.email ? `Email: ${opts.sender.email}` : ""
+    ].filter(Boolean), 50, contentY + 38, { lineHeightFactor: 1.5 });
+  }
+
+  if (opts.recipient) {
+    doc.setDrawColor("#e2e8f0").setFillColor("#f8fafc").rect(300, contentY, 255, 110, "FD");
+    doc.setTextColor(BRAND_NAVY).setFontSize(11).setFont("helvetica", "bold").text("Recipient:", 310, contentY + 20);
+    doc.setFontSize(10).setFont("helvetica", "normal").setTextColor(TEXT_MUTED);
+    doc.text([
+      opts.recipient.contact,
+      opts.recipient.line1,
+      [opts.recipient.city, opts.recipient.zip, opts.recipient.country].filter(Boolean).join(", "),
+      opts.recipient.phone ? `Phone: ${opts.recipient.phone}` : "",
+      opts.recipient.email ? `Email: ${opts.recipient.email}` : ""
+    ].filter(Boolean), 310, contentY + 38, { lineHeightFactor: 1.5 });
+  }
+
+  if (opts.sender || opts.recipient) {
+    contentY += 140;
+  }
+
+  // Details Section
+  doc.setFillColor(BRAND_NAVY).rect(40, contentY, pw - 80, 25, "F");
+  doc.setTextColor("#ffffff").setFontSize(10).setFont("helvetica", "bold");
+  doc.text("Document Details", 50, contentY + 17);
+
+  contentY += 45;
+  doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(BRAND_NAVY);
+  
+  const midPoint = 300;
+  opts.details.forEach((detail, index) => {
+    const isRight = index % 2 !== 0;
+    const xOffset = isRight ? midPoint : 40;
+    const rowY = contentY + Math.floor(index / 2) * 20;
+    
+    doc.setFont("helvetica", "bold").setTextColor(TEXT_MUTED);
+    doc.text(`${detail.label}:`, xOffset + 10, rowY);
+    
+    doc.setFont("helvetica", "normal").setTextColor(BRAND_NAVY);
+    doc.text(detail.value, xOffset + 100, rowY);
+  });
+
+  contentY += Math.ceil(opts.details.length / 2) * 20 + 20;
+
+  // Signatures
+  if (opts.requiresSignature) {
+    contentY += 40;
+    doc.setDrawColor(BRAND_NAVY).setLineWidth(0.5).line(40, contentY + 40, 250, contentY + 40);
+    doc.text("Authorized Signature", 40, contentY + 55);
+
+    doc.line(350, contentY + 40, 500, contentY + 40);
+    doc.text("Date", 350, contentY + 55);
+  }
+
+  if (opts.stamp) {
+    drawStamp(doc, opts.stamp.text, pw / 2, contentY + 100, opts.stamp.color);
+  }
+
+  drawFooter(doc, pw, ph);
+
+  const cleanType = opts.type.toLowerCase().replace(/\s+/g, '_');
+  doc.save(`${cleanType}_${opts.referenceValue}.pdf`);
+}
+
 // ---------- 1. Shipping Label ----------
 
 export function generateShippingLabel(shipment: any) {
@@ -424,3 +531,320 @@ export function generateCustomsDeclaration(c: CustomsInput) {
   doc.save(`customs_declaration_${c.trackingNumber}.pdf`);
 }
 
+// ---------- 4. Additional Enterprise Documents ----------
+
+function parseAddress(addr: any) {
+  if (!addr) return undefined;
+  const parsed = typeof addr === 'string' ? JSON.parse(addr) : addr;
+  return {
+    contact: parsed.contact_name || "Sender",
+    line1: parsed.line1 || "",
+    city: parsed.city || "",
+    zip: parsed.postal_code || "",
+    country: parsed.country_code || "",
+    phone: parsed.phone || "",
+    email: parsed.email || ""
+  };
+}
+
+export function generateShippingReceipt(shipment: any) {
+  generateBusinessDocument({
+    type: "Shipping Receipt",
+    referenceLabel: "Tracking Number",
+    referenceValue: shipment.tracking_number || shipment.trackingNumber,
+    date: format(new Date(), "MMM dd, yyyy"),
+    sender: parseAddress(shipment.origin),
+    recipient: parseAddress(shipment.destination),
+    details: [
+      { label: "Service", value: shipment.service },
+      { label: "Status", value: shipment.status },
+      { label: "Weight", value: `${shipment.package?.weight_kg || 1} KG` },
+      { label: "Created At", value: format(new Date(shipment.created_at || Date.now()), "MMM dd, yyyy HH:mm") }
+    ],
+    stamp: { text: "RECEIVED", color: "#10b981" }
+  });
+}
+
+export function generateShipmentConfirmation(shipment: any) {
+  generateBusinessDocument({
+    type: "Shipment Confirmation",
+    referenceLabel: "Tracking Number",
+    referenceValue: shipment.tracking_number || shipment.trackingNumber,
+    date: format(new Date(), "MMM dd, yyyy"),
+    sender: parseAddress(shipment.origin),
+    recipient: parseAddress(shipment.destination),
+    details: [
+      { label: "Service", value: shipment.service },
+      { label: "Estimated Delivery", value: "3-5 Business Days" },
+      { label: "Weight", value: `${shipment.package?.weight_kg || 1} KG` }
+    ],
+    stamp: { text: "CONFIRMED", color: "#0ea5e9" }
+  });
+}
+
+export function generatePickupReceipt(pickup: any) {
+  const addr = parseAddress(pickup.address || pickup.location);
+  generateBusinessDocument({
+    type: "Pickup Receipt",
+    referenceLabel: "Pickup ID",
+    referenceValue: pickup.id.substring(0, 8).toUpperCase(),
+    date: format(new Date(), "MMM dd, yyyy"),
+    sender: addr, // Pickup location is essentially the sender
+    details: [
+      { label: "Pickup Date", value: pickup.pickup_date || "N/A" },
+      { label: "Time Slot", value: pickup.slot || "N/A" },
+      { label: "Package Count", value: String(pickup.package_count || 1) },
+      { label: "Status", value: pickup.status || "Completed" }
+    ],
+    requiresSignature: true,
+    stamp: { text: "COLLECTED", color: "#10b981" }
+  });
+}
+
+export function generateDeliveryConfirmation(shipment: any) {
+  generateBusinessDocument({
+    type: "Delivery Confirmation",
+    referenceLabel: "Tracking Number",
+    referenceValue: shipment.tracking_number || shipment.trackingNumber,
+    date: format(new Date(), "MMM dd, yyyy"),
+    recipient: parseAddress(shipment.destination),
+    details: [
+      { label: "Service", value: shipment.service },
+      { label: "Status", value: "Delivered" },
+      { label: "Delivery Date", value: format(new Date(), "MMM dd, yyyy HH:mm") }
+    ],
+    stamp: { text: "DELIVERED", color: "#10b981" }
+  });
+}
+
+export function generateProofOfDelivery(shipment: any, podData: any) {
+  generateBusinessDocument({
+    type: "Proof Of Delivery",
+    referenceLabel: "Tracking Number",
+    referenceValue: shipment.tracking_number || shipment.trackingNumber,
+    date: format(new Date(), "MMM dd, yyyy"),
+    recipient: parseAddress(shipment.destination),
+    details: [
+      { label: "Service", value: shipment.service },
+      { label: "Delivery Date", value: format(new Date(podData?.timestamp || Date.now()), "MMM dd, yyyy HH:mm") },
+      { label: "Received By", value: podData?.signedBy || "Resident" },
+      { label: "Location", value: podData?.location || "Front Desk" }
+    ],
+    requiresSignature: true,
+    stamp: { text: "POD SECURED", color: "#8b5cf6" }
+  });
+}
+
+export function generateShipmentCertificate(shipment: any) {
+  generateBusinessDocument({
+    type: "Shipment Certificate",
+    referenceLabel: "Tracking Number",
+    referenceValue: shipment.tracking_number || shipment.trackingNumber,
+    date: format(new Date(), "MMM dd, yyyy"),
+    sender: parseAddress(shipment.origin),
+    recipient: parseAddress(shipment.destination),
+    details: [
+      { label: "Service", value: shipment.service },
+      { label: "Weight", value: `${shipment.package?.weight_kg || 1} KG` },
+      { label: "Declared Value", value: `$${shipment.declared_value || 0}` },
+      { label: "Certification", value: "Authentic SwiftArc Record" }
+    ],
+    ],
+    stamp: { text: "CERTIFIED", color: "#f59e0b" }
+  });
+}
+
+export interface FinancialInvoiceInput {
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  status: "draft" | "sent" | "paid" | "overdue" | "void";
+  currency: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+  lineItems: Array<{ label: string; qty: number; unitPrice: number; amount: number }>;
+  billTo: { contact: string; line1: string; city: string; zip: string; country: string; phone?: string; email?: string };
+}
+
+export function generateBillingInvoice(inv: FinancialInvoiceInput) {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pw = 595.28;
+  const ph = 841.89;
+
+  drawLogo(doc, 40, 40, 1.2);
+  
+  doc.setFont("helvetica", "bold").setFontSize(26).setTextColor(BRAND_NAVY);
+  doc.text("INVOICE", pw - 40, 60, { align: "right" });
+  doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(TEXT_MUTED);
+  doc.text(`Invoice Number: ${inv.invoiceNumber}`, pw - 40, 78, { align: "right" });
+  doc.text(`Date Issued: ${format(new Date(inv.issueDate), "MMM dd, yyyy")}`, pw - 40, 92, { align: "right" });
+  doc.text(`Due Date: ${format(new Date(inv.dueDate), "MMM dd, yyyy")}`, pw - 40, 106, { align: "right" });
+
+  doc.setDrawColor("#e2e8f0").setFillColor("#f8fafc").rect(40, 130, 240, 110, "FD");
+  doc.setTextColor(BRAND_NAVY).setFontSize(11).setFont("helvetica", "bold").text("Billed to:", 50, 150);
+  doc.setFontSize(10).setFont("helvetica", "normal").setTextColor(TEXT_MUTED);
+  doc.text([
+    inv.billTo.contact,
+    inv.billTo.line1,
+    `${inv.billTo.city}, ${inv.billTo.zip}, ${inv.billTo.country}`,
+    inv.billTo.phone ? `Phone: ${inv.billTo.phone}` : "",
+    inv.billTo.email ? `Email: ${inv.billTo.email}` : ""
+  ].filter(Boolean), 50, 168, { lineHeightFactor: 1.5 });
+
+  const tableY = 270;
+  doc.setFillColor(BRAND_NAVY).rect(40, tableY, pw - 80, 25, "F");
+  
+  doc.setTextColor("#ffffff").setFontSize(10).setFont("helvetica", "bold");
+  doc.text("Description", 50, tableY + 17);
+  doc.text("Qty", 350, tableY + 17);
+  doc.text("Unit Price", 420, tableY + 17);
+  doc.text("Amount", 500, tableY + 17);
+  
+  let rY = tableY + 45;
+  inv.lineItems.forEach((li) => {
+    doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(BRAND_NAVY);
+    doc.text(li.label, 50, rY);
+    doc.setFont("helvetica", "normal").setTextColor(TEXT_MUTED);
+    doc.text(`${li.qty}`, 350, rY);
+    doc.text(`${inv.currency === "USD" ? "$" : ""}${li.unitPrice.toFixed(2)}`, 420, rY);
+    doc.setTextColor(BRAND_NAVY).setFont("helvetica", "bold").text(`${inv.currency === "USD" ? "$" : ""}${li.amount.toFixed(2)}`, 500, rY);
+    rY += 30;
+  });
+
+  doc.setDrawColor("#e2e8f0").line(40, rY + 10, pw - 40, rY + 10);
+
+  const tY = rY + 40;
+  doc.setFillColor("#f8fafc").rect(360, tY, 195, 90, "F");
+  
+  doc.setFontSize(10).setTextColor(TEXT_MUTED);
+  doc.text("Subtotal:", 380, tY + 25);
+  doc.setTextColor(BRAND_NAVY).text(`${inv.currency === "USD" ? "$" : ""}${inv.subtotal.toFixed(2)}`, 500, tY + 25);
+  
+  doc.setTextColor(TEXT_MUTED).text(`Tax:`, 380, tY + 45);
+  doc.setTextColor(BRAND_NAVY).text(`${inv.currency === "USD" ? "$" : ""}${inv.tax.toFixed(2)}`, 500, tY + 45);
+
+  doc.setDrawColor("#cbd5e1").line(380, tY + 60, 535, tY + 60);
+
+  doc.setFont("helvetica", "bold").setFontSize(14).setTextColor(BRAND_NAVY);
+  doc.text("Total:", 380, tY + 80);
+  doc.text(`${inv.currency === "USD" ? "$" : ""}${inv.total.toFixed(2)}`, 500, tY + 80);
+
+  if (inv.status === "paid") {
+    drawStamp(doc, "PAID IN FULL", 200, tY, "#10b981");
+  } else if (inv.status === "overdue") {
+    drawStamp(doc, "OVERDUE", 200, tY, "#ef4444");
+  } else if (inv.status === "void") {
+    drawStamp(doc, "VOID", 200, tY, "#94a3b8");
+  }
+
+  drawFooter(doc, pw, ph);
+  doc.save(`invoice_${inv.invoiceNumber}.pdf`);
+}
+
+export function generatePaymentReceipt(transaction: any) {
+  generateBusinessDocument({
+    type: "Payment Receipt",
+    referenceLabel: "Transaction ID",
+    referenceValue: transaction.id || transaction.txId,
+    date: format(new Date(transaction.date || Date.now()), "MMM dd, yyyy"),
+    details: [
+      { label: "Payment Method", value: transaction.method || "Credit Card" },
+      { label: "Amount Paid", value: `$${Number(transaction.amount || 0).toFixed(2)}` },
+      { label: "Status", value: transaction.status || "Successful" },
+      { label: "Related Invoice", value: transaction.invoiceId || "N/A" }
+    ],
+    stamp: { text: "PAID IN FULL", color: "#10b981" }
+  });
+}
+
+export function generateShippingManifest(manifestId: string, driver: string, route: string, shipments: any[]) {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pw = 595.28;
+  const ph = 841.89;
+
+  // Header
+  drawLogo(doc, 40, 40, 1.2);
+  doc.setFont("helvetica", "bold").setFontSize(22).setTextColor(BRAND_NAVY);
+  doc.text("SHIPPING MANIFEST", pw - 40, 60, { align: "right" });
+  
+  doc.setFont("helvetica", "normal").setFontSize(10).setTextColor(TEXT_MUTED);
+  doc.text(`Manifest ID: ${manifestId}`, pw - 40, 78, { align: "right" });
+  doc.text(`Date: ${format(new Date(), "MMM dd, yyyy")}`, pw - 40, 92, { align: "right" });
+
+  drawQRCode(doc, pw - 90, 110, 50, `https://swiftarc.app/manifest/${manifestId}`);
+
+  // Route Info
+  doc.setDrawColor("#e2e8f0").setFillColor("#f8fafc").rect(40, 110, 300, 80, "FD");
+  doc.setTextColor(BRAND_NAVY).setFontSize(11).setFont("helvetica", "bold").text("Dispatch Information", 50, 130);
+  doc.setFontSize(10).setFont("helvetica", "normal").setTextColor(TEXT_MUTED);
+  doc.text(`Driver / Carrier: ${driver}`, 50, 148);
+  doc.text(`Route: ${route}`, 50, 163);
+  doc.text(`Total Packages: ${shipments.length}`, 50, 178);
+
+  // Table Header
+  const tableY = 220;
+  doc.setFillColor(BRAND_NAVY).rect(40, tableY, pw - 80, 25, "F");
+  
+  doc.setTextColor("#ffffff").setFontSize(9).setFont("helvetica", "bold");
+  doc.text("Tracking Number", 50, tableY + 17);
+  doc.text("Service", 170, tableY + 17);
+  doc.text("Weight", 250, tableY + 17);
+  doc.text("Destination", 310, tableY + 17);
+  doc.text("Status", 490, tableY + 17);
+
+  // Table Rows
+  let rY = tableY + 45;
+  doc.setFontSize(8).setFont("helvetica", "normal");
+  
+  shipments.forEach((s) => {
+    if (rY > ph - 150) {
+      // New Page if it overflows
+      drawFooter(doc, pw, ph);
+      doc.addPage();
+      rY = 60;
+      doc.setFillColor(BRAND_NAVY).rect(40, rY, pw - 80, 25, "F");
+      doc.setTextColor("#ffffff").setFontSize(9).setFont("helvetica", "bold");
+      doc.text("Tracking Number", 50, rY + 17);
+      doc.text("Service", 170, rY + 17);
+      doc.text("Weight", 250, rY + 17);
+      doc.text("Destination", 310, rY + 17);
+      doc.text("Status", 490, rY + 17);
+      rY += 45;
+      doc.setFontSize(8).setFont("helvetica", "normal");
+    }
+
+    const dest = typeof s.destination === "string" ? JSON.parse(s.destination) : (s.destination || {});
+    
+    doc.setTextColor(BRAND_NAVY).setFont("helvetica", "bold");
+    doc.text(s.tracking_number || s.trackingNumber, 50, rY);
+    
+    doc.setFont("helvetica", "normal").setTextColor(TEXT_MUTED);
+    doc.text(s.service || "Standard", 170, rY);
+    doc.text(`${s.package?.weight_kg || 1} KG`, 250, rY);
+    
+    doc.text(`${dest.city || "Unknown"}, ${dest.country_code || ""}`, 310, rY);
+    doc.text(s.status || "Pending", 490, rY);
+    
+    doc.setDrawColor("#f1f5f9").setLineWidth(0.5).line(40, rY + 10, pw - 40, rY + 10);
+    rY += 25;
+  });
+
+  // Signatures
+  rY += 20;
+  if (rY > ph - 100) {
+    drawFooter(doc, pw, ph);
+    doc.addPage();
+    rY = 60;
+  }
+  
+  doc.setDrawColor(BRAND_NAVY).setLineWidth(0.5).line(40, rY + 40, 250, rY + 40);
+  doc.text("Driver Signature", 40, rY + 55);
+
+  doc.line(300, rY + 40, 500, rY + 40);
+  doc.text("Dispatch Signature", 300, rY + 55);
+
+  drawFooter(doc, pw, ph);
+
+  doc.save(`manifest_${manifestId}.pdf`);
+}
