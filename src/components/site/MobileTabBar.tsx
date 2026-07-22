@@ -1,17 +1,24 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, PackageSearch, Calculator, MapPin, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
-const tabs = [
+const baseTabs = [
   { to: "/", label: "Home", Icon: Home },
   { to: "/tracking", label: "Track", Icon: PackageSearch },
   { to: "/rates", label: "Rates", Icon: Calculator },
   { to: "/locations", label: "Places", Icon: MapPin },
-  { to: "/login", label: "Account", Icon: User },
 ] as const;
 
 export function MobileTabBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { signedIn } = useAuth();
+
+  const tabs = [
+    ...baseTabs,
+    { to: signedIn ? "/dashboard" : "/login", label: "Account", Icon: User },
+  ];
+
   return (
     <nav
       aria-label="Mobile navigation"

@@ -8,8 +8,53 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getCheckoutTransaction, listPaymentMethods, listActiveWallets, selectPaymentMethod, markTransactionPaid, sendEmailReceipt } from "@/lib/api.functions";
+import { getCheckoutTransaction, listPaymentMethods, listActiveWallets, selectPaymentMethod, markTransactionPaid, sendEmailReceipt, createPaymentIntent } from "@/lib/api.functions";
 import { generateShippingLabel } from "@/lib/pdf";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || "pk_test_mock");
+
+function StripeCheckoutForm({ amount, onSuccess }: { amount: string, onSuccess: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setIsProcessing(true);
+    setErrorMsg("");
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      setErrorMsg(error.message || "An unexpected error occurred.");
+      setIsProcessing(false);
+    } else {
+      onSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement />
+      {errorMsg && <div className="text-sm font-medium text-destructive">{errorMsg}</div>}
+      <Button
+        type="submit"
+        disabled={isProcessing || !stripe || !elements}
+        className="mt-4 h-11 w-full bg-[#0074d4] text-white hover:bg-[#005bb5] rounded-md shadow-sm transition-all"
+      >
+        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Pay {amount}
+      </Button>
+    </form>
+  );
+}
 
 export const Route = createFileRoute("/shipping/checkout/$transactionId")({
   head: () => ({
@@ -61,17 +106,20 @@ function CheckoutPage() {
     onError: () => toast.error("Failed to send receipt"),
   });
 
-  // Card form state
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
-  const [cardName, setCardName] = useState("");
-
-  // Bank transfer state
-  const [bankRef, setBankRef] = useState("");
-
   // Crypto state
   const [cryptoTxHash, setCryptoTxHash] = useState("");
+  
+  // Stripe state
+  const getSecret = useServerFn(createPaymentIntent);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tab === "card" && !clientSecret && txn.data) {
+      getSecret({ data: { transactionId } })
+        .then((res) => setClientSecret(res.clientSecret))
+        .catch(() => toast.error("Failed to initialize payment gateway"));
+    }
+  }, [tab, clientSecret, !!txn.data, transactionId]);
 
   const wallet = (wallets.data ?? []).find((w: any) => w.id === selectedWallet);
 
@@ -91,9 +139,7 @@ function CheckoutPage() {
       if (tab === "bank_transfer") {
         return doPay({ data: { transactionId, method: "bank_transfer", bankReference: bankRef || undefined } });
       }
-      // Card
-      const last4 = cardNumber.replace(/\s/g, "").slice(-4);
-      return doPay({ data: { transactionId, method: "card", cardLast4: last4 } });
+      return null;
     },
     onSuccess: (res: any) => {
       qc.invalidateQueries({ queryKey: ["checkout", transactionId] });
@@ -227,56 +273,27 @@ function CheckoutPage() {
             <div className="space-y-5 rounded-xl border border-border bg-[#f6f9fc] p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-[#1a1f36]">Pay with card</span>
-                <div className="flex gap-1">
-                  <div className="h-6 w-10 rounded bg-[#e6ebf1] grid place-items-center"><span className="text-[10px] font-bold text-[#4f566b]">VISA</span></div>
-                  <div className="h-6 w-10 rounded bg-[#e6ebf1] grid place-items-center"><span className="text-[10px] font-bold text-[#4f566b]">MC</span></div>
-                </div>
               </div>
               
               <div className="space-y-4">
-                <div className="grid gap-1.5">
-                  <Label className="text-xs font-semibold text-[#4f566b]">Name on card</Label>
-                  <Input value={cardName} onChange={(e) => setCardName(e.target.value)} placeholder="Full name" className="h-11 bg-white border-[#e6ebf1] text-[#1a1f36] shadow-sm rounded-md focus-visible:ring-1 focus-visible:ring-[#0074d4]" />
-                </div>
-                
-                <div className="grid gap-1.5">
-                  <Label className="text-xs font-semibold text-[#4f566b]">Card Information</Label>
-                  <div className="flex flex-col bg-white border border-[#e6ebf1] rounded-md shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-[#0074d4] focus-within:border-[#0074d4]">
-                    <div className="flex border-b border-[#e6ebf1]">
-                      <div className="flex items-center pl-3 text-[#a3acb9]"><CreditCard className="h-5 w-5" /></div>
-                      <Input
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value.replace(/[^\d\s]/g, "").slice(0, 19))}
-                        placeholder="Card number"
-                        className="h-11 border-none shadow-none focus-visible:ring-0 text-[#1a1f36] placeholder:text-[#a3acb9]"
-                      />
-                    </div>
-                    <div className="flex divide-x divide-[#e6ebf1]">
-                      <Input 
-                        value={cardExpiry} 
-                        onChange={(e) => setCardExpiry(e.target.value.slice(0, 5))} 
-                        placeholder="MM / YY" 
-                        className="h-11 flex-1 border-none shadow-none focus-visible:ring-0 text-[#1a1f36] placeholder:text-[#a3acb9]" 
-                      />
-                      <Input 
-                        value={cardCvc} 
-                        onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))} 
-                        placeholder="CVC" 
-                        className="h-11 w-24 border-none shadow-none focus-visible:ring-0 text-[#1a1f36] placeholder:text-[#a3acb9]" 
-                        type="password" 
-                      />
-                    </div>
+                {clientSecret ? (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <StripeCheckoutForm 
+                      amount={fmt(Number(t.amount))} 
+                      onSuccess={() => {
+                        doPay({ data: { transactionId, method: "card" } }).then(() => {
+                          qc.invalidateQueries({ queryKey: ["checkout", transactionId] });
+                          toast.success("Payment processed successfully");
+                        });
+                      }} 
+                    />
+                  </Elements>
+                ) : (
+                  <div className="flex h-32 items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#0074d4]" />
                   </div>
-                </div>
+                )}
                 
-                <Button
-                  onClick={() => payMut.mutate()}
-                  disabled={payMut.isPending || cardNumber.replace(/\s/g, "").length < 13}
-                  className="mt-4 h-11 w-full bg-[#0074d4] text-white hover:bg-[#005bb5] rounded-md shadow-sm transition-all"
-                >
-                  {payMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Pay {fmt(Number(t.amount))}
-                </Button>
                 <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4f566b]">
                   <ShieldCheck className="h-4 w-4" /> Secured by Stripe
                 </div>

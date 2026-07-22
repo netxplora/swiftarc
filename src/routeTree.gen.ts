@@ -47,6 +47,7 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminMapRouteImport } from './routes/admin.map'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as ShippingCheckoutTransactionIdRouteImport } from './routes/shipping.checkout.$transactionId'
 import { Route as DashboardNotificationsIdRouteImport } from './routes/dashboard.notifications.$id'
 import { Route as DashboardInvoicesInvoiceIdRouteImport } from './routes/dashboard.invoices.$invoiceId'
@@ -241,6 +242,11 @@ const AdminBroadcastRoute = AdminBroadcastRouteImport.update({
   path: '/broadcast',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ShippingCheckoutTransactionIdRoute =
   ShippingCheckoutTransactionIdRouteImport.update({
     id: '/checkout/$transactionId',
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/shipping': typeof ShippingRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/map': typeof AdminMapRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/shipping': typeof ShippingRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/map': typeof AdminMapRoute
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/shipping': typeof ShippingRouteWithChildren
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/map': typeof AdminMapRoute
@@ -411,6 +420,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/support'
     | '/terms'
+    | '/admin/analytics'
     | '/admin/broadcast'
     | '/admin/invoices'
     | '/admin/map'
@@ -452,6 +462,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/support'
     | '/terms'
+    | '/admin/analytics'
     | '/admin/broadcast'
     | '/admin/invoices'
     | '/admin/map'
@@ -495,6 +506,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/support'
     | '/terms'
+    | '/admin/analytics'
     | '/admin/broadcast'
     | '/admin/invoices'
     | '/admin/map'
@@ -811,6 +823,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBroadcastRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/shipping/checkout/$transactionId': {
       id: '/shipping/checkout/$transactionId'
       path: '/checkout/$transactionId'
@@ -836,6 +855,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBroadcastRoute: typeof AdminBroadcastRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminMapRoute: typeof AdminMapRoute
@@ -848,6 +868,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminBroadcastRoute: AdminBroadcastRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminMapRoute: AdminMapRoute,

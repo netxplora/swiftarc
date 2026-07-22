@@ -28,6 +28,7 @@ const mainNav = [
 
 const adminNav = [
   { to: "/admin", label: "Admin Overview", icon: Shield, end: true },
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart },
   { to: "/admin/map", label: "Global Map", icon: Map },
   { to: "/admin/shipments", label: "All Shipments", icon: Package2 },
   { to: "/admin/users", label: "Customers", icon: Users },

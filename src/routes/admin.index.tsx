@@ -63,6 +63,9 @@ function AdminOverview() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Link to="/admin/analytics" className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80">
+            <Activity className="mr-2 h-4 w-4" /> Analytics
+          </Link>
           <Link to="/admin/invoices" className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80">
             <Receipt className="mr-2 h-4 w-4" /> Issue Invoice
           </Link>

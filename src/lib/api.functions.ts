@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { statusLabels, type ShipmentStatus } from "@/lib/types";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock", {
+  apiVersion: "2024-04-10" as any,
+});
 
 // Sanitize DB errors before returning to the client. Raw Supabase/Postgres
 // error messages leak schema, constraint, and column names.
@@ -711,9 +716,12 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
     cryptoTxHash: z.string().max(255).optional(),
   }).parse(i))
   .handler(async ({ data, context }) => {
+    // We auto-verify non-card methods for the MVP. Card is handled by Stripe Webhooks.
+    const newStatus = data.method === "card" ? "processing" : "verified";
+    
     const updates: any = {
       method: data.method,
-      status: "processing", // Real validation happens via webhooks now
+      status: newStatus,
       updated_at: new Date().toISOString(),
     };
     if (data.cardLast4) updates.card_last4 = data.cardLast4;
@@ -723,7 +731,7 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
     // Verify ownership
     const { data: txn, error: getErr } = await context.supabase
       .from("payment_transactions")
-      .select("*, shipments!inner(user_id)")
+      .select("*, shipments!inner(id, user_id)")
       .eq("id", data.transactionId)
       .eq("shipments.user_id", context.userId)
       .maybeSingle();
@@ -736,7 +744,98 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
       .eq("id", data.transactionId);
     if (error) dbFail(error);
 
+    if (newStatus === "verified") {
+      // Update shipment status to label_created now that payment is verified
+      await supabaseAdmin
+        .from("shipments")
+        .update({ status: "label_created" } as any)
+        .eq("id", txn.shipments.id);
+
+      // Send the email receipt in the background
+      const userProfile = await context.supabase.from("profiles").select("email").eq("id", context.userId).maybeSingle();
+      if (userProfile.data?.email) {
+        sendEmailReceipt({ transactionId: data.transactionId, email: userProfile.data.email }).catch(err => {
+          console.error("Failed to send background email receipt:", err);
+        });
+      }
+    }
+
     return { ok: true, status: updates.status as string };
+  });
+
+export const sendEmailReceipt = createServerFn({ method: "POST" })
+  .validator((i) => z.object({ transactionId: z.string().uuid(), email: z.string().email() }).parse(i))
+  .handler(async ({ data }) => {
+    if (!process.env.RESEND_API_KEY) {
+      console.log("Simulating email receipt to", data.email, "for txn", data.transactionId);
+      await new Promise(r => setTimeout(r, 1000));
+      return { ok: true, simulated: true };
+    }
+    
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: txn, error } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("*, shipments(tracking_number, service)")
+      .eq("id", data.transactionId)
+      .maybeSingle();
+      
+    if (error || !txn) return { ok: false };
+
+    try {
+      const { Resend } = await import("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: 'SwiftArc Payments <receipts@swiftarc.net>',
+        to: data.email,
+        subject: `Receipt for Shipment ${txn.shipments.tracking_number}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #1E293B;">Payment Receipt</h2>
+            <p>Thank you for booking with SwiftArc. Your payment has been received and your shipping label is ready.</p>
+            <div style="background: #F1F5F9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Tracking Number:</strong> ${txn.shipments.tracking_number}</p>
+              <p><strong>Service:</strong> ${txn.shipments.service}</p>
+              <p><strong>Amount:</strong> ${txn.amount} ${txn.currency}</p>
+              <p><strong>Reference:</strong> ${txn.reference}</p>
+            </div>
+            <p style="color: #64748B; font-size: 12px;">This is an automated receipt. If you have questions, please contact support.</p>
+          </div>
+        `
+      });
+      return { ok: true };
+    } catch (err) {
+      console.error("Resend API Error:", err);
+      return { ok: false };
+    }
+  });
+
+export const createPaymentIntent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) => z.object({ transactionId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: txn, error } = await supabaseAdmin
+      .from("payment_transactions")
+      .select("*, shipments!inner(id, user_id)")
+      .eq("id", data.transactionId)
+      .eq("shipments.user_id", context.userId)
+      .maybeSingle();
+
+    if (error || !txn) throw new Error("Forbidden or not found");
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(Number(txn.amount) * 100), // Stripe expects cents
+      currency: txn.currency.toLowerCase(),
+      metadata: {
+        reference: txn.reference,
+        transactionId: txn.id,
+      },
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    return { clientSecret: paymentIntent.client_secret };
   });
 
 export const getCourierManifest = createServerFn({ method: "GET" })
@@ -749,13 +848,4 @@ export const getCourierManifest = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) dbFail(error);
     return data ?? [];
-  });
-
-export const sendEmailReceipt = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ transactionId: z.string().uuid() }).parse(i))
-  .handler(async ({ data }) => {
-    // Mock sending email via Resend
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    return { ok: true, message: "Receipt sent successfully" };
   });

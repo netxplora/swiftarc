@@ -59,6 +59,33 @@ function AdminGlobalMap() {
 
   const anomalyCount = activeShipments.filter((s: any) => s.telemetry?.shockEvents > 0 || s.telemetry?.healthScore < 80).length;
 
+  const [couriers, setCouriers] = useState([
+    { id: "c1", name: "David Kim", lat: 34.0522, lng: -118.2437 },
+    { id: "c2", name: "Sarah Chen", lat: 40.7128, lng: -74.0060 },
+    { id: "c3", name: "Marcus Johnson", lat: 51.5074, lng: -0.1278 },
+    { id: "c4", name: "Alex Rivera", lat: -33.8688, lng: 151.2093 },
+  ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCouriers(prev => prev.map(c => ({
+        ...c,
+        lat: c.lat + (Math.random() - 0.5) * 0.05,
+        lng: c.lng + (Math.random() - 0.5) * 0.05
+      })));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const truckIcon = createIcon(`
+    <div class="relative flex h-8 w-8 items-center justify-center">
+      <div class="absolute h-full w-full rounded-full bg-blue-500 opacity-30 animate-ping"></div>
+      <div class="relative h-6 w-6 rounded-full border-2 border-background bg-blue-500 shadow-md flex items-center justify-center text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><path d="M14 17h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+      </div>
+    </div>
+  `);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -112,6 +139,17 @@ function AdminGlobalMap() {
               </Marker>
             );
           })}
+          
+          {couriers.map(c => (
+            <Marker key={c.id} position={[c.lat, c.lng]} icon={truckIcon}>
+              <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+                <div className="space-y-1 p-1">
+                  <p className="text-xs font-bold text-navy-deep">{c.name}</p>
+                  <p className="text-[10px] text-muted-foreground text-center">Active Courier (GPS)</p>
+                </div>
+              </Tooltip>
+            </Marker>
+          ))}
         </MapContainer>
       </div>
     </div>

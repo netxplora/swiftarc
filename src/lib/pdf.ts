@@ -649,7 +649,6 @@ export function generateShipmentCertificate(shipment: any) {
       { label: "Declared Value", value: `$${shipment.declared_value || 0}` },
       { label: "Certification", value: "Authentic SwiftArc Record" }
     ],
-    ],
     stamp: { text: "CERTIFIED", color: "#f59e0b" }
   });
 }

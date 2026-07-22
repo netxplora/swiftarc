@@ -9,7 +9,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { bookShipment, listAddresses, AddressSnapshot } from "@/lib/api.functions";
+import { bookShipment, listAddresses, upsertAddress, AddressSnapshot } from "@/lib/api.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { LocationPicker, type LocationData } from "@/components/shipping/LocationPicker";
@@ -167,6 +167,7 @@ function BookingWizard({ user }: { user: any }) {
   const [s, dispatch] = useReducer(reducer, initial);
   const doBook = useServerFn(bookShipment);
   const fetchAddresses = useServerFn(listAddresses);
+  const saveAddr = useServerFn(upsertAddress);
   const { data: addresses } = useQuery({ queryKey: ["addresses"], queryFn: () => fetchAddresses() });
 
   // Auto-fill sender from user profile
@@ -219,6 +220,12 @@ function BookingWizard({ user }: { user: any }) {
       } as any,
     }),
     onSuccess: (res) => {
+      if (user) {
+        const o = cleanAddr(s.origin);
+        saveAddr({ data: { label: `${o.contact_name} - ${o.city}`, ...o, is_default_sender: true, is_default_recipient: false } as any }).catch(() => {});
+        const d = cleanAddr(s.destination);
+        saveAddr({ data: { label: `${d.contact_name} - ${d.city}`, ...d, is_default_sender: false, is_default_recipient: true } as any }).catch(() => {});
+      }
       toast.success(`Shipment created · ${res.trackingNumber}`);
       nav({ to: "/shipping/checkout/$transactionId", params: { transactionId: res.transactionId } });
     },

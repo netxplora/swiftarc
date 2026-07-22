@@ -36,12 +36,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Ship, track, and optimize freight across 220+ countries with SwiftArc's engineered logistics network and predictive delivery intelligence.",
+          "Ship, track, and manage freight across 220+ countries with SwiftArc's global logistics network and reliable delivery tracking.",
       },
-      { property: "og:title", content: "SwiftArc — Engineered Global Logistics" },
+      { property: "og:title", content: "SwiftArc — Global Logistics" },
       {
         property: "og:description",
-        content: "Priority parcels, freight, and real-time visibility.",
+        content: "Priority parcels, freight, and reliable tracking.",
       },
     ],
   }),

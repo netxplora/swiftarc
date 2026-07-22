@@ -95,6 +95,97 @@ export const adminOverview = createServerFn({ method: "GET" })
     };
   });
 
+// ---------- Analytics ----------
+
+export const adminAnalytics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Revenue over 30 days
+    const thirtyAgo = new Date();
+    thirtyAgo.setDate(thirtyAgo.getDate() - 30);
+
+    const [invoiceRes, shipmentRes, userRes] = await Promise.all([
+      supabaseAdmin.from("invoices").select("status, total, created_at").gte("created_at", thirtyAgo.toISOString()),
+      supabaseAdmin.from("shipments").select("status, service, origin, destination, created_at").gte("created_at", thirtyAgo.toISOString()),
+      supabaseAdmin.from("profiles").select("id, created_at").gte("created_at", thirtyAgo.toISOString()),
+    ]);
+
+    const invoices = invoiceRes.data ?? [];
+    const shipments = shipmentRes.data ?? [];
+    const newUsers = userRes.data ?? [];
+
+    // Revenue by day (last 30 days)
+    const revenueByDay = Array.from({ length: 30 }).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      const dateStr = date.toISOString().split("T")[0];
+      const dayRevenue = invoices
+        .filter((inv: any) => inv.created_at.startsWith(dateStr) && inv.status === "paid")
+        .reduce((sum: number, inv: any) => sum + Number(inv.total), 0);
+      return { date: dateStr, revenue: dayRevenue };
+    });
+
+    // Shipments by service
+    const serviceMap: Record<string, number> = {};
+    shipments.forEach((s: any) => {
+      serviceMap[s.service] = (serviceMap[s.service] || 0) + 1;
+    });
+    const byService = Object.entries(serviceMap).map(([name, value]) => ({ name, value }));
+
+    // Status breakdown
+    const statusMap: Record<string, number> = {};
+    shipments.forEach((s: any) => {
+      statusMap[s.status] = (statusMap[s.status] || 0) + 1;
+    });
+    const byStatus = Object.entries(statusMap).map(([name, value]) => ({ name, value }));
+
+    // Top destinations
+    const destMap: Record<string, number> = {};
+    shipments.forEach((s: any) => {
+      const city = s.destination?.city || "Unknown";
+      destMap[city] = (destMap[city] || 0) + 1;
+    });
+    const topDestinations = Object.entries(destMap)
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+
+    // New users by day (last 14 days)
+    const usersByDay = Array.from({ length: 14 }).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (13 - i));
+      const dateStr = date.toISOString().split("T")[0];
+      const count = newUsers.filter((u: any) => u.created_at.startsWith(dateStr)).length;
+      return { date: dateStr, users: count };
+    });
+
+    // Summary stats
+    const totalRevenue = invoices.filter((i: any) => i.status === "paid").reduce((s: number, i: any) => s + Number(i.total), 0);
+    const totalShipments = shipments.length;
+    const deliveredCount = shipments.filter((s: any) => s.status === "delivered").length;
+    const exceptionCount = shipments.filter((s: any) => s.status === "exception").length;
+    const deliveryRate = totalShipments > 0 ? Math.round((deliveredCount / totalShipments) * 100) : 0;
+
+    return {
+      revenueByDay,
+      byService,
+      byStatus,
+      topDestinations,
+      usersByDay,
+      summary: {
+        totalRevenue,
+        totalShipments,
+        deliveredCount,
+        exceptionCount,
+        deliveryRate,
+        newUserCount: newUsers.length,
+      }
+    };
+  });
+
 // ---------- Users ----------
 
 export const adminListUsers = createServerFn({ method: "GET" })
