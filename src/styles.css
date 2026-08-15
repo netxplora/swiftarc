@@ -431,4 +431,198 @@
   .grid-layout { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8; }
 }
 
+/* ============================================================
+   PRINT STYLES — Shipment Waybill Document
+   ============================================================ */
+@media print {
+  /* Hide everything on page by default */
+  body > *,
+  body header,
+  body footer,
+  body nav,
+  .no-print,
+  [data-print-trigger],
+  .site-header,
+  .site-footer,
+  .mobile-tab-bar {
+    display: none !important;
+  }
 
+  /* Show only the printable waybill region */
+  #print-waybill {
+    display: block !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  #print-waybill {
+    width: 100%;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Branded header bar */
+  #print-waybill .waybill-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #0f172a;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+  }
+
+  #print-waybill .waybill-header .brand-block {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #print-waybill .waybill-header .brand-name {
+    font-size: 26pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #0f172a;
+    line-height: 1;
+  }
+
+  #print-waybill .waybill-header .brand-tagline {
+    font-size: 8pt;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-top: 3px;
+  }
+
+  #print-waybill .waybill-header .doc-type-block {
+    text-align: right;
+  }
+
+  #print-waybill .waybill-header .doc-type {
+    font-size: 14pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0f172a;
+  }
+
+  #print-waybill .waybill-header .doc-date {
+    font-size: 8pt;
+    color: #64748b;
+    margin-top: 3px;
+  }
+
+  /* Tracking number band */
+  #print-waybill .tracking-band {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #print-waybill .tracking-band .tn-label {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+  }
+
+  #print-waybill .tracking-band .tn-value {
+    font-size: 18pt;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.08em;
+    color: #0f172a;
+  }
+
+  #print-waybill .tracking-band .status-pill {
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 8pt;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Section grid */
+  #print-waybill .waybill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 32px;
+    margin-bottom: 24px;
+  }
+
+  #print-waybill .waybill-section {
+    border-top: 1.5px solid #e2e8f0;
+    padding-top: 12px;
+  }
+
+  #print-waybill .waybill-section h4 {
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+    margin: 0 0 8px 0;
+  }
+
+  #print-waybill .waybill-section p {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  #print-waybill .waybill-section p.sub {
+    font-size: 9pt;
+    font-weight: 400;
+    color: #475569;
+    margin-top: 2px;
+  }
+
+  /* Footer strip */
+  #print-waybill .waybill-footer {
+    border-top: 2px solid #e2e8f0;
+    margin-top: 32px;
+    padding-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #print-waybill .waybill-footer .disclaimer {
+    font-size: 7.5pt;
+    color: #94a3b8;
+    max-width: 70%;
+    line-height: 1.4;
+  }
+
+  #print-waybill .waybill-footer .brand-small {
+    font-size: 9pt;
+    font-weight: 800;
+    color: #cbd5e1;
+    letter-spacing: 0.05em;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+  }
+}

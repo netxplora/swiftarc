@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -57,13 +57,13 @@ export const Route = createFileRoute("/tracking/$trackingId")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.shipment.trackingNumber} — SwiftArc Tracking`
-          : "Not found — SwiftArc",
+          ? `${loaderData.shipment.trackingNumber} â€” SwiftArc Tracking`
+          : "Not found â€” SwiftArc",
       },
       {
         name: "description",
         content: loaderData
-          ? `Live status for shipment ${loaderData.shipment.trackingNumber}: ${statusLabels[loaderData.shipment.status as keyof typeof statusLabels]} · ${(loaderData.shipment.origin as any)?.city ?? ""} → ${(loaderData.shipment.destination as any)?.city ?? ""}.`
+          ? `Live status for shipment ${loaderData.shipment.trackingNumber}: ${statusLabels[loaderData.shipment.status as keyof typeof statusLabels]} Â· ${(loaderData.shipment.origin as any)?.city ?? ""} â†’ ${(loaderData.shipment.destination as any)?.city ?? ""}.`
           : "Tracking number not found.",
       },
       { name: "robots", content: "noindex" },
@@ -174,7 +174,7 @@ function TrackingDetail() {
     weightKg: pkg.weight_kg ?? 0,
     dimensions:
       pkg.length_cm && pkg.width_cm && pkg.height_cm
-        ? `${pkg.length_cm} × ${pkg.width_cm} × ${pkg.height_cm} cm`
+        ? `${pkg.length_cm} Ã— ${pkg.width_cm} Ã— ${pkg.height_cm} cm`
         : "N/A",
     pieces: pkg.pieces ?? pkg.quantity ?? 1,
     packageType: pkg.type ?? "Parcel",
@@ -340,7 +340,96 @@ function TrackingDetail() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      {/* ========================================================== */}
+      {/* PRINT WAYBILL â€” Only visible when printing                  */}
+      {/* ========================================================== */}
+      <div id="print-waybill" style={{ display: "none" }}>
+        <div className="waybill-header">
+          <div className="brand-block">
+            <div className="brand-name">SwiftArc</div>
+            <div className="brand-tagline">Global Logistics &amp; Freight Solutions</div>
+          </div>
+          <div className="doc-type-block">
+            <div className="doc-type">Shipment Waybill</div>
+            <div className="doc-date">Printed: {new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</div>
+          </div>
+        </div>
+
+        <div className="tracking-band">
+          <div>
+            <div className="tn-label">Tracking Number</div>
+            <div className="tn-value">{shipment.trackingNumber}</div>
+          </div>
+          <div className="status-pill">{statusLabels[realtimeStatus] || "In Transit"}</div>
+        </div>
+
+        <div className="waybill-grid">
+          <div className="waybill-section">
+            <h4>Sender</h4>
+            <p>{shipment.origin.contact}</p>
+            {shipment.origin.line1 && <p className="sub">{shipment.origin.line1}</p>}
+            <p className="sub">{shipment.origin.city}{shipment.origin.country ? `, ${shipment.origin.country}` : ""}{shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}</p>
+            {shipment.origin.phone && <p className="sub">Tel: {shipment.origin.phone}</p>}
+            {shipment.origin.email && <p className="sub">{shipment.origin.email}</p>}
+          </div>
+          <div className="waybill-section">
+            <h4>Recipient</h4>
+            <p>{shipment.destination.contact}</p>
+            {shipment.destination.line1 && <p className="sub">{shipment.destination.line1}</p>}
+            <p className="sub">{shipment.destination.city}{shipment.destination.country ? `, ${shipment.destination.country}` : ""}{shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}</p>
+            {shipment.destination.phone && <p className="sub">Tel: {shipment.destination.phone}</p>}
+            {shipment.destination.email && <p className="sub">{shipment.destination.email}</p>}
+          </div>
+          <div className="waybill-section">
+            <h4>Service Type</h4>
+            <p>{shipment.service}</p>
+            <p className="sub">{shipment.type} Â· {shipment.priority} Priority</p>
+          </div>
+          <div className="waybill-section">
+            <h4>Reference No.</h4>
+            <p>{shipment.referenceNumber}</p>
+          </div>
+          <div className="waybill-section">
+            <h4>Origin</h4>
+            <p>{shipment.origin.city}, {shipment.origin.country}</p>
+          </div>
+          <div className="waybill-section">
+            <h4>Destination</h4>
+            <p>{shipment.destination.city}, {shipment.destination.country}</p>
+          </div>
+          <div className="waybill-section">
+            <h4>Booking Date</h4>
+            <p>{new Date(shipment.shipDate).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}</p>
+          </div>
+          <div className="waybill-section">
+            <h4>Estimated Delivery</h4>
+            <p>{new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}</p>
+          </div>
+          <div className="waybill-section">
+            <h4>Package Details</h4>
+            {shipment.description && <p>{shipment.description}</p>}
+            <p className="sub">{shipment.weightKg} kg Â· {shipment.dimensions} Â· {shipment.pieces} pcs</p>
+            {shipment.declaredValue > 0 && <p className="sub">Declared Value: ${shipment.declaredValue.toFixed(2)}{shipment.insurance ? " Â· Insured" : ""}</p>}
+          </div>
+          <div className="waybill-section">
+            <h4>Shipping Charges</h4>
+            <p>{shipment.shippingFee}</p>
+            {shipment.distanceKm !== "N/A" && <p className="sub">Distance: {shipment.distanceKm}</p>}
+          </div>
+        </div>
+
+        <div className="waybill-footer">
+          <div className="disclaimer">
+            This document is an official shipment record issued by SwiftArc Logistics. Please retain this document for your records. For queries, contact support@swiftarc.com
+          </div>
+          <div className="brand-small">SWIFTARC</div>
+        </div>
+      </div>
+
+      {/* ========================================================== */}
+      {/* SCREEN VIEW                                                 */}
+      {/* ========================================================== */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 no-print">
         {/* Header Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3">
@@ -409,7 +498,7 @@ function TrackingDetail() {
                     day: "numeric",
                     year: "numeric",
                   })}{" "}
-                  ·{" "}
+                  Â·{" "}
                   {new Date(shipment.estimatedDelivery).toLocaleTimeString(undefined, {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -462,7 +551,6 @@ function TrackingDetail() {
               </Button>
             </div>
 
-            {/* Customs Hold Alert */}
             {/* Customs Hold Alert */}
             {hasCustomsHold &&
               (() => {
@@ -542,7 +630,7 @@ function TrackingDetail() {
                         className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-11"
                       >
                         <Link to="/pay/$caseId" params={{ caseId: activeHold.id }}>
-                          Resolve & Proceed to Payment
+                          Resolve &amp; Proceed to Payment
                         </Link>
                       </Button>
                     )}
@@ -626,7 +714,6 @@ function TrackingDetail() {
                   <Headphones className="h-3.5 w-3.5 mr-2" /> Contact Support
                 </Button>
               </div>
-              {/* Decorative element resembling the mockup's 3D headphones */}
               <div className="absolute -right-4 -bottom-4 h-32 w-32 bg-amber/10 rounded-full blur-2xl"></div>
               <Headphones className="absolute right-4 bottom-4 h-16 w-16 text-amber drop-shadow-xl" />
             </div>
@@ -634,6 +721,132 @@ function TrackingDetail() {
 
           {/* Right Column */}
           <div className="lg:col-span-9 space-y-6 flex flex-col">
+
+            {/* â”€â”€ SHIPMENT DETAILS â€” Moved to top â”€â”€ */}
+            <div className="bg-card text-card-foreground rounded-2xl p-6 lg:p-8 shadow-sm border border-border">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-lg">Shipment Details</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  data-print-trigger
+                  onClick={() => window.print()}
+                  className="text-xs font-semibold rounded-lg h-9 px-4 gap-2 no-print"
+                >
+                  <Printer className="h-3.5 w-3.5" /> Print Waybill
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+                {/* Sender */}
+                <div className="flex gap-3">
+                  <User className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Sender</p>
+                    <p className="font-bold text-sm">{shipment.origin.contact}</p>
+                    {shipment.origin.line1 && (
+                      <p className="text-xs text-muted-foreground">{shipment.origin.line1}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {shipment.origin.city}
+                      {shipment.origin.country ? `, ${shipment.origin.country}` : ""}
+                      {shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
+                    </p>
+                    {shipment.origin.phone && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <Phone className="h-3 w-3" /> {shipment.origin.phone}
+                      </p>
+                    )}
+                    {shipment.origin.email && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Mail className="h-3 w-3" /> {shipment.origin.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Receiver */}
+                <div className="flex gap-3">
+                  <User className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Receiver</p>
+                    <p className="font-bold text-sm">{shipment.destination.contact}</p>
+                    {shipment.destination.line1 && (
+                      <p className="text-xs text-muted-foreground">
+                        {shipment.destination.line1}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {shipment.destination.city}
+                      {shipment.destination.country ? `, ${shipment.destination.country}` : ""}
+                      {shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
+                    </p>
+                    {shipment.destination.phone && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <Phone className="h-3 w-3" /> {shipment.destination.phone}
+                      </p>
+                    )}
+                    {shipment.destination.email && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Mail className="h-3 w-3" /> {shipment.destination.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Service Type */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Service Type</p>
+                  <p className="font-bold text-sm">{shipment.service}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {shipment.type} Â· {shipment.priority} Priority
+                  </p>
+                </div>
+
+                {/* Package Info */}
+                <div className="flex gap-3">
+                  <ClipboardCheck className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Package Details</p>
+                    {shipment.description && (
+                      <p className="font-bold text-sm">{shipment.description}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {shipment.weightKg} kg Â· {shipment.dimensions} Â· {shipment.pieces} pcs
+                    </p>
+                    {shipment.declaredValue > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Declared Value: ${shipment.declaredValue.toFixed(2)}
+                        {shipment.insurance && " Â· Insured"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Booking Date & Reference */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Reference No.</p>
+                  <p className="font-bold text-sm">{shipment.referenceNumber}</p>
+
+                  <p className="text-xs text-muted-foreground mt-4 mb-1">Booking Date</p>
+                  <p className="font-bold text-sm">
+                    {new Date(shipment.shipDate).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+
+                {/* Route Info */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Route Distance</p>
+                  <p className="font-bold text-sm">{shipment.distanceKm}</p>
+                  <p className="text-xs text-muted-foreground mt-4 mb-1">Shipping Fee</p>
+                  <p className="font-bold text-sm">{shipment.shippingFee}</p>
+                </div>
+              </div>
+            </div>
+
             {/* Map Area */}
             <div className="relative h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-muted rounded-3xl overflow-hidden shadow-sm border border-border">
               <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
@@ -663,7 +876,7 @@ function TrackingDetail() {
               </button>
             </div>
 
-            {/* Location & Delivery Cards — moved below map for visibility and mobile friendliness */}
+            {/* Location & Delivery Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Current Location Card */}
               <div className="bg-card text-card-foreground rounded-2xl p-5 shadow-sm border border-border">
@@ -677,11 +890,11 @@ function TrackingDetail() {
                   <div>
                     <h4 className="font-bold text-sm">
                       {shipment.currentLocation.label ||
-                        `${shipment.origin.city} → ${shipment.destination.city}`}
+                        `${shipment.origin.city} â†’ ${shipment.destination.city}`}
                     </h4>
                     <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                      {livePos[0].toFixed(4)}° {livePos[0] >= 0 ? "N" : "S"},{" "}
-                      {Math.abs(livePos[1]).toFixed(4)}° {livePos[1] >= 0 ? "E" : "W"}
+                      {livePos[0].toFixed(4)}Â° {livePos[0] >= 0 ? "N" : "S"},{" "}
+                      {Math.abs(livePos[1]).toFixed(4)}Â° {livePos[1] >= 0 ? "E" : "W"}
                     </p>
                   </div>
                 </div>
@@ -760,188 +973,60 @@ function TrackingDetail() {
               <StatBox
                 icon={Package}
                 label="Package"
-                value={`${shipment.weightKg} kg · ${shipment.pieces} pcs`}
+                value={`${shipment.weightKg} kg Â· ${shipment.pieces} pcs`}
               />
             </div>
 
-            {/* Details & Notifications Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Shipment Details */}
-              <div className="md:col-span-2 bg-card text-card-foreground rounded-2xl p-6 lg:p-8 shadow-sm border border-border">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-bold text-lg">Shipment Details</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    data-print-trigger
-                    onClick={() => window.print()}
-                    className="text-xs font-semibold rounded-lg h-9 px-4 gap-2 no-print"
-                  >
-                    <Printer className="h-3.5 w-3.5" /> Print Details
-                  </Button>
+            {/* Notifications */}
+            <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex flex-col">
+              <h3 className="font-bold text-lg mb-6">Notifications</h3>
+              <div className="space-y-4 flex-1">
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                    <div className="h-3 w-3 rounded-full border-2 border-emerald-500"></div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <p className="font-semibold text-sm">In Transit Update</p>
+                      <span className="text-[10px] text-muted-foreground">1 min ago</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Your shipment is on the way
+                    </p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                  {/* Sender */}
-                  <div className="flex gap-3">
-                    <User className="h-5 w-5 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Sender</p>
-                      <p className="font-bold text-sm">{shipment.origin.contact}</p>
-                      {shipment.origin.line1 && (
-                        <p className="text-xs text-muted-foreground">{shipment.origin.line1}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {shipment.origin.city}
-                        {shipment.origin.country ? `, ${shipment.origin.country}` : ""}
-                        {shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
-                      </p>
-                      {shipment.origin.phone && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Phone className="h-3 w-3" /> {shipment.origin.phone}
-                        </p>
-                      )}
-                      {shipment.origin.email && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Mail className="h-3 w-3" /> {shipment.origin.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Receiver */}
-                  <div className="flex gap-3">
-                    <User className="h-5 w-5 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Receiver</p>
-                      <p className="font-bold text-sm">{shipment.destination.contact}</p>
-                      {shipment.destination.line1 && (
-                        <p className="text-xs text-muted-foreground">
-                          {shipment.destination.line1}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {shipment.destination.city}
-                        {shipment.destination.country ? `, ${shipment.destination.country}` : ""}
-                        {shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
-                      </p>
-                      {shipment.destination.phone && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Phone className="h-3 w-3" /> {shipment.destination.phone}
-                        </p>
-                      )}
-                      {shipment.destination.email && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Mail className="h-3 w-3" /> {shipment.destination.email}
-                        </p>
-                      )}
-                    </div>
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
+                    <MapPin className="h-4 w-4 text-amber" />
                   </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <p className="font-semibold text-sm">Location Update</p>
+                      <span className="text-[10px] text-muted-foreground">1 min ago</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">New location available</p>
+                  </div>
+                </div>
 
-                  {/* Service Type */}
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Service Type</p>
-                    <p className="font-bold text-sm">{shipment.service}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {shipment.type} · {shipment.priority} Priority
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
+                    <Bell className="h-4 w-4 text-amber" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <p className="font-semibold text-sm">ETA Update</p>
+                      <span className="text-[10px] text-muted-foreground">2 hours ago</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Estimated delivery updated
                     </p>
-                  </div>
-
-                  {/* Package Info */}
-                  <div className="flex gap-3">
-                    <ClipboardCheck className="h-5 w-5 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Package Details</p>
-                      {shipment.description && (
-                        <p className="font-bold text-sm">{shipment.description}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {shipment.weightKg} kg · {shipment.dimensions} · {shipment.pieces} pcs
-                      </p>
-                      {shipment.declaredValue > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Declared Value: ${shipment.declaredValue.toFixed(2)}
-                          {shipment.insurance && " · Insured"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Booking Date & Reference */}
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Reference No.</p>
-                    <p className="font-bold text-sm">{shipment.referenceNumber}</p>
-
-                    <p className="text-xs text-muted-foreground mt-4 mb-1">Booking Date</p>
-                    <p className="font-bold text-sm">
-                      {new Date(shipment.shipDate).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-
-                  {/* Route Info */}
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Route Distance</p>
-                    <p className="font-bold text-sm">{shipment.distanceKm}</p>
-                    <p className="text-xs text-muted-foreground mt-4 mb-1">Shipping Fee</p>
-                    <p className="font-bold text-sm">{shipment.shippingFee}</p>
                   </div>
                 </div>
               </div>
-
-              {/* Notifications */}
-              <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex flex-col">
-                <h3 className="font-bold text-lg mb-6">Notifications</h3>
-                <div className="space-y-4 flex-1">
-                  <div className="flex gap-3">
-                    <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                      <div className="h-3 w-3 rounded-full border-2 border-emerald-500"></div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <p className="font-semibold text-sm">In Transit Update</p>
-                        <span className="text-[10px] text-muted-foreground">1 min ago</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Your shipment is on the way
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="h-8 w-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-                      <MapPin className="h-4 w-4 text-amber" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <p className="font-semibold text-sm">Location Update</p>
-                        <span className="text-[10px] text-muted-foreground">1 min ago</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">New location available</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="h-8 w-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-                      <Bell className="h-4 w-4 text-amber" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <p className="font-semibold text-sm">ETA Update</p>
-                        <span className="text-[10px] text-muted-foreground">2 hours ago</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Estimated delivery updated
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <Button variant="link" className="w-full mt-4 text-amber font-semibold">
-                  View All Notifications
-                </Button>
-              </div>
+              <Button variant="link" className="w-full mt-4 text-amber font-semibold">
+                View All Notifications
+              </Button>
             </div>
 
             {/* Shipment Progress Horizontal Stepper */}
@@ -1024,12 +1109,10 @@ function TrackingDetail() {
                   </div>
                   <p className="text-[10px] text-muted-foreground/70 mt-2">Coming Soon</p>
                 </div>
-                {/* Mockup phone image placeholder */}
                 <div className="absolute right-0 top-6 bottom-0 w-1/3 bg-muted rounded-tl-2xl border-t-4 border-l-4 border-border"></div>
               </div>
 
               <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex items-center justify-between overflow-hidden relative">
-                {/* Mockup box image placeholder */}
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 w-24 h-24 bg-amber/20 rounded-xl flex items-center justify-center">
                   <Box className="h-10 w-10 text-amber" />
                 </div>
@@ -1050,6 +1133,7 @@ function TrackingDetail() {
     </div>
   );
 }
+
 
 function StatBox({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (

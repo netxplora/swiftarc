@@ -877,6 +877,48 @@ export const adminCreateShipmentEvent = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminUpdateShipmentLocation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) =>
+    z
+      .object({
+        shipment_id: z.string().uuid(),
+        city: z.string().min(1),
+        country: z.string().min(1),
+        lat: z.number(),
+        lng: z.number(),
+        status_label: z.string().min(1),
+        new_status: z.string().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Insert a tracking event for the new location
+    const locationStr = `${data.city}, ${data.country}`;
+    const { error: evErr } = await supabaseAdmin.from("shipment_events").insert({
+      shipment_id: data.shipment_id,
+      status: data.status_label,
+      description: `Package arrived at ${locationStr}`,
+      location: locationStr,
+      occurred_at: new Date().toISOString(),
+    });
+    if (evErr) fail(evErr);
+
+    // Optionally update the shipment status
+    if (data.new_status) {
+      const { error: sErr } = await supabaseAdmin
+        .from("shipments")
+        .update({ status: data.new_status })
+        .eq("id", data.shipment_id);
+      if (sErr) fail(sErr);
+    }
+
+    return { ok: true };
+  });
+
 export const adminUpdateShipmentEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) =>

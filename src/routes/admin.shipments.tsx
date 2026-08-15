@@ -41,6 +41,7 @@ import {
   adminGetCustomsHolds,
   adminCreateCustomsHold,
   adminReleaseCustomsHold,
+  adminUpdateShipmentLocation,
 } from "@/lib/admin.functions";
 import {
   Loader2,
@@ -428,6 +429,12 @@ function AdminShipments() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <UpdateLocationDialog
+                            shipmentId={r.id}
+                            onSuccess={() =>
+                              qc.invalidateQueries({ queryKey: ["admin-shipments"] })
+                            }
+                          />
                           <ShipmentEditDialog
                             shipmentId={r.id}
                             users={usersQ.data ?? []}
@@ -463,6 +470,195 @@ function AdminShipments() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/* ================================================================ */
+/*  Update Location Dialog                                          */
+/* ================================================================ */
+
+const LOCATION_STATUSES = [
+  "Departed Origin",
+  "In Transit",
+  "Arrived at Hub",
+  "Customs Processing",
+  "Out for Delivery",
+  "Near Destination",
+  "Delivered",
+];
+
+function UpdateLocationDialog({
+  shipmentId,
+  onSuccess,
+}: {
+  shipmentId: string;
+  onSuccess: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
+  const [statusLabel, setStatusLabel] = useState("In Transit");
+  const [newStatus, setNewStatus] = useState("");
+  const [loading, setLoading] = useState(false);
+  const updateLocFn = useServerFn(adminUpdateShipmentLocation);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!city || !country || !lat || !lng) {
+      toast.error("Please fill in all location fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      await updateLocFn({
+        data: {
+          shipment_id: shipmentId,
+          city: city.trim(),
+          country: country.trim(),
+          lat: parseFloat(lat),
+          lng: parseFloat(lng),
+          status_label: statusLabel,
+          new_status: newStatus || undefined,
+        },
+      });
+      toast.success("Location updated and tracking event added");
+      setOpen(false);
+      setCity("");
+      setCountry("");
+      setLat("");
+      setLng("");
+      onSuccess();
+    } catch {
+      toast.error("Location update failed");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-500/10"
+          title="Update shipment location"
+        >
+          <MapPin className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-blue-500" /> Update Current Location
+          </DialogTitle>
+        </DialogHeader>
+        <p className="text-xs text-muted-foreground -mt-2 pb-2">
+          This will add a new tracking event and update the shipment's position on the live map.
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                City *
+              </label>
+              <Input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g. Rotterdam"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                Country *
+              </label>
+              <Input
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                placeholder="e.g. Netherlands"
+                required
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                Latitude *
+              </label>
+              <Input
+                value={lat}
+                onChange={(e) => setLat(e.target.value)}
+                placeholder="e.g. 51.9225"
+                type="number"
+                step="any"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                Longitude *
+              </label>
+              <Input
+                value={lng}
+                onChange={(e) => setLng(e.target.value)}
+                placeholder="e.g. 4.4792"
+                type="number"
+                step="any"
+                required
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+              Location Status Label
+            </label>
+            <select
+              value={statusLabel}
+              onChange={(e) => setStatusLabel(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              {LOCATION_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+              Also Update Shipment Status (optional)
+            </label>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">-- Keep current status --</option>
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {statusLabels[s] || s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MapPin className="h-4 w-4 mr-2" />}
+              Save Location
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
