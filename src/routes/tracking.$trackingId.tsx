@@ -211,14 +211,14 @@ function TrackingDetail() {
           type: "hold_placed"
         });
         
-        if (hold.status === "released") {
+        if (hold.status === "released" || hold.payment_status === "verified") {
           holdEvents.push({
             id: `release-${hold.id}`,
             timestamp: hold.released_at ?? hold.updated_at ?? new Date().toISOString(),
             facility: hold.customs_authority || "Customs Authority",
             city: "",
             country: "",
-            status: "Customs Clearance Released",
+            status: hold.status === "released" ? "Customs Clearance Released" : "Payment Verified - Clearance in Progress",
             lat: 0,
             lng: 0,
             type: "hold_released"
@@ -458,41 +458,64 @@ function TrackingDetail() {
             </div>
 
             {/* Customs Hold Alert */}
-            {hasCustomsHold && (
-              <div className="bg-red-50 text-red-900 rounded-2xl p-6 shadow-sm border border-red-200">
+            {/* Customs Hold Alert */}
+            {hasCustomsHold && (() => {
+              const isResolved = activeHold?.status === "released" || activeHold?.payment_status === "verified";
+              const alertStyle = isResolved
+                ? "bg-emerald-50 text-emerald-900 border-emerald-200"
+                : "bg-red-50 text-red-900 border-red-200";
+              const iconBg = isResolved ? "bg-emerald-100" : "bg-red-100";
+              const iconColor = isResolved ? "text-emerald-600" : "text-red-600";
+              const subText = isResolved ? "text-emerald-700/80" : "text-red-700/80";
+              const innerBox = isResolved ? "border-emerald-100" : "border-red-100";
+
+              return (
+              <div className={`${alertStyle} rounded-2xl p-6 shadow-sm border`}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-10 w-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
-                    <ShieldAlert className="h-5 w-5 text-red-600" />
+                  <div className={`h-10 w-10 ${iconBg} rounded-full flex items-center justify-center shrink-0`}>
+                    {isResolved ? (
+                      <CheckCircle2 className={`h-5 w-5 ${iconColor}`} />
+                    ) : (
+                      <ShieldAlert className={`h-5 w-5 ${iconColor}`} />
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg leading-tight">Clearance Hold</h3>
-                    <p className="text-sm text-red-700/80">Action required</p>
+                    <h3 className="font-bold text-lg leading-tight">
+                      {isResolved ? "Clearance Complete" : "Clearance Hold"}
+                    </h3>
+                    <p className={`text-sm ${subText}`}>
+                      {isResolved ? "Shipment released" : "Action required"}
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-3 mb-5 text-sm">
-                  <div className="bg-white/60 rounded-lg p-3 border border-red-100">
-                    <p className="text-xs text-red-700/70 mb-0.5">Reason</p>
-                    <p className="font-medium">{activeHold?.hold_reason || "Customs Inspection Required"}</p>
+                
+                {!isResolved && (
+                  <div className="space-y-3 mb-5 text-sm">
+                    <div className={`bg-white/60 rounded-lg p-3 border ${innerBox}`}>
+                      <p className={`text-xs ${subText} mb-0.5`}>Reason</p>
+                      <p className="font-medium">{activeHold?.hold_reason || "Customs Inspection Required"}</p>
+                    </div>
+                    {activeHold?.required_action && (
+                      <div className={`bg-white/60 rounded-lg p-3 border ${innerBox}`}>
+                        <p className={`text-xs ${subText} mb-0.5`}>Required Document</p>
+                        <p className="font-medium">{activeHold.required_action}</p>
+                      </div>
+                    )}
+                    {(activeHold?.amount_due > 0 || activeHold?.status === "payment_required" || activeHold?.payment_status === "verification_required") && (
+                      <div className={`bg-white/60 rounded-lg p-3 border ${innerBox} flex items-center justify-between`}>
+                        <div>
+                          <p className={`text-xs ${subText} mb-0.5`}>Clearance Charges</p>
+                          <p className="font-bold">{activeHold?.currency || "USD"} {Number(activeHold?.amount_due || 0).toFixed(2)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-xs ${subText} mb-0.5`}>Status</p>
+                          <p className="font-bold capitalize">{activeHold?.payment_status?.replace(/_/g, " ") || "Pending"}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {activeHold?.required_action && (
-                    <div className="bg-white/60 rounded-lg p-3 border border-red-100">
-                      <p className="text-xs text-red-700/70 mb-0.5">Required Document</p>
-                      <p className="font-medium">{activeHold.required_action}</p>
-                    </div>
-                  )}
-                  {(activeHold?.amount_due > 0 || activeHold?.status === "payment_required" || activeHold?.payment_status === "verification_required") && (
-                    <div className="bg-white/60 rounded-lg p-3 border border-red-100 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-red-700/70 mb-0.5">Clearance Charges</p>
-                        <p className="font-bold">{activeHold?.currency || "USD"} {Number(activeHold?.amount_due || 0).toFixed(2)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-red-700/70 mb-0.5">Status</p>
-                        <p className="font-bold capitalize">{activeHold?.payment_status?.replace(/_/g, " ") || "Pending"}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
+
                 {activeHold && ["payment_required", "open"].includes(activeHold.status) && (
                   <Button
                     asChild
@@ -503,14 +526,16 @@ function TrackingDetail() {
                     </Link>
                   </Button>
                 )}
+                
                 {activeHold?.payment_status === "verification_required" && (
-                  <div className="text-center text-sm font-semibold text-amber-700 bg-amber-100/50 rounded-xl py-3 border border-amber-200">
+                  <div className="text-center text-sm font-semibold text-amber-700 bg-amber-100/50 rounded-xl py-3 border border-amber-200 mt-5">
                     <Clock className="h-4 w-4 inline mr-1.5" />
                     Payment Verification Pending
                   </div>
                 )}
               </div>
-            )}
+              );
+            })()}
 
             {/* Shipment Timeline */}
             <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border">
