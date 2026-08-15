@@ -8,7 +8,11 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About SwiftArc — Engineered Global Logistics" },
-      { name: "description", content: "SwiftArc is an integrated logistics network moving priority freight across 220+ countries with real-time visibility." },
+      {
+        name: "description",
+        content:
+          "SwiftArc is an integrated logistics network moving priority freight across 220+ countries with real-time visibility.",
+      },
       { property: "og:title", content: "About SwiftArc" },
       { property: "og:description", content: "Our story, mission, and the people behind the arc." },
     ],
@@ -29,19 +33,21 @@ function About() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber">Our mission</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber">
+              Our mission
+            </p>
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
               Make the world's freight legible.
             </h2>
             <div className="mt-6 space-y-4 text-muted-foreground">
               <p>
-                SwiftArc was built by a team of logistics engineers, air-freight operators,
-                and product designers who were frustrated with fragmented tracking, hidden
-                surcharges, and blind handoffs between carriers.
+                SwiftArc was built by a team of logistics engineers, air-freight operators, and
+                product designers who were frustrated with fragmented tracking, hidden surcharges,
+                and blind handoffs between carriers.
               </p>
               <p>
-                Today we run a fully integrated network of 72 air gateways, 1,240 ground hubs,
-                and 3,800 last-mile partners — with a single API and a single dashboard.
+                Today we run a fully integrated network of 72 air gateways, 1,240 ground hubs, and
+                3,800 last-mile partners — with a single API and a single dashboard.
               </p>
               <p>
                 Every shipment gets a real-time timeline, a predictive ETA, and a proof of delivery.
@@ -50,7 +56,14 @@ function About() {
             </div>
           </div>
           <div className="relative overflow-hidden rounded-2xl">
-            <img src={aircraft} alt="" width={1600} height={900} loading="lazy" className="h-full w-full object-cover" />
+            <img
+              src={aircraft}
+              alt=""
+              width={1600}
+              height={900}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
       </section>
@@ -69,7 +82,8 @@ function About() {
             ].map((s) => (
               <div key={s.l}>
                 <div className="font-display text-5xl font-bold text-amber">
-                  <Counter to={s.v} />{s.s}
+                  <Counter to={s.v} />
+                  {s.s}
                 </div>
                 <div className="mt-2 text-xs uppercase tracking-widest text-cream/60">{s.l}</div>
               </div>
@@ -80,7 +94,9 @@ function About() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-amber">Leadership</p>
-        <h2 className="mt-3 font-display text-4xl font-bold tracking-tight">The team behind the arc.</h2>
+        <h2 className="mt-3 font-display text-4xl font-bold tracking-tight">
+          The team behind the arc.
+        </h2>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {[
             { n: "Ana Ferreira", r: "Chief Executive" },
@@ -96,7 +112,10 @@ function About() {
               className="rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-amber/50"
             >
               <div className="grid h-16 w-16 place-items-center rounded-full bg-amber font-display text-xl text-navy-deep">
-                {p.n.split(" ").map((s) => s[0]).join("")}
+                {p.n
+                  .split(" ")
+                  .map((s) => s[0])
+                  .join("")}
               </div>
               <h3 className="mt-4 font-display text-lg">{p.n}</h3>
               <p className="text-sm text-muted-foreground">{p.r}</p>

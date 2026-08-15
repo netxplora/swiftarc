@@ -1,21 +1,20 @@
 interface LogoProps {
   className?: string;
-  tone?: "light" | "dark";
+  tone?: "light" | "dark" | "auto";
   showWord?: boolean;
 }
 
-export function Logo({ className, tone = "dark", showWord = true }: LogoProps) {
-  const stroke = tone === "light" ? "var(--color-cream)" : "var(--color-navy-deep)";
+export function Logo({ className, tone = "auto", showWord = true }: LogoProps) {
+  const stroke =
+    tone === "light"
+      ? "var(--color-cream)"
+      : tone === "dark"
+        ? "var(--color-navy-deep)"
+        : "currentColor";
   const accent = "var(--color-amber)";
   return (
     <div className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
-      <svg
-        width="34"
-        height="34"
-        viewBox="0 0 40 40"
-        fill="none"
-        aria-hidden="true"
-      >
+      <svg width="34" height="34" viewBox="0 0 40 40" fill="none" aria-hidden="true">
         <circle cx="20" cy="20" r="19" stroke={stroke} strokeWidth="1.5" opacity="0.15" />
         <path
           d="M6 28 Q 20 -2 34 24"
@@ -29,8 +28,8 @@ export function Logo({ className, tone = "dark", showWord = true }: LogoProps) {
       </svg>
       {showWord && (
         <span
-          className="font-display text-lg font-bold tracking-tight"
-          style={{ color: stroke, fontFamily: "var(--font-display)" }}
+          className="font-display text-lg font-bold tracking-tight text-foreground"
+          style={{ fontFamily: "var(--font-display)" }}
         >
           Swift<span style={{ color: accent }}>Arc</span>
         </span>

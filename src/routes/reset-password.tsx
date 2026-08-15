@@ -9,10 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
-    meta: [
-      { title: "Reset password — SwiftArc" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Reset password — SwiftArc" }, { name: "robots", content: "noindex" }],
   }),
   component: ResetPassword,
 });
@@ -27,7 +24,7 @@ function ResetPassword() {
 
   useEffect(() => {
     let mounted = true;
-    
+
     // First check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
@@ -62,7 +59,7 @@ function ResetPassword() {
     e.preventDefault();
     if (password.length < 8) return toast.error("Choose at least 8 characters");
     if (password !== confirmPassword) return toast.error("Passwords do not match");
-    
+
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
@@ -79,21 +76,26 @@ function ResetPassword() {
 
   return (
     <div className="mx-auto grid min-h-[70vh] max-w-md place-items-center px-4">
-      <form onSubmit={submit} className="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <form
+        onSubmit={submit}
+        className="w-full rounded-2xl border border-border bg-card p-8 shadow-sm"
+      >
         <h1 className="font-display text-3xl font-bold tracking-tight">Set a new password</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Use 8+ characters with a mix of cases and numbers.</p>
-        
+        <p className="mt-1 text-sm text-muted-foreground">
+          Use 8+ characters with a mix of cases and numbers.
+        </p>
+
         <div className="mt-6 grid gap-4">
           <div>
             <Label>New password</Label>
             <div className="relative mt-1.5">
-              <Input 
-                type={showPassword ? "text" : "password"} 
-                required 
-                minLength={8} 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                className="h-11 pr-10" 
+              <Input
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 pr-10"
               />
               <button
                 type="button"
@@ -108,13 +110,13 @@ function ResetPassword() {
           <div>
             <Label>Confirm password</Label>
             <div className="relative mt-1.5">
-              <Input 
-                type={showPassword ? "text" : "password"} 
-                required 
-                minLength={8} 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                className="h-11 pr-10" 
+              <Input
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="h-11 pr-10"
               />
               <button
                 type="button"
@@ -128,7 +130,11 @@ function ResetPassword() {
           </div>
         </div>
 
-        <Button disabled={busy} type="submit" className="mt-6 h-11 w-full bg-navy-deep text-cream hover:bg-navy">
+        <Button
+          disabled={busy}
+          type="submit"
+          className="mt-6 h-11 w-full bg-navy-deep text-cream hover:bg-navy"
+        >
           {busy ? "Saving…" : "Update password"}
         </Button>
       </form>

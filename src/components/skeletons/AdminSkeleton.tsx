@@ -6,7 +6,9 @@ export function AdminSkeleton() {
   return (
     <div>
       <div className="flex items-center gap-4 border-b border-border bg-card p-4 lg:hidden">
-        <Button variant="ghost" size="icon" disabled><Menu className="h-5 w-5" /></Button>
+        <Button variant="ghost" size="icon" disabled>
+          <Menu className="h-5 w-5" />
+        </Button>
         <span className="font-display font-semibold">Admin Panel</span>
       </div>
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:px-8">
@@ -50,7 +52,10 @@ export function AdminSkeleton() {
             </div>
             <div className="p-0">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-border p-4 last:border-0">
+                <div
+                  key={i}
+                  className="flex items-center justify-between border-b border-border p-4 last:border-0"
+                >
                   <div className="flex items-center gap-4">
                     <Skeleton className="h-10 w-10 rounded-full" />
                     <div>

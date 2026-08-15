@@ -35,12 +35,24 @@ export function LiveChat() {
   // Realtime subscription
   useEffect(() => {
     if (!convo?.id) return;
-    const channel = supabase.channel(`chat_${convo.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `conversation_id=eq.${convo.id}` }, () => {
-        qc.invalidateQueries({ queryKey: ["chat-messages", convo.id] });
-      })
+    const channel = supabase
+      .channel(`chat_${convo.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `conversation_id=eq.${convo.id}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["chat-messages", convo.id] });
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [convo?.id, qc]);
 
   // Scroll to bottom
@@ -87,10 +99,18 @@ export function LiveChat() {
             <h3 className="font-display font-semibold">SwiftArc Support</h3>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => setMinimized(!minimized)} className="rounded-md p-1 hover:bg-white/10" aria-label="Minimize chat">
+            <button
+              onClick={() => setMinimized(!minimized)}
+              className="rounded-md p-1 hover:bg-white/10"
+              aria-label="Minimize chat"
+            >
               <Minus className="h-4 w-4" />
             </button>
-            <button onClick={() => setIsOpen(false)} className="rounded-md p-1 hover:bg-white/10" aria-label="Close chat">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="rounded-md p-1 hover:bg-white/10"
+              aria-label="Close chat"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -135,7 +155,12 @@ export function LiveChat() {
                 className="flex-1"
                 autoFocus
               />
-              <Button type="submit" size="icon" disabled={!input.trim() || mut.isPending || !convo} className="bg-amber text-navy-deep hover:bg-amber-soft">
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!input.trim() || mut.isPending || !convo}
+                className="bg-amber text-navy-deep hover:bg-amber-soft"
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </form>

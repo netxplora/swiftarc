@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { Building2, Zap, ShieldCheck, Users, ArrowRight, ShoppingBag, HeartPulse, Factory, Store } from "lucide-react";
+import {
+  Building2,
+  Zap,
+  ShieldCheck,
+  Users,
+  ArrowRight,
+  ShoppingBag,
+  HeartPulse,
+  Factory,
+  Store,
+} from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +23,16 @@ export const Route = createFileRoute("/business")({
   head: () => ({
     meta: [
       { title: "Business Solutions — SwiftArc" },
-      { name: "description", content: "Enterprise logistics, e-commerce automation, healthcare cold-chain, and SMB shipping — built for the way your business ships." },
+      {
+        name: "description",
+        content:
+          "Enterprise logistics, e-commerce automation, healthcare cold-chain, and SMB shipping — built for the way your business ships.",
+      },
       { property: "og:title", content: "Business Solutions — SwiftArc" },
-      { property: "og:description", content: "Enterprise, e-commerce, healthcare, and SMB solutions." },
+      {
+        property: "og:description",
+        content: "Enterprise, e-commerce, healthcare, and SMB solutions.",
+      },
       { property: "og:url", content: "/business" },
     ],
     links: [{ rel: "canonical", href: "/business" }],
@@ -24,10 +41,45 @@ export const Route = createFileRoute("/business")({
 });
 
 const solutions = [
-  { Icon: Building2, name: "Enterprise", desc: "Dedicated account teams, priority routing, SLA guarantees, and a private lane on the SwiftArc network.", bullets: ["24/7 named support", "Custom pricing", "Volume commitments", "On-network priority"] },
-  { Icon: Zap, name: "E-commerce", desc: "Turn your storefront into a shipping engine with bulk labels, returns portal, and marketplace connectors.", bullets: ["Bulk labels & manifests", "Branded tracking pages", "Returns portal", "Marketplace connectors"] },
-  { Icon: ShieldCheck, name: "Healthcare & Life Sciences", desc: "Cold-chain, chain-of-custody, and time-critical service tiers validated by GDP standards.", bullets: ["Cold chain -20°C to +25°C", "GDP-validated lanes", "Chain-of-custody log", "Real-time sensor data"] },
-  { Icon: Users, name: "SMB", desc: "Flat, transparent pricing. Open an account in minutes and ship the same day.", bullets: ["No monthly minimums", "One-click booking", "Instant discounts at scale", "Community support"] },
+  {
+    Icon: Building2,
+    name: "Enterprise",
+    desc: "Dedicated account teams, priority routing, SLA guarantees, and a private lane on the SwiftArc network.",
+    bullets: ["24/7 named support", "Custom pricing", "Volume commitments", "On-network priority"],
+  },
+  {
+    Icon: Zap,
+    name: "E-commerce",
+    desc: "Turn your storefront into a shipping engine with bulk labels, returns portal, and marketplace connectors.",
+    bullets: [
+      "Bulk labels & manifests",
+      "Branded tracking pages",
+      "Returns portal",
+      "Marketplace connectors",
+    ],
+  },
+  {
+    Icon: ShieldCheck,
+    name: "Healthcare & Life Sciences",
+    desc: "Cold-chain, chain-of-custody, and time-critical service tiers validated by GDP standards.",
+    bullets: [
+      "Cold chain -20°C to +25°C",
+      "GDP-validated lanes",
+      "Chain-of-custody log",
+      "Real-time sensor data",
+    ],
+  },
+  {
+    Icon: Users,
+    name: "SMB",
+    desc: "Flat, transparent pricing. Open an account in minutes and ship the same day.",
+    bullets: [
+      "No monthly minimums",
+      "One-click booking",
+      "Instant discounts at scale",
+      "Community support",
+    ],
+  },
 ];
 
 const industries = [
@@ -85,7 +137,16 @@ const industries = [
   },
 ];
 
-const integrations = ["Shopify", "SAP", "NetSuite", "Salesforce", "Odoo", "Magento", "Zapier", "Snowflake"];
+const integrations = [
+  "Shopify",
+  "SAP",
+  "NetSuite",
+  "Salesforce",
+  "Odoo",
+  "Magento",
+  "Zapier",
+  "Snowflake",
+];
 
 function Business() {
   return (
@@ -116,7 +177,9 @@ function Business() {
                     ))}
                   </ul>
                   <Button asChild variant="link" className="mt-4 px-0 text-navy-deep">
-                    <Link to="/contact">Talk to sales <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                    <Link to="/contact">
+                      Talk to sales <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -128,7 +191,9 @@ function Business() {
       <section className="border-y border-border bg-secondary/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber">By industry</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber">
+              By industry
+            </p>
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
               Purpose-built lanes for your industry.
             </h2>
@@ -151,24 +216,33 @@ function Business() {
               <TabsContent key={it.id} value={it.id} className="mt-8">
                 <div className="grid gap-8 rounded-2xl border border-border bg-card p-6 sm:p-10 lg:grid-cols-[1.2fr_1fr]">
                   <div>
-                    <h3 className="font-display text-3xl font-bold tracking-tight">{it.headline}</h3>
+                    <h3 className="font-display text-3xl font-bold tracking-tight">
+                      {it.headline}
+                    </h3>
                     <p className="mt-3 max-w-xl text-muted-foreground">{it.copy}</p>
                     <div className="mt-8 grid grid-cols-3 gap-4">
                       {it.metrics.map((m) => (
                         <div key={m.l}>
                           <div className="font-display text-3xl font-bold text-navy-deep">
-                            <Counter to={m.v} />{m.s}
+                            <Counter to={m.v} />
+                            {m.s}
                           </div>
-                          <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">{m.l}</div>
+                          <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+                            {m.l}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="rounded-xl bg-navy-deep p-6 text-cream">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-amber">Customer case</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-amber">
+                      Customer case
+                    </p>
                     <p className="mt-3 font-display text-xl leading-snug">{it.case}</p>
                     <Button asChild variant="link" className="mt-4 px-0 text-amber">
-                      <Link to="/contact">Read the full story <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                      <Link to="/contact">
+                        Read the full story <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -187,8 +261,8 @@ function Business() {
         </div>
         <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
           {integrations.map((i, idx) => (
-            <motion.div 
-              key={i} 
+            <motion.div
+              key={i}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-50px" }}
@@ -202,19 +276,31 @@ function Business() {
       </section>
 
       <section className="relative overflow-hidden bg-navy-deep text-cream">
-        <img src={warehouse} alt="" width={1600} height={1024} loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-25" />
+        <img
+          src={warehouse}
+          alt=""
+          width={1600}
+          height={1024}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover opacity-25"
+        />
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <h2 className="max-w-3xl font-display text-4xl font-bold tracking-tight sm:text-5xl">
             Ready to move your logistics onto the arc?
           </h2>
           <p className="mt-4 max-w-xl text-cream/70">
-            Our team designs custom lane strategies for enterprise shippers. Get a network audit and a projection in one week.
+            Our team designs custom lane strategies for enterprise shippers. Get a network audit and
+            a projection in one week.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild className="h-11 bg-amber text-navy-deep hover:bg-amber-soft">
               <Link to="/contact">Contact sales</Link>
             </Button>
-            <Button asChild variant="outline" className="h-11 border-cream/30 bg-transparent text-cream hover:bg-cream/10">
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 border-cream/30 bg-transparent text-cream hover:bg-cream/10"
+            >
               <Link to="/register">Open a business account</Link>
             </Button>
           </div>

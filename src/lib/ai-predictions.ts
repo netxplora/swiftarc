@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { statusLabels } from "./types";
 
 /**
@@ -6,62 +7,88 @@ import { statusLabels } from "./types";
  * traffic API (e.g. Google Distance Matrix), and historical ML models.
  */
 export async function evaluateShipmentRisk(shipment: any) {
-  // 1. Simulate data gathering
+  // 1. Extract routing data
   const originStr = shipment.origin?.city?.toLowerCase() ?? "";
   const destStr = shipment.destination?.city?.toLowerCase() ?? "";
-  
-  // 2. Simple Heuristics (Rule-based ML stand-in)
-  let onTimeConfidence = 96;
-  let aiNote = "Route is clear. Expected to arrive on time.";
+
+  // 2. Base ML Risk Profile
+  let riskScore = 0.05; // Base 5% risk of delay
+  let reasons: string[] = [];
   let delayMinutes = 0;
 
-  // Weather triggers
-  if (originStr.includes("chicago") || destStr.includes("chicago") || originStr.includes("denver")) {
-    onTimeConfidence -= 15;
-    aiNote = "Blizzard warning in routing area. Delay likely.";
+  // Weather Event Simulation
+  if (
+    originStr.includes("chicago") ||
+    destStr.includes("chicago") ||
+    originStr.includes("denver")
+  ) {
+    riskScore += 0.45;
+    reasons.push("Severe Winter Storm Warning in routing area.");
     delayMinutes += 2880; // 48 hours
-  } else if (originStr.includes("miami") || destStr.includes("miami") || originStr.includes("houston")) {
-    onTimeConfidence -= 10;
-    aiNote = "Severe thunderstorms reported. Minor delays expected.";
-    delayMinutes += 720; // 12 hours
+  } else if (
+    originStr.includes("miami") ||
+    destStr.includes("miami") ||
+    originStr.includes("houston")
+  ) {
+    riskScore += 0.35;
+    reasons.push("Tropical Storm / Hurricane conditions affecting logistics lines.");
+    delayMinutes += 1440; // 24 hours
+  } else if (originStr.includes("seattle") || destStr.includes("seattle")) {
+    riskScore += 0.15;
+    reasons.push("Heavy rainfall slowing ground transport.");
+    delayMinutes += 180;
   }
 
-  // Traffic / Hub congestion triggers
-  if (destStr.includes("los angeles") || destStr.includes("new york")) {
-    onTimeConfidence -= 5;
-    aiNote = "High volume at destination hub.";
-    delayMinutes += 240; // 4 hours
+  // Traffic & Hub Congestion Simulation
+  if (
+    destStr.includes("los angeles") ||
+    destStr.includes("new york") ||
+    destStr.includes("london")
+  ) {
+    riskScore += 0.2;
+    reasons.push("Elevated congestion at destination terminal hub.");
+    delayMinutes += 360; // 6 hours
   }
 
-  // Shock/Temperature telemetry triggers (if IoT data exists)
+  // IoT Telemetry Trigger Simulation
   if (shipment.telemetry) {
     if (shipment.telemetry.shockEvents > 2) {
-      onTimeConfidence -= 10;
-      aiNote = "Multiple shock events detected. Inspection may delay delivery.";
+      riskScore += 0.3;
+      reasons.push("Multiple shock events detected via IoT. QA inspection required.");
       delayMinutes += 1440; // 24 hours
     }
     if (shipment.telemetry.temperatureC > 30) {
-      aiNote = "Temperature threshold exceeded. Package flagged.";
+      riskScore += 0.5;
+      reasons.push("Temperature threshold exceeded. Regulatory hold pending.");
+      delayMinutes += 2880;
     }
   }
 
-  // 3. Status-based baseline
+  // Status Overrides
   if (shipment.status === "exception") {
-    onTimeConfidence = 25;
-    aiNote = "Exception logged. Requires manual intervention.";
+    riskScore = 0.95;
+    if (reasons.length === 0) reasons.push("Exception logged requiring manual intervention.");
   } else if (shipment.status === "delivered") {
-    onTimeConfidence = 100;
-    aiNote = "Shipment completed successfully.";
+    riskScore = 0.0;
+    reasons = ["Shipment completed successfully."];
     delayMinutes = 0;
   }
 
-  // 4. Calculate new ETA
+  // Bound the risk score
+  riskScore = Math.max(0, Math.min(1.0, riskScore));
+
+  let finalReason = null;
+  if (riskScore > 0.3) {
+    finalReason = reasons.join(" ");
+  }
+
+  // 3. Calculate new ETA if needed
   const originalEta = new Date(shipment.estimated_delivery ?? Date.now() + 3 * 86400000);
   const adjustedEta = new Date(originalEta.getTime() + delayMinutes * 60000);
 
   return {
-    onTimeConfidence: Math.max(0, Math.min(100, onTimeConfidence)),
-    aiNote,
+    ai_delay_risk: riskScore,
+    ai_delay_reason: finalReason,
     adjustedEstimatedDelivery: adjustedEta.toISOString(),
   };
 }

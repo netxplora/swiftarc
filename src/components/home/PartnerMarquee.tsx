@@ -1,6 +1,14 @@
 const partners = [
-  "Northlight", "Marché & Vine", "Toriha", "Halyard & Sons", "Loom & Warp",
-  "Merlion Components", "North Sea Optics", "Studio Farina", "Terraline", "Kestrel Labs",
+  "Northlight",
+  "Marché & Vine",
+  "Toriha",
+  "Halyard & Sons",
+  "Loom & Warp",
+  "Merlion Components",
+  "North Sea Optics",
+  "Studio Farina",
+  "Terraline",
+  "Kestrel Labs",
 ];
 
 export function PartnerMarquee() {
@@ -13,7 +21,10 @@ export function PartnerMarquee() {
         <div className="relative mt-6 overflow-hidden">
           <div className="flex marquee whitespace-nowrap gap-14">
             {[...partners, ...partners].map((p, i) => (
-              <span key={i} className="font-display text-2xl font-semibold tracking-tight text-muted-foreground/70">
+              <span
+                key={i}
+                className="font-display text-2xl font-semibold tracking-tight text-muted-foreground/70"
+              >
                 {p}
               </span>
             ))}

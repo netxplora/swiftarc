@@ -1,12 +1,40 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { 
-  LayoutDashboard, Package2, BookUser, Receipt, Bell, Settings, LogOut, 
-  Shield, Sun, Moon, Map, PlusCircle, Users, Truck, MessageSquare, CreditCard,
-  Building2, Warehouse, Activity, BarChart
+import {
+  LayoutDashboard,
+  Package2,
+  BookUser,
+  Receipt,
+  Bell,
+  Settings,
+  LogOut,
+  Shield,
+  Sun,
+  Moon,
+  Map,
+  PlusCircle,
+  Users,
+  Truck,
+  MessageSquare,
+  CreditCard,
+  Building2,
+  Warehouse,
+  Activity,
+  BarChart,
+  ShieldAlert,
+  BadgeDollarSign,
 } from "lucide-react";
 import {
-  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/use-auth";
@@ -17,14 +45,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const mainNav = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/dashboard/shipments", label: "Shipments", icon: Package2 },
-  { to: "/dashboard/address-book", label: "Address Book", icon: BookUser },
-  { to: "/tracking", label: "Tracking", icon: Map },
-  { to: "/shipping", label: "Book Shipment", icon: PlusCircle },
-  { to: "/dashboard/invoices", label: "Invoices", icon: Receipt },
-];
+// Main nav removed for admin-only structure
 
 const adminNav = [
   { to: "/admin", label: "Admin Overview", icon: Shield, end: true },
@@ -34,17 +55,14 @@ const adminNav = [
   { to: "/admin/users", label: "Customers", icon: Users },
   { to: "/admin/pickups", label: "Couriers", icon: Truck },
   { to: "/admin/payments", label: "Payments", icon: CreditCard },
+  { to: "/admin/payments-config", label: "Payment Config", icon: Settings },
+  { to: "/admin/clearance", label: "Clearance Payments", icon: ShieldAlert },
   { to: "/admin/invoices", label: "All Invoices", icon: Receipt },
   { to: "/admin/support", label: "Support Tickets", icon: MessageSquare },
   { to: "/admin/broadcast", label: "Broadcasts", icon: Activity },
 ];
 
-const bottomNav = [
-  { to: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { to: "/dashboard/api-keys", label: "Developer API", icon: Settings },
-  { to: "/support", label: "Support", icon: MessageSquare },
-  { to: "/dashboard/settings", label: "Settings", icon: Settings },
-];
+const bottomNav = [{ to: "/support", label: "Support", icon: MessageSquare }];
 
 export function DashboardSidebar() {
   const { state } = useSidebar();
@@ -64,7 +82,9 @@ export function DashboardSidebar() {
     nav({ to: "/login", replace: true });
   };
 
-  const initials = (user?.user_metadata?.display_name || user?.email || "A").slice(0, 1).toUpperCase();
+  const initials = (user?.user_metadata?.display_name || user?.email || "A")
+    .slice(0, 1)
+    .toUpperCase();
   const name = user?.user_metadata?.display_name || user?.email;
 
   const isActive = (to: string, end?: boolean) => {
@@ -77,16 +97,16 @@ export function DashboardSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link to="/dashboard" className="flex items-center gap-2 px-2 py-3">
+        <Link to="/admin" className="flex items-center gap-2 px-2 py-3">
           <Logo />
         </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin Controls</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNav.map(({ to, label, icon: Icon, end }) => (
+              {adminNav.map(({ to, label, icon: Icon, end }) => (
                 <SidebarMenuItem key={to}>
                   <SidebarMenuButton asChild isActive={isActive(to, end)} tooltip={label}>
                     <Link to={to} className="flex items-center gap-2">
@@ -99,26 +119,6 @@ export function DashboardSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin Control Center</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminNav.map(({ to, label, icon: Icon, end }) => (
-                  <SidebarMenuItem key={to}>
-                    <SidebarMenuButton asChild isActive={isActive(to, end)} tooltip={label}>
-                      <Link to={to} className="flex items-center gap-2">
-                        <Icon className="h-4 w-4" />
-                        <span>{label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter>
@@ -136,7 +136,10 @@ export function DashboardSidebar() {
                 </SidebarMenuItem>
               ))}
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={toggle} tooltip={theme === "dark" ? "Light mode" : "Dark mode"}>
+                <SidebarMenuButton
+                  onClick={toggle}
+                  tooltip={theme === "dark" ? "Light mode" : "Dark mode"}
+                >
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
                 </SidebarMenuButton>

@@ -39,20 +39,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     // 1. Load local immediately
-    const stored = (typeof window !== "undefined" && (localStorage.getItem(KEY) as Pref | null)) || null;
+    const stored =
+      (typeof window !== "undefined" && (localStorage.getItem(KEY) as Pref | null)) || null;
     const initial: Pref = stored ?? "system";
     setPref(initial);
     const t = resolve(initial);
-    setTheme(t); 
+    setTheme(t);
     apply(t);
 
     // 2. Set up system matcher
-    const mq = typeof window !== "undefined" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    const mq =
+      typeof window !== "undefined" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
     const onSystemChange = () => {
       const current = (localStorage.getItem(KEY) as Pref | null) ?? "system";
       if (current === "system") {
         const t2 = systemTheme();
-        setTheme(t2); 
+        setTheme(t2);
         apply(t2);
       }
     };
@@ -60,16 +62,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // 3. Pull remote
     async function pull() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user || cancelled) return;
-      const { data } = await supabase.from("profiles").select("theme").eq("id", user.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("theme")
+        .eq("id", user.id)
+        .maybeSingle();
       if (cancelled || !data?.theme) return;
       const p = data.theme as Pref;
       setPref(p);
       const tRemote = resolve(p);
-      setTheme(tRemote); 
+      setTheme(tRemote);
       apply(tRemote);
-      try { localStorage.setItem(KEY, p); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(KEY, p);
+      } catch {
+        /* ignore */
+      }
     }
     pull();
 
@@ -88,11 +100,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setPreference = useCallback(async (next: Pref) => {
     setPref(next);
     const t = resolve(next);
-    setTheme(t); 
+    setTheme(t);
     apply(t);
-    try { localStorage.setItem(KEY, next); } catch { /* ignore */ }
-    
-    const { data: { user } } = await supabase.auth.getUser();
+    try {
+      localStorage.setItem(KEY, next);
+    } catch {
+      /* ignore */
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       await supabase.from("profiles").update({ theme: next }).eq("id", user.id);
     }
@@ -102,7 +120,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setPreference(theme === "dark" ? "light" : "dark");
   }, [theme, setPreference]);
 
-  const value = useMemo(() => ({ theme, preference: pref, toggle, setPreference }), [theme, pref, toggle, setPreference]);
+  const value = useMemo(
+    () => ({ theme, preference: pref, toggle, setPreference }),
+    [theme, pref, toggle, setPreference],
+  );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

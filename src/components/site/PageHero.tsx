@@ -1,7 +1,11 @@
 import { motion } from "motion/react";
 
 export function PageHero({
-  eyebrow, title, subtitle, imageSrc, children,
+  eyebrow,
+  title,
+  subtitle,
+  imageSrc,
+  children,
 }: {
   eyebrow: string;
   title: string;
@@ -13,12 +17,22 @@ export function PageHero({
     <section className="relative overflow-hidden bg-navy-deep text-cream dark:bg-navy-deep">
       {imageSrc && (
         <>
-          <img src={imageSrc} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 via-navy-deep/40 to-transparent" aria-hidden />
+          <img
+            src={imageSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-70"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 via-navy-deep/40 to-transparent"
+            aria-hidden
+          />
         </>
       )}
       <div className="absolute inset-0 arc-grid opacity-20" aria-hidden />
-      <div className="absolute inset-x-0 -top-40 h-96 bg-[radial-gradient(closest-side,_var(--color-amber)_0%,_transparent_70%)] opacity-15" aria-hidden />
+      <div
+        className="absolute inset-x-0 -top-40 h-96 bg-[radial-gradient(closest-side,_var(--color-amber)_0%,_transparent_70%)] opacity-15"
+        aria-hidden
+      />
       <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
         <motion.p
           initial={{ opacity: 0, y: 10 }}

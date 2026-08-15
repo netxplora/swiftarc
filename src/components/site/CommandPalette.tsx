@@ -1,12 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  CommandDialog, CommandEmpty, CommandGroup, CommandInput,
-  CommandItem, CommandList, CommandSeparator,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
-  Home, PackageSearch, Calculator, MapPin, Building2, LifeBuoy,
-  BookOpen, LogIn, UserPlus, Truck, Info, Mail,
+  Home,
+  PackageSearch,
+  Calculator,
+  MapPin,
+  Building2,
+  LifeBuoy,
+  BookOpen,
+  LogIn,
+  UserPlus,
+  Truck,
+  Info,
+  Mail,
 } from "lucide-react";
 
 const routes = [

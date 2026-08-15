@@ -13,7 +13,11 @@ export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
       { title: "Open an Account — SwiftArc" },
-      { name: "description", content: "Create a SwiftArc account to book, track, and manage shipments across our global network." },
+      {
+        name: "description",
+        content:
+          "Create a SwiftArc account to book, track, and manage shipments across our global network.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -21,8 +25,12 @@ export const Route = createFileRoute("/register")({
 });
 
 const perks = [
-  "Volume-based pricing", "Bulk labels & manifests", "Returns portal",
-  "API & webhook access", "24/7 support", "AI ETAs on every shipment",
+  "Volume-based pricing",
+  "Bulk labels & manifests",
+  "Returns portal",
+  "API & webhook access",
+  "24/7 support",
+  "AI ETAs on every shipment",
 ];
 
 function scorePassword(p: string) {
@@ -54,7 +62,8 @@ function Register() {
     if (score < 2) return toast.error("Please choose a stronger password");
     setBusy(true);
     const { data, error } = await supabase.auth.signUp({
-      email, password: pw,
+      email,
+      password: pw,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
         data: { display_name: `${first} ${last}`.trim(), company },
@@ -62,19 +71,27 @@ function Register() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    
+
     if (!data.session) {
       toast.success("Account created! Please check your email to verify your account.");
     } else {
       toast.success("Account created");
-      nav({ to: "/dashboard" });
+      nav({ to: "/" });
     }
   };
 
   const google = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin }
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) toast.error(error.message);
+  };
+
+  const apple = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: window.location.origin },
     });
     if (error) toast.error(error.message);
   };
@@ -83,8 +100,12 @@ function Register() {
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-24 lg:px-8">
       <div className="rounded-3xl bg-navy-deep p-8 text-cream sm:p-10">
         <Logo tone="light" />
-        <h1 className="mt-8 font-display text-5xl font-bold tracking-tight">Ship smarter, from day one.</h1>
-        <p className="mt-4 text-cream/70">Business account with everything you need to run global logistics.</p>
+        <h1 className="mt-8 font-display text-5xl font-bold tracking-tight">
+          Ship smarter, from day one.
+        </h1>
+        <p className="mt-4 text-cream/70">
+          Business account with everything you need to run global logistics.
+        </p>
         <ul className="mt-8 space-y-3">
           {perks.map((p) => (
             <li key={p} className="flex items-center gap-3 text-cream/90">
@@ -98,27 +119,59 @@ function Register() {
         <h2 className="font-display text-3xl font-bold tracking-tight">Open an account</h2>
         <p className="mt-1 text-sm text-muted-foreground">Ready in under 60 seconds.</p>
 
-        <div className="mt-5">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <Button type="button" variant="outline" className="h-11 w-full" onClick={google}>
             Continue with Google
           </Button>
+          <Button type="button" variant="outline" className="h-11 w-full" onClick={apple}>
+            Continue with Apple
+          </Button>
         </div>
         <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> or with email <span className="h-px flex-1 bg-border" />
+          <span className="h-px flex-1 bg-border" /> or with email{" "}
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <div className="flex gap-2 mb-6 p-1 bg-secondary/50 rounded-lg">
-          <button type="button" onClick={() => setMode("create")} className={cn("flex-1 text-sm font-medium py-2 px-3 rounded-md transition-all", mode === "create" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground")}>Create Workspace</button>
-          <button type="button" onClick={() => setMode("join")} className={cn("flex-1 text-sm font-medium py-2 px-3 rounded-md transition-all", mode === "join" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground")}>Join Team</button>
+          <button
+            type="button"
+            onClick={() => setMode("create")}
+            className={cn(
+              "flex-1 text-sm font-medium py-2 px-3 rounded-md transition-all",
+              mode === "create"
+                ? "bg-background shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Create Workspace
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("join")}
+            className={cn(
+              "flex-1 text-sm font-medium py-2 px-3 rounded-md transition-all",
+              mode === "join"
+                ? "bg-background shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Join Team
+          </button>
         </div>
 
         {mode === "join" && (
           <div className="mb-6 space-y-4 rounded-xl border border-amber/20 bg-amber/5 p-4">
             <h3 className="font-semibold text-amber-deep">Got an invite?</h3>
-            <p className="text-sm text-amber-deep/80">Enter your company's secure invite code to automatically link your account to their workspace.</p>
+            <p className="text-sm text-amber-deep/80">
+              Enter your company's secure invite code to automatically link your account to their
+              workspace.
+            </p>
             <div className="space-y-2">
               <Label>Invite Code</Label>
-              <Input placeholder="e.g. SWIFT-8X92-AL" className="font-mono uppercase bg-background" />
+              <Input
+                placeholder="e.g. SWIFT-8X92-AL"
+                className="font-mono uppercase bg-background"
+              />
             </div>
           </div>
         )}
@@ -126,35 +179,62 @@ function Register() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="first">First name</Label>
-            <Input id="first" required value={first} onChange={e=>setFirst(e.target.value)} className="h-11" />
+            <Input
+              id="first"
+              required
+              value={first}
+              onChange={(e) => setFirst(e.target.value)}
+              className="h-11"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="last">Last name</Label>
-            <Input id="last" required value={last} onChange={e=>setLast(e.target.value)} className="h-11" />
+            <Input
+              id="last"
+              required
+              value={last}
+              onChange={(e) => setLast(e.target.value)}
+              className="h-11"
+            />
           </div>
         </div>
-        
+
         {mode === "create" && (
           <div className="mt-4 space-y-2">
             <Label htmlFor="company">Company / Workspace Name</Label>
-            <Input id="company" placeholder="Acme Logistics Corp" required value={company} onChange={e=>setCompany(e.target.value)} className="h-11" />
+            <Input
+              id="company"
+              placeholder="Acme Logistics Corp"
+              required
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="h-11"
+            />
           </div>
         )}
 
         <div className="mt-4 space-y-2">
           <Label htmlFor="email">Work Email</Label>
-          <Input id="email" type="email" placeholder="you@company.com" required value={email} onChange={e=>setEmail(e.target.value)} className="h-11" />
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@company.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-11"
+          />
         </div>
 
         <div className="mt-4 space-y-2">
           <Label>Password</Label>
           <div className="relative">
-            <Input 
-              type={showPassword ? "text" : "password"} 
-              required 
-              value={pw} 
-              onChange={(e) => setPw(e.target.value)} 
-              className="h-11 pr-10" 
+            <Input
+              type={showPassword ? "text" : "password"}
+              required
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              className="h-11 pr-10"
             />
             <button
               type="button"
@@ -169,21 +249,32 @@ function Register() {
             <div className="mt-2">
               <div className="flex gap-1">
                 {[0, 1, 2, 3].map((i) => (
-                  <span key={i} className={`h-1.5 flex-1 rounded-full ${i < score ? strengthColors[score] : "bg-secondary"}`} />
+                  <span
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full ${i < score ? strengthColors[score] : "bg-secondary"}`}
+                  />
                 ))}
               </div>
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Password strength: <span className="font-medium text-foreground">{strengthLabels[score]}</span>
+                Password strength:{" "}
+                <span className="font-medium text-foreground">{strengthLabels[score]}</span>
               </p>
             </div>
           )}
         </div>
 
-        <Button disabled={busy || score < 2} type="submit" className="mt-6 h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft disabled:opacity-60">
+        <Button
+          disabled={busy || score < 2}
+          type="submit"
+          className="mt-6 h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft disabled:opacity-60"
+        >
           {busy ? "Creating account…" : "Open account"}
         </Button>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account? <Link to="/login" className="font-medium text-navy-deep underline">Log in</Link>
+          Already have an account?{" "}
+          <Link to="/login" className="font-medium text-navy-deep underline">
+            Log in
+          </Link>
         </p>
       </form>
     </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -18,12 +19,15 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { MobileTabBar } from "@/components/site/MobileTabBar";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { LocaleProvider } from "@/hooks/use-locale";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 
 const CommandPalette = React.lazy(() =>
-  import("@/components/site/CommandPalette").then((m) => ({ default: m.CommandPalette }))
+  import("@/components/site/CommandPalette").then((m) => ({ default: m.CommandPalette })),
 );
 const ChatWidget = React.lazy(() =>
-  import("@/components/chat/ChatWidget").then((m) => ({ default: m.ChatWidget }))
+  import("@/components/chat/ChatWidget").then((m) => ({ default: m.ChatWidget })),
 );
 
 function NotFoundComponent() {
@@ -78,7 +82,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="inline-flex h-11 items-center justify-center rounded-md bg-navy-deep px-5 text-sm font-medium text-cream hover:bg-navy"
           >
             Try again
@@ -99,7 +106,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+      },
       { name: "theme-color", content: "#07162C" },
       { title: "SwiftArc — Global Logistics & Shipment Tracking" },
       {
@@ -109,19 +119,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "SwiftArc — Engineered Global Logistics" },
       {
         property: "og:description",
-        content: "Enterprise-grade shipping, real-time tracking, and AI-powered delivery intelligence.",
+        content:
+          "Enterprise-grade shipping, real-time tracking, and delay risk monitoring across 220+ countries.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/favicon.ico" },
       {
         rel: "preconnect",
         href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous" as any,
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap",
       },
     ],
     scripts: [
@@ -150,6 +169,19 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var pref = localStorage.getItem('swiftarc-theme');
+                  var theme = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                  if (theme === 'dark') document.documentElement.classList.add('dark');
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         {children}
@@ -204,39 +236,48 @@ function RootComponent() {
   }, [queryClient]);
 
   const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+  const isPrint = pathname.startsWith("/invoice");
   const isAdmin = pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <div suppressHydrationWarning className={`flex min-h-dvh flex-col bg-background ${isDashboard ? "" : "pb-16 lg:pb-0"}`}>
-            <GlobalLoading />
-            {!isDashboard && <SiteHeader />}
-            <main className="flex-1 flex flex-col">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={pathname}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="flex-1 flex flex-col"
-                >
-                  <Outlet />
-                </motion.div>
-              </AnimatePresence>
-            </main>
-            {!isDashboard && <SiteFooter />}
-            {!isDashboard && <MobileTabBar />}
-            <Suspense fallback={null}>
-              <CommandPalette />
-              {!isAdmin && <ChatWidget />}
-            </Suspense>
-            <Toaster richColors position="top-right" />
-          </div>
-        </ThemeProvider>
-      </AuthProvider>
+      <TooltipProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <div
+                suppressHydrationWarning
+                className={`flex min-h-dvh flex-col bg-background ${isDashboard || isPrint ? "" : "pb-16 lg:pb-0"}`}
+              >
+                <GlobalLoading />
+                {!isDashboard && !isPrint && <SiteHeader />}
+                <main className="flex-1 flex flex-col">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={isDashboard ? "dashboard-app" : pathname}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.22, ease: "easeOut" }}
+                      className="flex-1 flex flex-col"
+                    >
+                      <Outlet />
+                    </motion.div>
+                  </AnimatePresence>
+                </main>
+                {!isDashboard && !isPrint && <SiteFooter />}
+                {!isDashboard && !isPrint && <MobileTabBar />}
+                <Suspense fallback={null}>
+                  {!isPrint && <CommandPalette />}
+                  {!isAdmin && !isPrint && <ChatWidget />}
+                </Suspense>
+                <PwaInstallPrompt />
+                <Toaster richColors position="top-right" />
+              </div>
+            </ThemeProvider>
+          </AuthProvider>
+        </LocaleProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

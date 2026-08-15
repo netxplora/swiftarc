@@ -20,7 +20,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PickupRouteImport } from './routes/pickup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocationsRouteImport } from './routes/locations'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomsRouteImport } from './routes/customs'
 import { Route as CourierRouteImport } from './routes/courier'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -30,27 +29,31 @@ import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackingIndexRouteImport } from './routes/tracking.index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TrackingTrackingIdRouteImport } from './routes/tracking.$trackingId'
-import { Route as DashboardShipmentsRouteImport } from './routes/dashboard.shipments'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
-import { Route as DashboardNotificationsRouteImport } from './routes/dashboard.notifications'
-import { Route as DashboardInvoicesRouteImport } from './routes/dashboard.invoices'
-import { Route as DashboardApiKeysRouteImport } from './routes/dashboard.api-keys'
-import { Route as DashboardAddressBookRouteImport } from './routes/dashboard.address-book'
+import { Route as ResourcesSlugRouteImport } from './routes/resources.$slug'
+import { Route as PayCaseIdRouteImport } from './routes/pay.$caseId'
+import { Route as InvoiceTrackingIdRouteImport } from './routes/invoice.$trackingId'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShipmentsRouteImport } from './routes/admin.shipments'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPricingRouteImport } from './routes/admin.pricing'
 import { Route as AdminPickupsRouteImport } from './routes/admin.pickups'
+import { Route as AdminPaymentsConfigRouteImport } from './routes/admin.payments-config'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminMapRouteImport } from './routes/admin.map'
 import { Route as AdminInvoicesRouteImport } from './routes/admin.invoices'
+import { Route as AdminFleetRouteImport } from './routes/admin.fleet'
+import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
+import { Route as AdminCmsRouteImport } from './routes/admin.cms'
+import { Route as AdminClearanceRouteImport } from './routes/admin.clearance'
 import { Route as AdminBroadcastRouteImport } from './routes/admin.broadcast'
+import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
-import { Route as ShippingCheckoutTransactionIdRouteImport } from './routes/shipping.checkout.$transactionId'
-import { Route as DashboardNotificationsIdRouteImport } from './routes/dashboard.notifications.$id'
-import { Route as DashboardInvoicesInvoiceIdRouteImport } from './routes/dashboard.invoices.$invoiceId'
+import { Route as AdminShipmentsCreateRouteImport } from './routes/admin.shipments_.create'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -107,11 +110,6 @@ const LocationsRoute = LocationsRouteImport.update({
   path: '/locations',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CustomsRoute = CustomsRouteImport.update({
   id: '/customs',
   path: '/customs',
@@ -157,11 +155,6 @@ const TrackingIndexRoute = TrackingIndexRouteImport.update({
   path: '/tracking/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -172,35 +165,20 @@ const TrackingTrackingIdRoute = TrackingTrackingIdRouteImport.update({
   path: '/tracking/$trackingId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardShipmentsRoute = DashboardShipmentsRouteImport.update({
-  id: '/shipments',
-  path: '/shipments',
-  getParentRoute: () => DashboardRoute,
+const ResourcesSlugRoute = ResourcesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ResourcesRoute,
 } as any)
-const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => DashboardRoute,
+const PayCaseIdRoute = PayCaseIdRouteImport.update({
+  id: '/pay/$caseId',
+  path: '/pay/$caseId',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardInvoicesRoute = DashboardInvoicesRouteImport.update({
-  id: '/invoices',
-  path: '/invoices',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardApiKeysRoute = DashboardApiKeysRouteImport.update({
-  id: '/api-keys',
-  path: '/api-keys',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAddressBookRoute = DashboardAddressBookRouteImport.update({
-  id: '/address-book',
-  path: '/address-book',
-  getParentRoute: () => DashboardRoute,
+const InvoiceTrackingIdRoute = InvoiceTrackingIdRouteImport.update({
+  id: '/invoice/$trackingId',
+  path: '/invoice/$trackingId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
@@ -217,14 +195,39 @@ const AdminShipmentsRoute = AdminShipmentsRouteImport.update({
   path: '/shipments',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPricingRoute = AdminPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPickupsRoute = AdminPickupsRouteImport.update({
   id: '/pickups',
   path: '/pickups',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPaymentsConfigRoute = AdminPaymentsConfigRouteImport.update({
+  id: '/payments-config',
+  path: '/payments-config',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMapRoute = AdminMapRouteImport.update({
@@ -237,9 +240,34 @@ const AdminInvoicesRoute = AdminInvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFleetRoute = AdminFleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDriversRoute = AdminDriversRouteImport.update({
+  id: '/drivers',
+  path: '/drivers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCmsRoute = AdminCmsRouteImport.update({
+  id: '/cms',
+  path: '/cms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClearanceRoute = AdminClearanceRouteImport.update({
+  id: '/clearance',
+  path: '/clearance',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminBroadcastRoute = AdminBroadcastRouteImport.update({
   id: '/broadcast',
   path: '/broadcast',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
+  id: '/audit-logs',
+  path: '/audit-logs',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -247,24 +275,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
-const ShippingCheckoutTransactionIdRoute =
-  ShippingCheckoutTransactionIdRouteImport.update({
-    id: '/checkout/$transactionId',
-    path: '/checkout/$transactionId',
-    getParentRoute: () => ShippingRoute,
-  } as any)
-const DashboardNotificationsIdRoute =
-  DashboardNotificationsIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => DashboardNotificationsRoute,
-  } as any)
-const DashboardInvoicesInvoiceIdRoute =
-  DashboardInvoicesInvoiceIdRouteImport.update({
-    id: '/$invoiceId',
-    path: '/$invoiceId',
-    getParentRoute: () => DashboardInvoicesRoute,
-  } as any)
+const AdminShipmentsCreateRoute = AdminShipmentsCreateRouteImport.update({
+  id: '/shipments_/create',
+  path: '/shipments/create',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -275,7 +290,6 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/courier': typeof CourierRoute
   '/customs': typeof CustomsRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
   '/pickup': typeof PickupRoute
@@ -283,32 +297,36 @@ export interface FileRoutesByFullPath {
   '/rates': typeof RatesRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/resources': typeof ResourcesRoute
-  '/shipping': typeof ShippingRouteWithChildren
+  '/resources': typeof ResourcesRouteWithChildren
+  '/shipping': typeof ShippingRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
+  '/admin/clearance': typeof AdminClearanceRoute
+  '/admin/cms': typeof AdminCmsRoute
+  '/admin/drivers': typeof AdminDriversRoute
+  '/admin/fleet': typeof AdminFleetRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/map': typeof AdminMapRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/payments-config': typeof AdminPaymentsConfigRoute
   '/admin/pickups': typeof AdminPickupsRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
-  '/dashboard/address-book': typeof DashboardAddressBookRoute
-  '/dashboard/api-keys': typeof DashboardApiKeysRoute
-  '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
-  '/dashboard/notifications': typeof DashboardNotificationsRouteWithChildren
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/dashboard/shipments': typeof DashboardShipmentsRoute
+  '/invoice/$trackingId': typeof InvoiceTrackingIdRoute
+  '/pay/$caseId': typeof PayCaseIdRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/tracking/$trackingId': typeof TrackingTrackingIdRoute
   '/admin/': typeof AdminIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
   '/tracking/': typeof TrackingIndexRoute
-  '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
-  '/dashboard/notifications/$id': typeof DashboardNotificationsIdRoute
-  '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
+  '/admin/shipments/create': typeof AdminShipmentsCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -325,32 +343,36 @@ export interface FileRoutesByTo {
   '/rates': typeof RatesRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/resources': typeof ResourcesRoute
-  '/shipping': typeof ShippingRouteWithChildren
+  '/resources': typeof ResourcesRouteWithChildren
+  '/shipping': typeof ShippingRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
+  '/admin/clearance': typeof AdminClearanceRoute
+  '/admin/cms': typeof AdminCmsRoute
+  '/admin/drivers': typeof AdminDriversRoute
+  '/admin/fleet': typeof AdminFleetRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/map': typeof AdminMapRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/payments-config': typeof AdminPaymentsConfigRoute
   '/admin/pickups': typeof AdminPickupsRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
-  '/dashboard/address-book': typeof DashboardAddressBookRoute
-  '/dashboard/api-keys': typeof DashboardApiKeysRoute
-  '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
-  '/dashboard/notifications': typeof DashboardNotificationsRouteWithChildren
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/dashboard/shipments': typeof DashboardShipmentsRoute
+  '/invoice/$trackingId': typeof InvoiceTrackingIdRoute
+  '/pay/$caseId': typeof PayCaseIdRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/tracking/$trackingId': typeof TrackingTrackingIdRoute
   '/admin': typeof AdminIndexRoute
-  '/dashboard': typeof DashboardIndexRoute
   '/tracking': typeof TrackingIndexRoute
-  '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
-  '/dashboard/notifications/$id': typeof DashboardNotificationsIdRoute
-  '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
+  '/admin/shipments/create': typeof AdminShipmentsCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -362,7 +384,6 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/courier': typeof CourierRoute
   '/customs': typeof CustomsRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/locations': typeof LocationsRoute
   '/login': typeof LoginRoute
   '/pickup': typeof PickupRoute
@@ -370,32 +391,36 @@ export interface FileRoutesById {
   '/rates': typeof RatesRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/resources': typeof ResourcesRoute
-  '/shipping': typeof ShippingRouteWithChildren
+  '/resources': typeof ResourcesRouteWithChildren
+  '/shipping': typeof ShippingRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/broadcast': typeof AdminBroadcastRoute
+  '/admin/clearance': typeof AdminClearanceRoute
+  '/admin/cms': typeof AdminCmsRoute
+  '/admin/drivers': typeof AdminDriversRoute
+  '/admin/fleet': typeof AdminFleetRoute
   '/admin/invoices': typeof AdminInvoicesRoute
   '/admin/map': typeof AdminMapRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/payments-config': typeof AdminPaymentsConfigRoute
   '/admin/pickups': typeof AdminPickupsRoute
+  '/admin/pricing': typeof AdminPricingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/shipments': typeof AdminShipmentsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/users': typeof AdminUsersRoute
-  '/dashboard/address-book': typeof DashboardAddressBookRoute
-  '/dashboard/api-keys': typeof DashboardApiKeysRoute
-  '/dashboard/invoices': typeof DashboardInvoicesRouteWithChildren
-  '/dashboard/notifications': typeof DashboardNotificationsRouteWithChildren
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/dashboard/shipments': typeof DashboardShipmentsRoute
+  '/invoice/$trackingId': typeof InvoiceTrackingIdRoute
+  '/pay/$caseId': typeof PayCaseIdRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/tracking/$trackingId': typeof TrackingTrackingIdRoute
   '/admin/': typeof AdminIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
   '/tracking/': typeof TrackingIndexRoute
-  '/dashboard/invoices/$invoiceId': typeof DashboardInvoicesInvoiceIdRoute
-  '/dashboard/notifications/$id': typeof DashboardNotificationsIdRoute
-  '/shipping/checkout/$transactionId': typeof ShippingCheckoutTransactionIdRoute
+  '/admin/shipments_/create': typeof AdminShipmentsCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -408,7 +433,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/courier'
     | '/customs'
-    | '/dashboard'
     | '/locations'
     | '/login'
     | '/pickup'
@@ -421,27 +445,31 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/admin/analytics'
+    | '/admin/audit-logs'
     | '/admin/broadcast'
+    | '/admin/clearance'
+    | '/admin/cms'
+    | '/admin/drivers'
+    | '/admin/fleet'
     | '/admin/invoices'
     | '/admin/map'
+    | '/admin/orders'
     | '/admin/payments'
+    | '/admin/payments-config'
     | '/admin/pickups'
+    | '/admin/pricing'
+    | '/admin/reports'
+    | '/admin/settings'
     | '/admin/shipments'
     | '/admin/support'
     | '/admin/users'
-    | '/dashboard/address-book'
-    | '/dashboard/api-keys'
-    | '/dashboard/invoices'
-    | '/dashboard/notifications'
-    | '/dashboard/settings'
-    | '/dashboard/shipments'
+    | '/invoice/$trackingId'
+    | '/pay/$caseId'
+    | '/resources/$slug'
     | '/tracking/$trackingId'
     | '/admin/'
-    | '/dashboard/'
     | '/tracking/'
-    | '/dashboard/invoices/$invoiceId'
-    | '/dashboard/notifications/$id'
-    | '/shipping/checkout/$transactionId'
+    | '/admin/shipments/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -463,27 +491,31 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/admin/analytics'
+    | '/admin/audit-logs'
     | '/admin/broadcast'
+    | '/admin/clearance'
+    | '/admin/cms'
+    | '/admin/drivers'
+    | '/admin/fleet'
     | '/admin/invoices'
     | '/admin/map'
+    | '/admin/orders'
     | '/admin/payments'
+    | '/admin/payments-config'
     | '/admin/pickups'
+    | '/admin/pricing'
+    | '/admin/reports'
+    | '/admin/settings'
     | '/admin/shipments'
     | '/admin/support'
     | '/admin/users'
-    | '/dashboard/address-book'
-    | '/dashboard/api-keys'
-    | '/dashboard/invoices'
-    | '/dashboard/notifications'
-    | '/dashboard/settings'
-    | '/dashboard/shipments'
+    | '/invoice/$trackingId'
+    | '/pay/$caseId'
+    | '/resources/$slug'
     | '/tracking/$trackingId'
     | '/admin'
-    | '/dashboard'
     | '/tracking'
-    | '/dashboard/invoices/$invoiceId'
-    | '/dashboard/notifications/$id'
-    | '/shipping/checkout/$transactionId'
+    | '/admin/shipments/create'
   id:
     | '__root__'
     | '/'
@@ -494,7 +526,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/courier'
     | '/customs'
-    | '/dashboard'
     | '/locations'
     | '/login'
     | '/pickup'
@@ -507,27 +538,31 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/admin/analytics'
+    | '/admin/audit-logs'
     | '/admin/broadcast'
+    | '/admin/clearance'
+    | '/admin/cms'
+    | '/admin/drivers'
+    | '/admin/fleet'
     | '/admin/invoices'
     | '/admin/map'
+    | '/admin/orders'
     | '/admin/payments'
+    | '/admin/payments-config'
     | '/admin/pickups'
+    | '/admin/pricing'
+    | '/admin/reports'
+    | '/admin/settings'
     | '/admin/shipments'
     | '/admin/support'
     | '/admin/users'
-    | '/dashboard/address-book'
-    | '/dashboard/api-keys'
-    | '/dashboard/invoices'
-    | '/dashboard/notifications'
-    | '/dashboard/settings'
-    | '/dashboard/shipments'
+    | '/invoice/$trackingId'
+    | '/pay/$caseId'
+    | '/resources/$slug'
     | '/tracking/$trackingId'
     | '/admin/'
-    | '/dashboard/'
     | '/tracking/'
-    | '/dashboard/invoices/$invoiceId'
-    | '/dashboard/notifications/$id'
-    | '/shipping/checkout/$transactionId'
+    | '/admin/shipments_/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -539,7 +574,6 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   CourierRoute: typeof CourierRoute
   CustomsRoute: typeof CustomsRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
   LocationsRoute: typeof LocationsRoute
   LoginRoute: typeof LoginRoute
   PickupRoute: typeof PickupRoute
@@ -547,10 +581,12 @@ export interface RootRouteChildren {
   RatesRoute: typeof RatesRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  ResourcesRoute: typeof ResourcesRoute
-  ShippingRoute: typeof ShippingRouteWithChildren
+  ResourcesRoute: typeof ResourcesRouteWithChildren
+  ShippingRoute: typeof ShippingRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  InvoiceTrackingIdRoute: typeof InvoiceTrackingIdRoute
+  PayCaseIdRoute: typeof PayCaseIdRoute
   TrackingTrackingIdRoute: typeof TrackingTrackingIdRoute
   TrackingIndexRoute: typeof TrackingIndexRoute
 }
@@ -634,13 +670,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/customs': {
       id: '/customs'
       path: '/customs'
@@ -704,13 +733,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -725,47 +747,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackingTrackingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/shipments': {
-      id: '/dashboard/shipments'
-      path: '/shipments'
-      fullPath: '/dashboard/shipments'
-      preLoaderRoute: typeof DashboardShipmentsRouteImport
-      parentRoute: typeof DashboardRoute
+    '/resources/$slug': {
+      id: '/resources/$slug'
+      path: '/$slug'
+      fullPath: '/resources/$slug'
+      preLoaderRoute: typeof ResourcesSlugRouteImport
+      parentRoute: typeof ResourcesRoute
     }
-    '/dashboard/settings': {
-      id: '/dashboard/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardSettingsRouteImport
-      parentRoute: typeof DashboardRoute
+    '/pay/$caseId': {
+      id: '/pay/$caseId'
+      path: '/pay/$caseId'
+      fullPath: '/pay/$caseId'
+      preLoaderRoute: typeof PayCaseIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/dashboard/notifications': {
-      id: '/dashboard/notifications'
-      path: '/notifications'
-      fullPath: '/dashboard/notifications'
-      preLoaderRoute: typeof DashboardNotificationsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/invoices': {
-      id: '/dashboard/invoices'
-      path: '/invoices'
-      fullPath: '/dashboard/invoices'
-      preLoaderRoute: typeof DashboardInvoicesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/api-keys': {
-      id: '/dashboard/api-keys'
-      path: '/api-keys'
-      fullPath: '/dashboard/api-keys'
-      preLoaderRoute: typeof DashboardApiKeysRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/address-book': {
-      id: '/dashboard/address-book'
-      path: '/address-book'
-      fullPath: '/dashboard/address-book'
-      preLoaderRoute: typeof DashboardAddressBookRouteImport
-      parentRoute: typeof DashboardRoute
+    '/invoice/$trackingId': {
+      id: '/invoice/$trackingId'
+      path: '/invoice/$trackingId'
+      fullPath: '/invoice/$trackingId'
+      preLoaderRoute: typeof InvoiceTrackingIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -788,6 +789,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShipmentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pricing': {
+      id: '/admin/pricing'
+      path: '/pricing'
+      fullPath: '/admin/pricing'
+      preLoaderRoute: typeof AdminPricingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pickups': {
       id: '/admin/pickups'
       path: '/pickups'
@@ -795,11 +817,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPickupsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/payments-config': {
+      id: '/admin/payments-config'
+      path: '/payments-config'
+      fullPath: '/admin/payments-config'
+      preLoaderRoute: typeof AdminPaymentsConfigRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/payments': {
       id: '/admin/payments'
       path: '/payments'
       fullPath: '/admin/payments'
       preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/map': {
@@ -816,11 +852,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInvoicesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/fleet': {
+      id: '/admin/fleet'
+      path: '/fleet'
+      fullPath: '/admin/fleet'
+      preLoaderRoute: typeof AdminFleetRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/drivers': {
+      id: '/admin/drivers'
+      path: '/drivers'
+      fullPath: '/admin/drivers'
+      preLoaderRoute: typeof AdminDriversRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cms': {
+      id: '/admin/cms'
+      path: '/cms'
+      fullPath: '/admin/cms'
+      preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clearance': {
+      id: '/admin/clearance'
+      path: '/clearance'
+      fullPath: '/admin/clearance'
+      preLoaderRoute: typeof AdminClearanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/broadcast': {
       id: '/admin/broadcast'
       path: '/broadcast'
       fullPath: '/admin/broadcast'
       preLoaderRoute: typeof AdminBroadcastRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit-logs': {
+      id: '/admin/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/admin/audit-logs'
+      preLoaderRoute: typeof AdminAuditLogsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/analytics': {
@@ -830,117 +901,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/shipping/checkout/$transactionId': {
-      id: '/shipping/checkout/$transactionId'
-      path: '/checkout/$transactionId'
-      fullPath: '/shipping/checkout/$transactionId'
-      preLoaderRoute: typeof ShippingCheckoutTransactionIdRouteImport
-      parentRoute: typeof ShippingRoute
-    }
-    '/dashboard/notifications/$id': {
-      id: '/dashboard/notifications/$id'
-      path: '/$id'
-      fullPath: '/dashboard/notifications/$id'
-      preLoaderRoute: typeof DashboardNotificationsIdRouteImport
-      parentRoute: typeof DashboardNotificationsRoute
-    }
-    '/dashboard/invoices/$invoiceId': {
-      id: '/dashboard/invoices/$invoiceId'
-      path: '/$invoiceId'
-      fullPath: '/dashboard/invoices/$invoiceId'
-      preLoaderRoute: typeof DashboardInvoicesInvoiceIdRouteImport
-      parentRoute: typeof DashboardInvoicesRoute
+    '/admin/shipments_/create': {
+      id: '/admin/shipments_/create'
+      path: '/shipments/create'
+      fullPath: '/admin/shipments/create'
+      preLoaderRoute: typeof AdminShipmentsCreateRouteImport
+      parentRoute: typeof AdminRoute
     }
   }
 }
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAuditLogsRoute: typeof AdminAuditLogsRoute
   AdminBroadcastRoute: typeof AdminBroadcastRoute
+  AdminClearanceRoute: typeof AdminClearanceRoute
+  AdminCmsRoute: typeof AdminCmsRoute
+  AdminDriversRoute: typeof AdminDriversRoute
+  AdminFleetRoute: typeof AdminFleetRoute
   AdminInvoicesRoute: typeof AdminInvoicesRoute
   AdminMapRoute: typeof AdminMapRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
+  AdminPaymentsConfigRoute: typeof AdminPaymentsConfigRoute
   AdminPickupsRoute: typeof AdminPickupsRoute
+  AdminPricingRoute: typeof AdminPricingRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminShipmentsRoute: typeof AdminShipmentsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminShipmentsCreateRoute: typeof AdminShipmentsCreateRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAuditLogsRoute: AdminAuditLogsRoute,
   AdminBroadcastRoute: AdminBroadcastRoute,
+  AdminClearanceRoute: AdminClearanceRoute,
+  AdminCmsRoute: AdminCmsRoute,
+  AdminDriversRoute: AdminDriversRoute,
+  AdminFleetRoute: AdminFleetRoute,
   AdminInvoicesRoute: AdminInvoicesRoute,
   AdminMapRoute: AdminMapRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
+  AdminPaymentsConfigRoute: AdminPaymentsConfigRoute,
   AdminPickupsRoute: AdminPickupsRoute,
+  AdminPricingRoute: AdminPricingRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminShipmentsRoute: AdminShipmentsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminShipmentsCreateRoute: AdminShipmentsCreateRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface DashboardInvoicesRouteChildren {
-  DashboardInvoicesInvoiceIdRoute: typeof DashboardInvoicesInvoiceIdRoute
+interface ResourcesRouteChildren {
+  ResourcesSlugRoute: typeof ResourcesSlugRoute
 }
 
-const DashboardInvoicesRouteChildren: DashboardInvoicesRouteChildren = {
-  DashboardInvoicesInvoiceIdRoute: DashboardInvoicesInvoiceIdRoute,
+const ResourcesRouteChildren: ResourcesRouteChildren = {
+  ResourcesSlugRoute: ResourcesSlugRoute,
 }
 
-const DashboardInvoicesRouteWithChildren =
-  DashboardInvoicesRoute._addFileChildren(DashboardInvoicesRouteChildren)
-
-interface DashboardNotificationsRouteChildren {
-  DashboardNotificationsIdRoute: typeof DashboardNotificationsIdRoute
-}
-
-const DashboardNotificationsRouteChildren: DashboardNotificationsRouteChildren =
-  {
-    DashboardNotificationsIdRoute: DashboardNotificationsIdRoute,
-  }
-
-const DashboardNotificationsRouteWithChildren =
-  DashboardNotificationsRoute._addFileChildren(
-    DashboardNotificationsRouteChildren,
-  )
-
-interface DashboardRouteChildren {
-  DashboardAddressBookRoute: typeof DashboardAddressBookRoute
-  DashboardApiKeysRoute: typeof DashboardApiKeysRoute
-  DashboardInvoicesRoute: typeof DashboardInvoicesRouteWithChildren
-  DashboardNotificationsRoute: typeof DashboardNotificationsRouteWithChildren
-  DashboardSettingsRoute: typeof DashboardSettingsRoute
-  DashboardShipmentsRoute: typeof DashboardShipmentsRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardAddressBookRoute: DashboardAddressBookRoute,
-  DashboardApiKeysRoute: DashboardApiKeysRoute,
-  DashboardInvoicesRoute: DashboardInvoicesRouteWithChildren,
-  DashboardNotificationsRoute: DashboardNotificationsRouteWithChildren,
-  DashboardSettingsRoute: DashboardSettingsRoute,
-  DashboardShipmentsRoute: DashboardShipmentsRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
-
-interface ShippingRouteChildren {
-  ShippingCheckoutTransactionIdRoute: typeof ShippingCheckoutTransactionIdRoute
-}
-
-const ShippingRouteChildren: ShippingRouteChildren = {
-  ShippingCheckoutTransactionIdRoute: ShippingCheckoutTransactionIdRoute,
-}
-
-const ShippingRouteWithChildren = ShippingRoute._addFileChildren(
-  ShippingRouteChildren,
+const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
+  ResourcesRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -952,7 +982,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   CourierRoute: CourierRoute,
   CustomsRoute: CustomsRoute,
-  DashboardRoute: DashboardRouteWithChildren,
   LocationsRoute: LocationsRoute,
   LoginRoute: LoginRoute,
   PickupRoute: PickupRoute,
@@ -960,10 +989,12 @@ const rootRouteChildren: RootRouteChildren = {
   RatesRoute: RatesRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  ResourcesRoute: ResourcesRoute,
-  ShippingRoute: ShippingRouteWithChildren,
+  ResourcesRoute: ResourcesRouteWithChildren,
+  ShippingRoute: ShippingRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  InvoiceTrackingIdRoute: InvoiceTrackingIdRoute,
+  PayCaseIdRoute: PayCaseIdRoute,
   TrackingTrackingIdRoute: TrackingTrackingIdRoute,
   TrackingIndexRoute: TrackingIndexRoute,
 }

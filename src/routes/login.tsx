@@ -16,7 +16,10 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Log in — SwiftArc" },
-      { name: "description", content: "Access your SwiftArc account to ship, track, and manage business shipments." },
+      {
+        name: "description",
+        content: "Access your SwiftArc account to ship, track, and manage business shipments.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -39,13 +42,21 @@ function Login() {
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back");
-    nav({ to: (redirect as "/" | undefined) ?? "/dashboard" });
+    nav({ to: (redirect as "/" | undefined) ?? "/admin/shipments" });
   };
 
   const google = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin }
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) toast.error(error.message);
+  };
+
+  const apple = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: window.location.origin },
     });
     if (error) toast.error(error.message);
   };
@@ -63,10 +74,16 @@ function Login() {
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-24 lg:px-8">
       <div className="hidden lg:block">
         <Logo />
-        <h1 className="mt-8 font-display text-5xl font-bold tracking-tight">Welcome back to the arc.</h1>
-        <p className="mt-4 text-muted-foreground">Access your dashboards, shipments, and business tools.</p>
+        <h1 className="mt-8 font-display text-5xl font-bold tracking-tight">
+          Welcome back to the arc.
+        </h1>
+        <p className="mt-4 text-muted-foreground">
+          Access your dashboards, shipments, and business tools.
+        </p>
         <div className="mt-10 rounded-2xl border border-border bg-navy-deep p-8 text-cream">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Live from the network</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber">
+            Live from the network
+          </p>
           <p className="mt-3 font-display text-2xl">99.4% on-time delivery this quarter.</p>
           <p className="mt-2 text-sm text-cream/70">Across 15M daily parcels and 220+ countries.</p>
         </div>
@@ -76,30 +93,41 @@ function Login() {
         <h2 className="font-display text-3xl font-bold tracking-tight">Log in</h2>
         <p className="mt-1 text-sm text-muted-foreground">Enter your email and password.</p>
 
-        <div className="mt-5">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <Button type="button" variant="outline" className="h-11 w-full" onClick={google}>
             Continue with Google
           </Button>
+          <Button type="button" variant="outline" className="h-11 w-full" onClick={apple}>
+            Continue with Apple
+          </Button>
         </div>
         <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> or with email <span className="h-px flex-1 bg-border" />
+          <span className="h-px flex-1 bg-border" /> or with email{" "}
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <div className="grid gap-4">
           <div>
             <Label>Email</Label>
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 h-11" autoComplete="email" />
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1.5 h-11"
+              autoComplete="email"
+            />
           </div>
           <div>
             <Label>Password</Label>
             <div className="relative mt-1.5">
-              <Input 
-                type={showPassword ? "text" : "password"} 
-                required 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                className="h-11 pr-10" 
-                autoComplete="current-password" 
+              <Input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 pr-10"
+                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -113,19 +141,33 @@ function Login() {
           </div>
         </div>
 
-        <Button disabled={busy} type="submit" className="mt-6 h-11 w-full bg-navy-deep text-cream hover:bg-navy">
+        <Button
+          disabled={busy}
+          type="submit"
+          className="mt-6 h-11 w-full bg-navy-deep text-cream hover:bg-navy"
+        >
           {busy ? "Signing in…" : "Log in"}
         </Button>
 
         <div className="mt-4 flex items-center justify-between text-sm">
           <details className="group">
-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">Forgot password?</summary>
+            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+              Forgot password?
+            </summary>
             <div className="mt-2 flex gap-2">
-              <Input placeholder="you@company.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
-              <Button type="button" variant="outline" onClick={sendReset}>Send</Button>
+              <Input
+                placeholder="you@company.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+              <Button type="button" variant="outline" onClick={sendReset}>
+                Send
+              </Button>
             </div>
           </details>
-          <Link to="/register" className="font-medium text-navy-deep underline">Open account</Link>
+          <Link to="/register" className="font-medium text-navy-deep underline">
+            Open account
+          </Link>
         </div>
       </form>
     </div>

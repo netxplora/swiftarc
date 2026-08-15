@@ -48,12 +48,19 @@ export function ChatWidget() {
       .channel(`chat-${convo.data.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages", filter: `conversation_id=eq.${convo.data.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `conversation_id=eq.${convo.data.id}`,
+        },
         () => qc.invalidateQueries({ queryKey: ["chat", "msgs", convo.data!.id] }),
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [convo.data?.id, qc]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [convo.data, qc]);
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -109,10 +116,16 @@ export function ChatWidget() {
             {!signedIn ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
                 <MessageCircle className="h-10 w-10 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">Sign in to chat with the SwiftArc support team.</p>
+                <p className="text-sm text-muted-foreground">
+                  Sign in to chat with the SwiftArc support team.
+                </p>
                 <div className="flex gap-2">
-                  <Button size="sm" asChild><Link to="/login">Log in</Link></Button>
-                  <Button size="sm" variant="outline" asChild><Link to="/register">Sign up</Link></Button>
+                  <Button size="sm" asChild>
+                    <Link to="/login">Log in</Link>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/register">Sign up</Link>
+                  </Button>
                 </div>
               </div>
             ) : (

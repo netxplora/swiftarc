@@ -3,7 +3,12 @@ import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { PhoneCall, Mail, MessageSquare, HelpCircle, Search, CheckCircle2 } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -11,7 +16,11 @@ export const Route = createFileRoute("/support")({
   head: () => ({
     meta: [
       { title: "Support — SwiftArc" },
-      { name: "description", content: "Help center, FAQs, and 24/7 contact options for SwiftArc shipments and business accounts." },
+      {
+        name: "description",
+        content:
+          "Help center, FAQs, and 24/7 contact options for SwiftArc shipments and business accounts.",
+      },
       { property: "og:title", content: "Support — SwiftArc" },
       { property: "og:description", content: "We're here 24/7 to help move your shipments." },
       { property: "og:url", content: "/support" },
@@ -22,14 +31,46 @@ export const Route = createFileRoute("/support")({
 });
 
 const faqs = [
-  { cat: "Tracking", q: "How do I track a shipment?", a: "Enter your tracking number on the Tracking page. You'll see live status, AI ETA, and a live map." },
-  { cat: "Tracking", q: "What if my package is late?", a: "Our AI ETA flags delays before they happen. You can enable notifications, request a reroute, or open a claim from the tracking page." },
-  { cat: "Delivery", q: "Do you deliver to PO boxes?", a: "Yes — for Standard Ground service in most regions. Priority services require a physical address." },
-  { cat: "Claims", q: "How do I file a claim?", a: "Use the Claim Center in your account dashboard, or contact support with your tracking number." },
-  { cat: "Shipping", q: "Can I schedule a pickup?", a: "Yes — from the homepage Quick Actions, choose Pickup and pick a date and window." },
-  { cat: "Shipping", q: "Is my package insured?", a: "All shipments include standard coverage. SwiftArc CarePlus is available for high-value goods." },
-  { cat: "Account", q: "How do I get volume pricing?", a: "Open a business account and volume tiers apply automatically. Enterprise customers get custom pricing." },
-  { cat: "Account", q: "How do I add teammates?", a: "In Settings → Team, invite by email and assign a role. SSO is available on Enterprise plans." },
+  {
+    cat: "Tracking",
+    q: "How do I track a shipment?",
+    a: "Enter your tracking number on the Tracking page. You'll see live status, AI ETA, and a live map.",
+  },
+  {
+    cat: "Tracking",
+    q: "What if my package is late?",
+    a: "Our AI ETA flags delays before they happen. You can enable notifications, request a reroute, or open a claim from the tracking page.",
+  },
+  {
+    cat: "Delivery",
+    q: "Do you deliver to PO boxes?",
+    a: "Yes — for Standard Ground service in most regions. Priority services require a physical address.",
+  },
+  {
+    cat: "Claims",
+    q: "How do I file a claim?",
+    a: "Use the Claim Center in your account dashboard, or contact support with your tracking number.",
+  },
+  {
+    cat: "Shipping",
+    q: "Can I schedule a pickup?",
+    a: "Yes — from the homepage Quick Actions, choose Pickup and pick a date and window.",
+  },
+  {
+    cat: "Shipping",
+    q: "Is my package insured?",
+    a: "All shipments include standard coverage. SwiftArc CarePlus is available for high-value goods.",
+  },
+  {
+    cat: "Account",
+    q: "How do I get volume pricing?",
+    a: "Open a business account and volume tiers apply automatically. Enterprise customers get custom pricing.",
+  },
+  {
+    cat: "Account",
+    q: "How do I add teammates?",
+    a: "In Settings → Team, invite by email and assign a role. SSO is available on Enterprise plans.",
+  },
 ];
 
 const services = [
@@ -43,9 +84,10 @@ const services = [
 function Support() {
   const [q, setQ] = useState("");
   const filtered = useMemo(
-    () => faqs.filter((f) =>
-      (f.q + " " + f.a + " " + f.cat).toLowerCase().includes(q.toLowerCase().trim()),
-    ),
+    () =>
+      faqs.filter((f) =>
+        (f.q + " " + f.a + " " + f.cat).toLowerCase().includes(q.toLowerCase().trim()),
+      ),
     [q],
   );
 
@@ -73,9 +115,19 @@ function Support() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            { Icon: MessageSquare, t: "Live chat", d: "Median response 42 seconds.", cta: "Open chat" },
+            {
+              Icon: MessageSquare,
+              t: "Live chat",
+              d: "Median response 42 seconds.",
+              cta: "Open chat",
+            },
             { Icon: PhoneCall, t: "Call us", d: "24/7 in 18 languages.", cta: "See numbers" },
-            { Icon: Mail, t: "Email", d: "Reply within 4 hours, always.", cta: "support@swiftarc.example" },
+            {
+              Icon: Mail,
+              t: "Email",
+              d: "Reply within 4 hours, always.",
+              cta: "support@swiftarc.example",
+            },
           ].map((c, i) => (
             <motion.div
               key={c.t}
@@ -88,7 +140,11 @@ function Support() {
               <c.Icon className="h-5 w-5 text-amber transition-transform duration-300 group-hover:scale-110" />
               <h3 className="mt-3 font-display text-lg">{c.t}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{c.d}</p>
-              <Button asChild variant="link" className="mt-2 px-0 text-navy-deep group-hover:text-amber transition-colors">
+              <Button
+                asChild
+                variant="link"
+                className="mt-2 px-0 text-navy-deep group-hover:text-amber transition-colors"
+              >
                 <Link to="/contact">{c.cta} →</Link>
               </Button>
             </motion.div>
@@ -102,19 +158,31 @@ function Support() {
             </h2>
             {filtered.length === 0 ? (
               <p className="mt-6 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
-                No answers found. Try different keywords or <Link to="/contact" className="text-navy-deep underline">contact support</Link>.
+                No answers found. Try different keywords or{" "}
+                <Link to="/contact" className="text-navy-deep underline">
+                  contact support
+                </Link>
+                .
               </p>
             ) : (
-              <Accordion type="single" collapsible className="mt-6 divide-y divide-border rounded-2xl border border-border bg-card">
+              <Accordion
+                type="single"
+                collapsible
+                className="mt-6 divide-y divide-border rounded-2xl border border-border bg-card"
+              >
                 {filtered.map((f, i) => (
                   <AccordionItem key={i} value={`f-${i}`} className="border-none px-6">
                     <AccordionTrigger className="text-left text-base font-semibold">
                       <span>
-                        <span className="mr-2 inline-block rounded-full bg-secondary px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{f.cat}</span>
+                        <span className="mr-2 inline-block rounded-full bg-secondary px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          {f.cat}
+                        </span>
                         {f.q}
                       </span>
                     </AccordionTrigger>
-                    <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
+                    <AccordionContent className="text-sm text-muted-foreground">
+                      {f.a}
+                    </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
@@ -124,7 +192,9 @@ function Support() {
           <aside className="rounded-2xl border border-border bg-card p-6">
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg">Network status</h3>
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Live</span>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Live
+              </span>
             </div>
             <ul className="mt-4 divide-y divide-border">
               {services.map((s) => (
@@ -143,7 +213,8 @@ function Support() {
               ))}
             </ul>
             <p className="mt-4 text-xs text-muted-foreground">
-              Overall: mostly operational · updated {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              Overall: mostly operational · updated{" "}
+              {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </p>
           </aside>
         </div>

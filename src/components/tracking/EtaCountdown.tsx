@@ -16,7 +16,7 @@ export function EtaCountdown({ iso }: { iso: string }) {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
-  
+
   if (now === null) {
     return (
       <div className="grid grid-cols-4 gap-2">
@@ -52,7 +52,9 @@ export function EtaCountdown({ iso }: { iso: string }) {
           <div className="font-display text-2xl font-bold tabular-nums text-navy-deep sm:text-3xl">
             {String(c.v).padStart(2, "0")}
           </div>
-          <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">{c.l}</div>
+          <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+            {c.l}
+          </div>
         </div>
       ))}
     </div>

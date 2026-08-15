@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { Copy, Mail, QrCode, Link as LinkIcon, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +15,7 @@ import { Input } from "@/components/ui/input";
 export function ShareDialog({ trackingNumber }: { trackingNumber: string }) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState(`/tracking/${trackingNumber}`);
-  
+
   useEffect(() => {
     setUrl(`${window.location.origin}/tracking/${trackingNumber}`);
   }, [trackingNumber]);
@@ -42,7 +47,11 @@ export function ShareDialog({ trackingNumber }: { trackingNumber: string }) {
         <div className="mt-2 flex items-center gap-2">
           <div className="flex flex-1 items-center gap-2 rounded-md border border-border bg-secondary/50 px-3 py-2 text-sm">
             <LinkIcon className="h-4 w-4 text-muted-foreground" />
-            <Input readOnly value={url} className="h-auto border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0" />
+            <Input
+              readOnly
+              value={url}
+              className="h-auto border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+            />
           </div>
           <Button size="sm" onClick={copy}>
             <Copy className="mr-1 h-4 w-4" /> Copy
@@ -58,7 +67,9 @@ export function ShareDialog({ trackingNumber }: { trackingNumber: string }) {
               <QrCode className="h-3.5 w-3.5" /> Scan to open on mobile
             </p>
             <Button variant="outline" size="sm" className="w-full" asChild>
-              <a href={`mailto:?subject=Track%20SwiftArc%20shipment%20${trackingNumber}&body=Follow%20live%20progress%3A%20${encodeURIComponent(url)}`}>
+              <a
+                href={`mailto:?subject=Track%20SwiftArc%20shipment%20${trackingNumber}&body=Follow%20live%20progress%3A%20${encodeURIComponent(url)}`}
+              >
                 <Mail className="mr-1 h-4 w-4" /> Email link
               </a>
             </Button>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, LocateFixed, Loader2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,8 @@ interface Props {
   onChange: (patch: Partial<LocationData>) => void;
   role: "sender" | "receiver";
   addresses?: any[];
+  savedAddresses?: any[];
+  onSaveAddress?: (a: any) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -74,7 +77,15 @@ const reverseGeocode = async (lat: number, lng: number): Promise<NominatimResult
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function LocationPicker({ value, onChange, role, addresses = [] }: Props) {
+export function LocationPicker({
+  value,
+  onChange,
+  role,
+  addresses: addressesProp = [],
+  savedAddresses = [],
+  onSaveAddress,
+}: Props) {
+  const addresses = savedAddresses.length > 0 ? savedAddresses : addressesProp;
   const [mods, setMods] = useState<null | typeof import("react-leaflet")>(null);
   const [L, setL] = useState<null | typeof import("leaflet")>(null);
   const [query, setQuery] = useState("");
@@ -94,7 +105,9 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
         setL(leaflet);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Close results when clicking outside
@@ -131,35 +144,52 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
     }, 350);
   }, []);
 
-  // Apply a Nominatim result to form fields
-  const applyResult = useCallback((r: NominatimResult) => {
-    const a = r.address;
-    onChange({
-      line1: a.road ? `${a.house_number || ""} ${a.road}`.trim() : value.line1,
-      city: a.city || a.town || a.village || "",
-      region: a.state || a.county || "",
-      postal_code: a.postcode || "",
-      country_code: (a.country_code || "").toUpperCase(),
-      lat: parseFloat(r.lat),
-      lng: parseFloat(r.lon),
-    });
-    setQuery(r.display_name.slice(0, 60));
-    setShowResults(false);
-  }, [onChange, value.line1]);
+  // Apply a Nominatim result to form fields — also updates line1 and syncs search box
+  const applyResult = useCallback(
+    (r: NominatimResult) => {
+      const a = r.address;
+      const street = a.road ? `${a.house_number || ""} ${a.road}`.trim() : "";
+      onChange({
+        line1: street,
+        city: a.city || a.town || a.village || "",
+        region: a.state || a.county || "",
+        postal_code: a.postcode || "",
+        country_code: (a.country_code || "").toUpperCase(),
+        lat: parseFloat(r.lat),
+        lng: parseFloat(r.lon),
+      });
+      // Show the street in the search box, or fall back to full display name
+      setQuery(street || r.display_name.slice(0, 60));
+      setShowResults(false);
+    },
+    [onChange],
+  );
 
   // Use GPS
   const useMyLocation = () => {
     if (!navigator.geolocation) return toast.error("Geolocation not supported by your browser.");
     setLocating(true);
+    // 1. Privacy notice as requested
+    toast.info("Using location to identify pickup location and postal code...", { duration: 3000 });
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const data = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const accuracy = Math.round(pos.coords.accuracy);
+
+          // 2. Warn if accuracy is poor
+          if (accuracy > 100) {
+            toast.warning(`Low accuracy detected (±${accuracy}m). Please verify the address.`);
+          }
+
+          const data = await reverseGeocode(lat, lng);
           if (data) {
             applyResult(data);
-            toast.success("Location applied.");
+            toast.success(`Location detected (Accuracy: ±${accuracy}m).`);
           } else {
-            toast.error("Could not determine address.");
+            toast.error("Could not determine address. Try manual entry.");
           }
         } catch {
           toast.error("Failed to reverse-geocode your location.");
@@ -167,25 +197,32 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
           setLocating(false);
         }
       },
-      () => {
-        toast.error("Location access denied.");
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+           toast.error("Location permission denied. Please enter address manually.");
+        } else {
+           toast.error("Unable to determine location. Try again or enter manually.");
+        }
         setLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   };
 
   // Handle map click → reverse geocode
-  const handleMapClick = useCallback(async (lat: number, lng: number) => {
-    try {
-      const data = await reverseGeocode(lat, lng);
-      if (data) {
-        applyResult(data);
+  const handleMapClick = useCallback(
+    async (lat: number, lng: number) => {
+      try {
+        const data = await reverseGeocode(lat, lng);
+        if (data) {
+          applyResult(data);
+        }
+      } catch {
+        /* silent */
       }
-    } catch {
-      /* silent */
-    }
-  }, [applyResult]);
+    },
+    [applyResult],
+  );
 
   const hasCoords = value.lat !== null && value.lng !== null;
 
@@ -196,7 +233,7 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
         <h3 className="font-display text-lg">
           {role === "sender" ? "Sender information" : "Receiver information"}
         </h3>
-        
+
         {addresses.length > 0 && (
           <select
             className="h-9 max-w-[200px] truncate rounded-md border border-input bg-background px-2 text-sm sm:max-w-[250px]"
@@ -220,10 +257,13 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
             }}
             value=""
           >
-            <option value="" disabled>Load from address book…</option>
+            <option value="" disabled>
+              Load from address book…
+            </option>
             {addresses.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.label} — {a.city} {a[role === "sender" ? "is_default_sender" : "is_default_recipient"] ? "★" : ""}
+                {a.label} — {a.city}{" "}
+                {a[role === "sender" ? "is_default_sender" : "is_default_recipient"] ? "★" : ""}
               </option>
             ))}
           </select>
@@ -231,34 +271,70 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label={role === "sender" ? "Sender name" : "Receiver name"} v={value.contact_name} on={(x) => onChange({ contact_name: x })} required autoComplete="name" />
-        <Field label="Phone number" v={value.phone} on={(x) => onChange({ phone: x })} type="tel" inputMode="tel" autoComplete="tel" />
-        <Field label="Email address" v={value.email} on={(x) => onChange({ email: x })} type="email" inputMode="email" autoComplete="email" wide />
+        <Field
+          label={role === "sender" ? "Sender name" : "Receiver name"}
+          v={value.contact_name}
+          on={(x) => onChange({ contact_name: x })}
+          required
+          autoComplete="name"
+        />
+        <Field
+          label="Phone number"
+          v={value.phone}
+          on={(x) => onChange({ phone: x })}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+        />
+        <Field
+          label="Email address"
+          v={value.email}
+          on={(x) => onChange({ email: x })}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          wide
+        />
       </div>
 
-      {/* Address search */}
+      {/* Address search — doubles as the pickup / delivery address field */}
       <div className="relative" ref={resultsRef}>
-        <Label className="text-xs uppercase tracking-widest text-muted-foreground">Search address</Label>
+        <Label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {role === "sender" ? "Pickup address" : "Delivery address"}{" "}
+          <span className="text-amber">*</span>
+        </Label>
         <div className="relative mt-1.5">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
-            value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Type an address, landmark, or place…"
-            className="pl-9 pr-24"
+            value={query || value.line1}
+            onChange={(e) => {
+              const val = e.target.value;
+              setQuery(val);
+              // Keep line1 in sync with manual typing
+              onChange({ line1: val });
+              // Trigger autocomplete
+              handleSearch(val);
+            }}
+            placeholder="Search or type a street address…"
+            className="pl-9 pr-24 h-11 sm:h-10 rounded-xl border-border focus:ring-2 focus:ring-amber/30 focus:border-amber/50 transition"
             onFocus={() => results.length > 0 && setShowResults(true)}
+            required
           />
           <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 gap-1">
             {searching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
             <Button
-              type="button" variant="ghost" size="sm"
+              type="button"
+              variant="ghost"
+              size="sm"
               className="h-7 px-2 text-xs"
               onClick={useMyLocation}
               disabled={locating}
             >
-              {locating
-                ? <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                : <LocateFixed className="mr-1 h-3 w-3 text-amber" />}
+              {locating ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <LocateFixed className="mr-1 h-3 w-3 text-amber" />
+              )}
               GPS
             </Button>
           </div>
@@ -282,24 +358,22 @@ export function LocationPicker({ value, onChange, role, addresses = [] }: Props)
         )}
       </div>
 
-      {/* Address detail fields */}
+      {/* Address detail fields — line1 is now captured by the search field above */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Country (ISO-2)" v={value.country_code} on={(x) => onChange({ country_code: x.toUpperCase().slice(0, 2) })} required />
+        <Field
+          label="Country (ISO-2)"
+          v={value.country_code}
+          on={(x) => onChange({ country_code: x.toUpperCase().slice(0, 2) })}
+          required
+        />
         <Field label="State / Province" v={value.region} on={(x) => onChange({ region: x })} />
         <Field label="City" v={value.city} on={(x) => onChange({ city: x })} required />
         <Field label="Postal code" v={value.postal_code} on={(x) => onChange({ postal_code: x })} />
-        <Field label={role === "sender" ? "Pickup address" : "Delivery address"} v={value.line1} on={(x) => onChange({ line1: x })} required wide />
       </div>
 
       {/* Interactive map */}
       <div className="overflow-hidden rounded-xl border border-border">
-        <LeafletMap
-          mods={mods}
-          L={L}
-          lat={value.lat}
-          lng={value.lng}
-          onMapClick={handleMapClick}
-        />
+        <LeafletMap mods={mods} L={L} lat={value.lat} lng={value.lng} onMapClick={handleMapClick} />
       </div>
 
       {hasCoords && (
@@ -361,7 +435,12 @@ function LeafletMap({
   }
 
   return (
-    <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} style={{ height: 220, width: "100%", zIndex: 1 }}>
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      scrollWheelZoom={false}
+      style={{ height: 220, width: "100%", zIndex: 1 }}
+    >
       <TileLayer
         attribution='&copy; <a href="https://carto.com/">Carto</a>'
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -382,10 +461,21 @@ function LeafletMap({
 /* ------------------------------------------------------------------ */
 
 function Field({
-  label, v, on, required, type = "text", wide, inputMode, autoComplete,
+  label,
+  v,
+  on,
+  required,
+  type = "text",
+  wide,
+  inputMode,
+  autoComplete,
 }: {
-  label: string; v: string; on: (x: string) => void;
-  required?: boolean; type?: string; wide?: boolean;
+  label: string;
+  v: string;
+  on: (x: string) => void;
+  required?: boolean;
+  type?: string;
+  wide?: boolean;
   inputMode?: "tel" | "email" | "text" | "numeric";
   autoComplete?: string;
 }) {

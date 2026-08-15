@@ -24,7 +24,10 @@ interface OsrmRoute {
 /* ------------------------------------------------------------------ */
 
 async function fetchRoute(
-  oLat: number, oLng: number, dLat: number, dLng: number,
+  oLat: number,
+  oLng: number,
+  dLat: number,
+  dLng: number,
 ): Promise<OsrmRoute | null> {
   const url = `https://router.project-osrm.org/route/v1/driving/${oLng},${oLat};${dLng},${dLat}?overview=full&geometries=polyline`;
   const res = await fetch(url);
@@ -80,9 +83,14 @@ export function RoutePreview({ origin, destination, height = 300 }: Props) {
   useEffect(() => {
     let cancelled = false;
     Promise.all([import("react-leaflet"), import("leaflet")]).then(([m, leaflet]) => {
-      if (!cancelled) { setMods(m); setL(leaflet); }
+      if (!cancelled) {
+        setMods(m);
+        setL(leaflet);
+      }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Fetch route with react-query caching
@@ -94,7 +102,13 @@ export function RoutePreview({ origin, destination, height = 300 }: Props) {
   });
 
   if (!mods || !L) {
-    return <div style={{ height }} className="w-full animate-pulse rounded-2xl bg-secondary" aria-hidden />;
+    return (
+      <div
+        style={{ height }}
+        className="w-full animate-pulse rounded-2xl bg-secondary"
+        aria-hidden
+      />
+    );
   }
 
   const { MapContainer, TileLayer, Polyline, Marker, Tooltip, useMap } = mods;
@@ -138,7 +152,12 @@ export function RoutePreview({ origin, destination, height = 300 }: Props) {
   return (
     <div className="space-y-3">
       <div className="overflow-hidden rounded-2xl border border-border" style={{ height }}>
-        <MapContainer center={center} zoom={6} scrollWheelZoom={false} style={{ height: "100%", width: "100%", zIndex: 1 }}>
+        <MapContainer
+          center={center}
+          zoom={6}
+          scrollWheelZoom={false}
+          style={{ height: "100%", width: "100%", zIndex: 1 }}
+        >
           <TileLayer
             attribution='&copy; <a href="https://carto.com/">Carto</a>'
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -151,10 +170,14 @@ export function RoutePreview({ origin, destination, height = 300 }: Props) {
             />
           )}
           <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
-            <Tooltip direction="bottom" offset={[0, 6]} opacity={1}>Pickup</Tooltip>
+            <Tooltip direction="bottom" offset={[0, 6]} opacity={1}>
+              Pickup
+            </Tooltip>
           </Marker>
           <Marker position={[destination.lat, destination.lng]} icon={destIcon}>
-            <Tooltip direction="bottom" offset={[0, 6]} opacity={1}>Delivery</Tooltip>
+            <Tooltip direction="bottom" offset={[0, 6]} opacity={1}>
+              Delivery
+            </Tooltip>
           </Marker>
         </MapContainer>
       </div>
@@ -171,11 +194,14 @@ export function RoutePreview({ origin, destination, height = 300 }: Props) {
             <span className="font-semibold">{distKm} km</span>
             <span className="mx-2 text-muted-foreground">·</span>
             <span className="text-muted-foreground">
-              Est. drive {durHrs > 0 ? `${durHrs}h ` : ""}{durMin}min
+              Est. drive {durHrs > 0 ? `${durHrs}h ` : ""}
+              {durMin}min
             </span>
           </div>
         ) : (
-          <span className="text-sm text-muted-foreground">Route unavailable for these locations.</span>
+          <span className="text-sm text-muted-foreground">
+            Route unavailable for these locations.
+          </span>
         )}
       </div>
     </div>

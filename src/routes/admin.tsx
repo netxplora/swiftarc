@@ -1,29 +1,17 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
-import { AdminSkeleton } from "@/components/skeletons/AdminSkeleton";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
-  beforeLoad: async ({ location }) => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) {
-      throw redirect({ to: "/login", search: { redirect: location.pathname } });
-    }
-    return { user: data.user };
-  },
   head: () => ({
-    meta: [
-      { title: "Admin — SwiftArc" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Admin — SwiftArc" }, { name: "robots", content: "noindex" }],
   }),
-  pendingComponent: AdminSkeleton,
-  pendingMs: 150,
   component: AdminLayout,
 });
 
@@ -35,9 +23,19 @@ function AdminLayout() {
           <DashboardSidebar />
           <SidebarInset className="flex flex-col flex-1 min-w-0">
             <DashboardHeader />
-            <div className="flex-1 w-full p-4 sm:p-6 lg:p-8">
+            <div className="flex-1 w-full p-4 sm:p-6 lg:p-8 relative">
               <div className="mx-auto w-full max-w-7xl">
-                <Outlet />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={useRouterState({ select: (s) => s.location.pathname })}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                  >
+                    <Outlet />
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </SidebarInset>

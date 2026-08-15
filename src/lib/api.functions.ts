@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -10,13 +11,38 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock", {
 
 // Sanitize DB errors before returning to the client. Raw Supabase/Postgres
 // error messages leak schema, constraint, and column names.
-function dbFail(error: any, message = "Operation failed. Please try again."): never {
-  // eslint-disable-next-line no-console
+export function dbFail(error: any, message = "Operation failed. Please try again."): never {
   console.error("[db error]", error);
   const errMsg = error?.message || error?.details || JSON.stringify(error);
   throw new Error(`${message} (Details: ${errMsg})`);
 }
 
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 500,
+): Promise<T> {
+  let lastError;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (err: any) {
+      lastError = err;
+      if (err.statusCode >= 400 && err.statusCode < 500 && err.statusCode !== 429) {
+        // Don't retry client errors unless it's a rate limit (429)
+        throw err;
+      }
+      if (attempt < maxRetries - 1) {
+        const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
+        console.warn(
+          `[Circuit Breaker] API call failed, retrying in ${Math.round(delay)}ms (Attempt ${attempt + 1}/${maxRetries})`,
+        );
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+  }
+  throw lastError;
+}
 
 // ---------- Shipments (user-owned) ----------
 export const listMyShipments = createServerFn({ method: "GET" })
@@ -24,13 +50,16 @@ export const listMyShipments = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("shipments")
-      .select("id, tracking_number, status, service, origin, destination, package, estimated_delivery, created_at, updated_at, is_hazmat, volumetric_weight")
+      .select(
+        "id, tracking_number, status, service, origin, destination, package, estimated_delivery, created_at, updated_at, is_hazmat, volumetric_weight, customs_holds(*)",
+      )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) dbFail(error);
     return (data ?? []).map((r: any) => {
-      const o = r.origin ?? {}; const d = r.destination ?? {};
+      const o = r.origin ?? {};
+      const d = r.destination ?? {};
       const status = (r.status as ShipmentStatus) ?? "label_created";
       return {
         id: r.id,
@@ -41,8 +70,18 @@ export const listMyShipments = createServerFn({ method: "GET" })
         origin: `${o.city ?? ""}, ${o.country_code ?? o.country ?? ""}`.replace(/^, /, ""),
         destination: `${d.city ?? ""}, ${d.country_code ?? d.country ?? ""}`.replace(/^, /, ""),
         recipient: d.contact_name ?? "",
-        estimatedDelivery: r.estimated_delivery ?? new Date(Date.now() + 3 * 86400_000).toISOString().slice(0,10),
-        progress: status === "delivered" ? 100 : status === "out_for_delivery" ? 88 : status === "in_transit" ? 55 : status === "picked_up" ? 25 : 8,
+        estimatedDelivery:
+          r.estimated_delivery ?? new Date(Date.now() + 3 * 86400_000).toISOString().slice(0, 10),
+        progress:
+          status === "delivered"
+            ? 100
+            : status === "out_for_delivery"
+              ? 88
+              : status === "in_transit"
+                ? 55
+                : status === "picked_up"
+                  ? 25
+                  : 8,
         onTimeConfidence: 96,
         lastUpdate: r.updated_at,
         createdAt: r.created_at,
@@ -53,6 +92,7 @@ export const listMyShipments = createServerFn({ method: "GET" })
         destination_raw: d,
         is_hazmat: r.is_hazmat,
         volumetric_weight: r.volumetric_weight,
+        customsHolds: r.customs_holds || [],
       };
     });
   });
@@ -64,29 +104,55 @@ export const resolveTracking = createServerFn({ method: "POST" })
   .validator((i) => z.object({ trackingNumber: z.string().min(4).max(64) }).parse(i))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const query = supabaseAdmin
+
+    // Core columns guaranteed to exist in all environments
+    const { data: ship, error: shipError } = await supabaseAdmin
       .from("shipments")
-      .select("id, tracking_number, status, service, origin, destination, package, estimated_delivery, declared_value, insurance, signature_required, notes, created_at, proof_of_delivery, telemetry");
-    
-    const { data: ship } = await (query as any)
+      .select(
+        "id, tracking_number, status, service, origin, destination, package, estimated_delivery, declared_value, insurance, signature_required, notes, created_at, proof_of_delivery, telemetry, ai_delay_risk, ai_delay_reason",
+      )
       .eq("tracking_number", data.trackingNumber)
       .maybeSingle();
+
+    if (shipError) {
+      console.error("[resolveTracking] DB error:", shipError.message);
+      return { kind: "none" as const };
+    }
     if (!ship) return { kind: "none" as const };
+
+    // Try fetching the newer GPS/fee columns added by migration — gracefully fail if not yet applied
+    let extendedData: any = {};
+    try {
+      const { data: ext } = await (supabaseAdmin as any)
+        .from("shipments")
+        .select("sender_info, receiver_info, distance_km, estimated_travel_time, shipping_fee")
+        .eq("id", ship.id)
+        .maybeSingle();
+      if (ext) extendedData = ext;
+    } catch {
+      // Migration not yet applied — new columns don't exist yet, that's okay
+    }
+
     const { data: events } = await supabaseAdmin
       .from("shipment_events")
       .select("id, status, description, location, occurred_at")
       .eq("shipment_id", ship.id)
       .order("occurred_at", { ascending: false });
     const evts = events ?? [];
-    const trim = (a: any) => a ? { city: a.city, country_code: a.country_code, region: a.region } : null;
 
     // AI Heuristics Engine (Phase 8 integration)
     const { evaluateShipmentRisk } = await import("./ai-predictions");
     const aiPrediction = await evaluateShipmentRisk({
       ...ship,
       telemetry: ship.telemetry,
-      proofOfDelivery: ship.proof_of_delivery
+      proofOfDelivery: ship.proof_of_delivery,
     });
+
+    const { data: customsHolds } = await supabaseAdmin
+      .from("customs_holds")
+      .select("*")
+      .eq("shipment_id", ship.id)
+      .order("hold_date", { ascending: false });
 
     return {
       kind: "db" as const,
@@ -95,18 +161,24 @@ export const resolveTracking = createServerFn({ method: "POST" })
         trackingNumber: ship.tracking_number,
         status: ship.status,
         service: ship.service,
-        origin: trim(ship.origin),
-        destination: trim(ship.destination),
+        origin: ship.origin,
+        destination: ship.destination,
         package: ship.package,
         estimatedDelivery: aiPrediction.adjustedEstimatedDelivery,
         declaredValue: Number(ship.declared_value ?? 0),
         insurance: ship.insurance,
         signatureRequired: ship.signature_required,
         createdAt: ship.created_at,
-        onTimeConfidence: aiPrediction.onTimeConfidence,
-        aiNote: aiPrediction.aiNote,
+        aiDelayRisk: ship.ai_delay_risk ?? aiPrediction.ai_delay_risk,
+        aiDelayReason: ship.ai_delay_reason ?? aiPrediction.ai_delay_reason,
         proof_of_delivery: ship.proof_of_delivery,
         telemetry: ship.telemetry,
+        customsHolds: customsHolds ?? [],
+        senderInfo: extendedData.sender_info ?? null,
+        receiverInfo: extendedData.receiver_info ?? null,
+        distanceKm: extendedData.distance_km ?? null,
+        estimatedTravelTime: extendedData.estimated_travel_time ?? null,
+        shippingFee: extendedData.shipping_fee ?? null,
       },
       events: evts,
     };
@@ -133,7 +205,10 @@ export const updateProfile = createServerFn({ method: "POST" })
     const updates: { display_name?: string } = {};
     if (data.display_name !== undefined) updates.display_name = data.display_name;
     if (Object.keys(updates).length === 0) return { ok: true };
-    const { error } = await context.supabase.from("profiles").update(updates).eq("id", context.userId);
+    const { error } = await context.supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", context.userId);
     if (error) dbFail(error);
     return { ok: true };
   });
@@ -143,19 +218,25 @@ export const updateTheme = createServerFn({ method: "POST" })
   .validator((i) => z.object({ theme: z.enum(["light", "dark", "system"]) }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
-      .from("profiles").update({ theme: data.theme }).eq("id", context.userId);
+      .from("profiles")
+      .update({ theme: data.theme })
+      .eq("id", context.userId);
     if (error) dbFail(error);
     return { ok: true };
   });
 
 export const updateNotifPrefs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({
-    notif_email: z.boolean().optional(),
-    notif_sms: z.boolean().optional(),
-    notif_push: z.boolean().optional(),
-    notif_marketing: z.boolean().optional(),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        notif_email: z.boolean().optional(),
+        notif_sms: z.boolean().optional(),
+        notif_push: z.boolean().optional(),
+        notif_marketing: z.boolean().optional(),
+      })
+      .parse(i),
+  )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("profiles").update(data).eq("id", context.userId);
     if (error) dbFail(error);
@@ -182,8 +263,10 @@ export const markNotificationRead = createServerFn({ method: "POST" })
   .validator((i) => z.object({ id: z.string().uuid(), read: z.boolean().default(true) }).parse(i))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
-      .from("notifications").update({ read: data.read })
-      .eq("id", data.id).eq("user_id", context.userId);
+      .from("notifications")
+      .update({ read: data.read })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
     if (error) dbFail(error);
     return { ok: true };
   });
@@ -192,8 +275,10 @@ export const markAllNotificationsRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { error } = await context.supabase
-      .from("notifications").update({ read: true })
-      .eq("user_id", context.userId).eq("read", false);
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", context.userId)
+      .eq("read", false);
     if (error) dbFail(error);
     return { ok: true };
   });
@@ -221,7 +306,10 @@ export const listAddresses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("addresses").select("*").eq("user_id", context.userId).order("updated_at", { ascending: false });
+      .from("addresses")
+      .select("*")
+      .eq("user_id", context.userId)
+      .order("updated_at", { ascending: false });
     if (error) dbFail(error);
     return data ?? [];
   });
@@ -232,7 +320,11 @@ export const upsertAddress = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const payload = { ...data, user_id: context.userId } as any;
     if (data.id) {
-      const { error } = await context.supabase.from("addresses").update(payload).eq("id", data.id).eq("user_id", context.userId);
+      const { error } = await context.supabase
+        .from("addresses")
+        .update(payload)
+        .eq("id", data.id)
+        .eq("user_id", context.userId);
       if (error) dbFail(error);
     } else {
       const { error } = await context.supabase.from("addresses").insert(payload);
@@ -245,22 +337,42 @@ export const deleteAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("addresses").delete().eq("id", data.id).eq("user_id", context.userId);
+    const { error } = await context.supabase
+      .from("addresses")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
     if (error) dbFail(error);
     return { ok: true };
   });
 
 export const setDefaultAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({ id: z.string().uuid(), role: z.enum(["sender", "recipient"]) }).parse(i))
+  .validator((i) =>
+    z.object({ id: z.string().uuid(), role: z.enum(["sender", "recipient"]) }).parse(i),
+  )
   .handler(async ({ data, context }) => {
     if (data.role === "sender") {
-      await context.supabase.from("addresses").update({ is_default_sender: false }).eq("user_id", context.userId);
-      const { error } = await context.supabase.from("addresses").update({ is_default_sender: true }).eq("id", data.id).eq("user_id", context.userId);
+      await context.supabase
+        .from("addresses")
+        .update({ is_default_sender: false })
+        .eq("user_id", context.userId);
+      const { error } = await context.supabase
+        .from("addresses")
+        .update({ is_default_sender: true })
+        .eq("id", data.id)
+        .eq("user_id", context.userId);
       if (error) dbFail(error);
     } else {
-      await context.supabase.from("addresses").update({ is_default_recipient: false }).eq("user_id", context.userId);
-      const { error } = await context.supabase.from("addresses").update({ is_default_recipient: true }).eq("id", data.id).eq("user_id", context.userId);
+      await context.supabase
+        .from("addresses")
+        .update({ is_default_recipient: false })
+        .eq("user_id", context.userId);
+      const { error } = await context.supabase
+        .from("addresses")
+        .update({ is_default_recipient: true })
+        .eq("id", data.id)
+        .eq("user_id", context.userId);
       if (error) dbFail(error);
     }
     return { ok: true };
@@ -274,7 +386,9 @@ export const getPickupSlots = createServerFn({ method: "POST" })
   .validator((i) => z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(i))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin.rpc("get_pickup_slot_counts", { target_date: data.date });
+    const { data: rows } = await supabaseAdmin.rpc("get_pickup_slot_counts", {
+      target_date: data.date,
+    });
     const CAP = 8;
     const counts = new Map<string, number>();
     (rows ?? []).forEach((r: { slot: string; cnt: number }) => counts.set(r.slot, Number(r.cnt)));
@@ -286,7 +400,9 @@ export const getPickupSlots = createServerFn({ method: "POST" })
       const startHour = parseInt(slot.slice(0, 2), 10);
       const isPast = data.date === today && startHour <= nowH + 1;
       return {
-        slot, capacity: CAP, remaining: Math.max(0, CAP - used),
+        slot,
+        capacity: CAP,
+        remaining: Math.max(0, CAP - used),
         available: !isPast && used < CAP,
         reason: isPast ? "Cutoff passed" : used >= CAP ? "Fully booked" : null,
       };
@@ -295,31 +411,43 @@ export const getPickupSlots = createServerFn({ method: "POST" })
 
 export const createPickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({
-    contact_name: z.string().min(1).max(120),
-    company: z.string().max(120).optional(),
-    address: z.string().min(1).max(200),
-    city: z.string().min(1).max(80),
-    postal_code: z.string().min(1).max(20),
-    instructions: z.string().max(500).optional(),
-    pickup_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    slot: z.enum(SLOTS),
-    package_count: z.number().int().min(1).max(99),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        contact_name: z.string().min(1).max(120),
+        company: z.string().max(120).optional(),
+        address: z.string().min(1).max(200),
+        city: z.string().min(1).max(80),
+        postal_code: z.string().min(1).max(20),
+        instructions: z.string().max(500).optional(),
+        pickup_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        slot: z.enum(SLOTS),
+        package_count: z.number().int().min(1).max(99),
+      })
+      .parse(i),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: counts } = await supabaseAdmin.rpc("get_pickup_slot_counts", { target_date: data.pickup_date });
-    const used = (counts ?? []).find((r: { slot: string; cnt: number }) => r.slot === data.slot)?.cnt ?? 0;
+    const { data: counts } = await supabaseAdmin.rpc("get_pickup_slot_counts", {
+      target_date: data.pickup_date,
+    });
+    const used =
+      (counts ?? []).find((r: { slot: string; cnt: number }) => r.slot === data.slot)?.cnt ?? 0;
     if (Number(used) >= 8) throw new Error("Selected slot is fully booked");
 
     const ref = `PU-${Math.floor(100000 + Math.random() * 900000)}`;
     const { data: row, error } = await context.supabase
-      .from("pickups").insert({ ...data, user_id: context.userId, reference: ref }).select("*").single();
+      .from("pickups")
+      .insert({ ...data, user_id: context.userId, reference: ref })
+      .select("*")
+      .single();
     if (error) dbFail(error);
     await context.supabase.from("notifications").insert({
-      user_id: context.userId, title: "Pickup scheduled",
+      user_id: context.userId,
+      title: "Pickup scheduled",
       body: `${ref} · ${data.pickup_date} · ${data.slot} · ${data.package_count} package(s)`,
-      category: "pickup", tone: "success",
+      category: "pickup",
+      tone: "success",
     });
     return row;
   });
@@ -328,8 +456,11 @@ export const listPickups = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("pickups").select("*").eq("user_id", context.userId)
-      .order("created_at", { ascending: false }).limit(20);
+      .from("pickups")
+      .select("*")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
     if (error) dbFail(error);
     return data ?? [];
   });
@@ -337,88 +468,160 @@ export const listPickups = createServerFn({ method: "GET" })
 // ---------- Shipment booking ----------
 
 export const AddressSnapshot = z.object({
-  contact_name: z.string().min(2).max(100).regex(/^[a-zA-Z\s\-'.]+$/),
-  phone: z.string().max(20).regex(/^\+?[0-9\s\-()]+$/).optional().nullable(),
+  contact_name: z
+    .string()
+    .min(2)
+    .max(100)
+    .regex(/^[a-zA-Z\s\-'.]+$/),
+  phone: z
+    .string()
+    .max(20)
+    .regex(/^\+?[0-9\s\-()]+$/)
+    .optional()
+    .nullable(),
   email: z.string().email().max(120).optional().nullable(),
   line1: z.string().min(5).max(150),
-  city: z.string().min(2).max(80).regex(/^[a-zA-Z\s\-'.]+$/),
+  city: z
+    .string()
+    .min(2)
+    .max(80)
+    .regex(/^[a-zA-Z\s-'.]+$/),
   region: z.string().max(80).optional().nullable(),
-  postal_code: z.string().min(3).max(20).regex(/^[A-Za-z0-9\s\-]+$/),
-  country_code: z.string().length(2).regex(/^[A-Z]+$/),
+  postal_code: z
+    .string()
+    .min(3)
+    .max(20)
+    .regex(/^[A-Za-z0-9\s-]+$/),
+  country_code: z
+    .string()
+    .length(2)
+    .regex(/^[A-Z]+$/),
   lat: z.number().optional().nullable(),
   lng: z.number().optional().nullable(),
 });
 
-export const bookShipment = createServerFn({ method: "POST" })
+export const calculatePricingQuote = createServerFn({ method: "POST" })
+  .validator((i) =>
+    z
+      .object({
+        origin: z.object({
+          lat: z.number().nullable().optional(),
+          lng: z.number().nullable().optional(),
+          city: z.string().optional(),
+        }),
+        destination: z.object({
+          lat: z.number().nullable().optional(),
+          lng: z.number().nullable().optional(),
+          city: z.string().optional(),
+        }),
+        weight_kg: z.number().default(1),
+        length_cm: z.number().optional(),
+        width_cm: z.number().optional(),
+        height_cm: z.number().optional(),
+        pieces: z.number().default(1),
+        vehicle_type: z.enum(["bike", "van", "box_truck", "freight_semi"]).optional(),
+        delivery_type: z
+          .enum(["instant", "scheduled", "express", "overnight", "ground", "freight"])
+          .optional(),
+        declared_value: z.number().default(0),
+        insurance: z.boolean().default(false),
+        signature_required: z.boolean().default(false),
+        is_hazmat: z.boolean().default(false),
+        promo_code: z.string().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    const { computePricingQuote } = await import("./pricing");
+    return computePricingQuote({
+      origin: { lat: data.origin.lat ?? 0, lng: data.origin.lng ?? 0, city: data.origin.city },
+      destination: {
+        lat: data.destination.lat ?? 0,
+        lng: data.destination.lng ?? 0,
+        city: data.destination.city,
+      },
+      weight_kg: data.weight_kg,
+      length_cm: data.length_cm,
+      width_cm: data.width_cm,
+      height_cm: data.height_cm,
+      pieces: data.pieces,
+      vehicle_type: data.vehicle_type,
+      delivery_type: data.delivery_type,
+      declared_value: data.declared_value,
+      insurance: data.insurance,
+      signature_required: data.signature_required,
+      is_hazmat: data.is_hazmat,
+      promo_code: data.promo_code,
+    });
+  });
+
+export const calculateAvailableServices = createServerFn({ method: "POST" })
+  .validator((i) =>
+    z
+      .object({
+        origin: z.object({
+          lat: z.number().nullable().optional(),
+          lng: z.number().nullable().optional(),
+          city: z.string().optional(),
+        }),
+        destination: z.object({
+          lat: z.number().nullable().optional(),
+          lng: z.number().nullable().optional(),
+          city: z.string().optional(),
+        }),
+        weight_kg: z.number().default(1),
+        length_cm: z.number().optional(),
+        width_cm: z.number().optional(),
+        height_cm: z.number().optional(),
+        pieces: z.number().default(1),
+        declared_value: z.number().default(0),
+        insurance: z.boolean().default(false),
+        signature_required: z.boolean().default(false),
+        is_hazmat: z.boolean().default(false),
+        carbon_offset: z.boolean().default(false),
+        promo_code: z.string().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    const { computeAvailableServices } = await import("./pricing");
+    return computeAvailableServices({
+      origin: { lat: data.origin.lat ?? 0, lng: data.origin.lng ?? 0, city: data.origin.city },
+      destination: {
+        lat: data.destination.lat ?? 0,
+        lng: data.destination.lng ?? 0,
+        city: data.destination.city,
+      },
+      weight_kg: data.weight_kg,
+      length_cm: data.length_cm,
+      width_cm: data.width_cm,
+      height_cm: data.height_cm,
+      pieces: data.pieces,
+      declared_value: data.declared_value,
+      insurance: data.insurance,
+      signature_required: data.signature_required,
+      is_hazmat: data.is_hazmat,
+      carbon_offset: data.carbon_offset,
+      promo_code: data.promo_code,
+    });
+  });
+
+export const getShipmentInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({
-    service: z.enum(["Priority Overnight", "Express", "Standard Ground", "Freight LTL"]),
-    origin: AddressSnapshot,
-    destination: AddressSnapshot,
-    package: z.object({
-      weight_kg: z.number().positive().max(1000), // Max 1000kg for standard LTL
-      length_cm: z.number().positive().max(300).optional(),
-      width_cm: z.number().positive().max(300).optional(),
-      height_cm: z.number().positive().max(300).optional(),
-      pieces: z.number().int().min(1).max(50), // Sane max pieces
-      description: z.string().max(1000).optional(),
-    }).refine(p => !p.length_cm || !p.width_cm || !p.height_cm || (p.length_cm * p.width_cm * p.height_cm <= 10_000_000), "Package volume exceeds 10 cubic meters"),
-    declared_value: z.number().nonnegative().max(100_000).default(0), // Max $100k
-    insurance: z.boolean().default(false),
-    signature_required: z.boolean().default(false),
-    is_hazmat: z.boolean().default(false),
-    volumetric_weight: z.number().optional(),
-    notes: z.string().max(2000).optional(),
-  }).parse(i))
+  .validator((i) => z.object({ trackingNumber: z.string().min(4).max(64) }).parse(i))
   .handler(async ({ data, context }) => {
-    // Rate limit: Max 5 bookings per 60 seconds per user
-    const { data: isAllowed, error: rlError } = await context.supabase.rpc("check_rate_limit", {
-      p_user_id: context.userId,
-      p_endpoint: "bookShipment",
-      p_max_requests: 5,
-      p_window_seconds: 60
-    });
-    if (rlError) dbFail(rlError);
-    if (!isAllowed) throw new Error("Rate limit exceeded. Please try again later.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ship, error } = await supabaseAdmin
+      .from("shipments")
+      .select("*")
+      .eq("tracking_number", data.trackingNumber)
+      .eq("user_id", context.userId)
+      .maybeSingle();
 
-    const etaDays = data.service === "Priority Overnight" ? 1 : data.service === "Express" ? 2 : data.service === "Standard Ground" ? 4 : 6;
-    const eta = new Date(Date.now() + etaDays * 86400_000).toISOString().slice(0, 10);
-
-    // Calculate rate server-side
-    const wt = Math.max(1, data.package.weight_kg);
-    let volWt = 0;
-    if (data.package.length_cm && data.package.width_cm && data.package.height_cm) {
-      volWt = (data.package.length_cm * data.package.width_cm * data.package.height_cm) / 5000;
-    }
-    const chargeableWt = Math.max(wt, volWt);
-    const pieces = Math.max(1, data.package.pieces);
-    const baseRates: Record<string, number> = { "Priority Overnight": 89, "Express": 49, "Standard Ground": 24, "Freight LTL": 149 };
-    const base = baseRates[data.service] ?? 49;
-    const weightFee = chargeableWt * (data.service === "Freight LTL" ? 2 : data.service === "Standard Ground" ? 3 : 6);
-    const piecesFee = (pieces - 1) * (data.service === "Freight LTL" ? 40 : 12);
-    const insuranceFee = data.insurance ? Math.max(6, data.declared_value * 0.008) : 0;
-    const signatureFee = data.signature_required ? 4 : 0;
-    const hazmatFee = data.is_hazmat ? 25 : 0;
-    const totalAmount = Math.round((base + weightFee + piecesFee + insuranceFee + signatureFee + hazmatFee) * 100) / 100;
-
-    const { data: result, error } = await context.supabase.rpc("create_shipment_with_payment", {
-      p_user_id: context.userId,
-      p_service: data.service,
-      p_origin: data.origin,
-      p_destination: data.destination,
-      p_package: data.package,
-      p_declared_value: data.declared_value,
-      p_insurance: data.insurance,
-      p_signature_required: data.signature_required,
-      p_notes: data.notes ?? null,
-      p_estimated_delivery: eta,
-      p_total_amount: totalAmount,
-      p_is_hazmat: data.is_hazmat,
-      p_volumetric_weight: data.volumetric_weight ?? null,
-    });
     if (error) dbFail(error);
+    if (!ship) throw new Error("Invoice not found or access denied");
 
-    return { trackingNumber: result.trackingNumber, id: result.id, estimatedDelivery: eta, transactionId: result.transactionId, amount: totalAmount };
+    return ship;
   });
 
 // ---------- Invoices ----------
@@ -428,16 +631,24 @@ export const listInvoices = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     // Seed a couple of demo invoices on first visit if none exist (idempotent)
     const { data: existing } = await context.supabase
-      .from("invoices").select("id").eq("user_id", context.userId).limit(1);
+      .from("invoices")
+      .select("id")
+      .eq("user_id", context.userId)
+      .limit(1);
     if (!existing || existing.length === 0) {
       const today = new Date();
       const seed = [
         {
           number: `INV-${today.getFullYear()}-0071`,
-          issue_date: new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().slice(0,10),
-          due_date: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().slice(0,10),
-          status: "sent", currency: "USD",
-          subtotal: 1080.00, tax: 108.00, total: 1188.00,
+          issue_date: new Date(today.getFullYear(), today.getMonth() - 1, 15)
+            .toISOString()
+            .slice(0, 10),
+          due_date: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().slice(0, 10),
+          status: "sent",
+          currency: "USD",
+          subtotal: 1080.0,
+          tax: 108.0,
+          total: 1188.0,
           line_items: [
             { label: "SwiftArc Priority Overnight", qty: 8, unit_price: 90 },
             { label: "SwiftArc Express", qty: 12, unit_price: 30 },
@@ -445,19 +656,26 @@ export const listInvoices = createServerFn({ method: "GET" })
         },
         {
           number: `INV-${today.getFullYear()}-0062`,
-          issue_date: new Date(today.getFullYear(), today.getMonth() - 2, 15).toISOString().slice(0,10),
-          due_date: new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().slice(0,10),
-          status: "paid", currency: "USD",
-          subtotal: 870.00, tax: 87.00, total: 957.00,
-          line_items: [
-            { label: "SwiftArc Standard Ground", qty: 29, unit_price: 30 },
-          ],
+          issue_date: new Date(today.getFullYear(), today.getMonth() - 2, 15)
+            .toISOString()
+            .slice(0, 10),
+          due_date: new Date(today.getFullYear(), today.getMonth() - 1, 15)
+            .toISOString()
+            .slice(0, 10),
+          status: "paid",
+          currency: "USD",
+          subtotal: 870.0,
+          tax: 87.0,
+          total: 957.0,
+          line_items: [{ label: "SwiftArc Standard Ground", qty: 29, unit_price: 30 }],
         },
       ].map((r) => ({ ...r, user_id: context.userId }));
       await context.supabase.from("invoices").insert(seed);
     }
     const { data, error } = await context.supabase
-      .from("invoices").select("*").eq("user_id", context.userId)
+      .from("invoices")
+      .select("*")
+      .eq("user_id", context.userId)
       .order("issue_date", { ascending: false });
     if (error) dbFail(error);
     return data ?? [];
@@ -468,7 +686,11 @@ export const getInvoiceById = createServerFn({ method: "POST" })
   .validator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
-      .from("invoices").select("*").eq("id", data.id).eq("user_id", context.userId).maybeSingle();
+      .from("invoices")
+      .select("*")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (error) dbFail(error);
     return row;
   });
@@ -476,11 +698,26 @@ export const getInvoiceById = createServerFn({ method: "POST" })
 // ---------- Customs & duties rates ----------
 
 const DUTY: Record<string, number> = {
-  Electronics: 0.05, Apparel: 0.12, "Home goods": 0.08,
-  Cosmetics: 0.065, Books: 0.0, Machinery: 0.03, Toys: 0.045, Jewelry: 0.11,
+  Electronics: 0.05,
+  Apparel: 0.12,
+  "Home goods": 0.08,
+  Cosmetics: 0.065,
+  Books: 0.0,
+  Machinery: 0.03,
+  Toys: 0.045,
+  Jewelry: 0.11,
 };
 const VAT: Record<string, number> = {
-  UK: 0.20, DE: 0.19, FR: 0.20, ES: 0.21, US: 0.0, JP: 0.10, CA: 0.05, AU: 0.10, AE: 0.05, IN: 0.18,
+  UK: 0.2,
+  DE: 0.19,
+  FR: 0.2,
+  ES: 0.21,
+  US: 0.0,
+  JP: 0.1,
+  CA: 0.05,
+  AU: 0.1,
+  AE: 0.05,
+  IN: 0.18,
 };
 const DOCS_BASE = ["Commercial invoice", "Packing list", "Air waybill / BOL"];
 const DOCS_BY_CATEGORY: Record<string, string[]> = {
@@ -491,15 +728,34 @@ const DOCS_BY_CATEGORY: Record<string, string[]> = {
   Jewelry: ["Kimberley Process cert (for diamonds)", "Assay certificate"],
 };
 
+export const apiSearchHsCodes = createServerFn({ method: "GET" })
+  .validator((i: string) => z.string().parse(i))
+  .handler(async ({ data, context }) => {
+    const term = `%${data.toLowerCase()}%`;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: results, error } = await supabaseAdmin
+      .from("hs_codes")
+      .select("*")
+      .or(`description.ilike.${term},code.ilike.${term}`)
+      .limit(20);
+
+    if (error) dbFail(error);
+    return results;
+  });
+
 export const estimateCustoms = createServerFn({ method: "POST" })
-  .validator((i) => z.object({
-    country: z.string(),
-    category: z.string(),
-    value: z.number().nonnegative(),
-    freight: z.number().nonnegative(),
-    insurance: z.number().nonnegative(),
-    hsCode: z.string().optional(),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        country: z.string(),
+        category: z.string(),
+        value: z.number().nonnegative(),
+        freight: z.number().nonnegative(),
+        insurance: z.number().nonnegative(),
+        hsCode: z.string().optional(),
+      })
+      .parse(i),
+  )
   .handler(async ({ data }) => {
     const dutyRate = DUTY[data.category] ?? 0.05;
     const vatRate = VAT[data.country] ?? 0.15;
@@ -532,10 +788,14 @@ export const estimateCustoms = createServerFn({ method: "POST" })
 // ---------- Rating Engine ----------
 
 export const calculateRates = createServerFn({ method: "POST" })
-  .validator((i) => z.object({
-    weight: z.number().positive().max(10000),
-    zone: z.enum(["regional", "international", "intercontinental"])
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        weight: z.number().positive().max(10000),
+        zone: z.enum(["regional", "international", "intercontinental"]),
+      })
+      .parse(i),
+  )
   .handler(async ({ data }) => {
     // In a real scenario, this would query carrier APIs or a complex pricing matrix in DB.
     const services = [
@@ -544,9 +804,9 @@ export const calculateRates = createServerFn({ method: "POST" })
       { id: "ground", name: "Standard Ground", days: 4, base: 18, perKg: 1.1 },
       { id: "freight", name: "Freight LTL", days: 6, base: 90, perKg: 0.7 },
     ];
-    
+
     const zoneMult = data.zone === "regional" ? 0.7 : data.zone === "international" ? 1 : 1.6;
-    
+
     return services.map((s) => ({
       id: s.id,
       name: s.name,
@@ -558,16 +818,24 @@ export const calculateRates = createServerFn({ method: "POST" })
 // ---------- Fleet & Courier ----------
 
 export const submitProofOfDelivery = createServerFn({ method: "POST" })
-  .validator((i) => z.object({
-    trackingNumber: z.string().min(4).max(64),
-    signedBy: z.string().min(1).max(120),
-    signatureSvgPath: z.string().min(1),
-    photoNote: z.string().optional(),
-    location: z.string().optional(),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        trackingNumber: z.string().min(4).max(64),
+        signedBy: z.string().min(1).max(120),
+        signatureSvgPath: z.string().min(1),
+        photoNote: z.string().optional(),
+        location: z.string().optional(),
+      })
+      .parse(i),
+  )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: ship } = await supabaseAdmin.from("shipments").select("id, package").eq("tracking_number", data.trackingNumber).maybeSingle();
+    const { data: ship } = await supabaseAdmin
+      .from("shipments")
+      .select("id, package")
+      .eq("tracking_number", data.trackingNumber)
+      .maybeSingle();
     if (!ship) throw new Error("Shipment not found");
 
     const pod = {
@@ -577,10 +845,12 @@ export const submitProofOfDelivery = createServerFn({ method: "POST" })
       timestamp: new Date().toISOString(),
     };
 
-    const { error } = await (supabaseAdmin.from("shipments").update({
-      status: "delivered",
-      proof_of_delivery: pod
-    } as any) as any).eq("id", ship.id);
+    const { error } = await (
+      supabaseAdmin.from("shipments").update({
+        status: "delivered",
+        proof_of_delivery: pod,
+      } as any) as any
+    ).eq("id", ship.id);
 
     if (error) dbFail(error);
 
@@ -590,15 +860,19 @@ export const submitProofOfDelivery = createServerFn({ method: "POST" })
       description: `Delivered and signed by ${data.signedBy}`,
       location: data.location ?? "Destination point",
     });
-    
+
     // Dispatch webhook
-    const { data: fullShip } = await supabaseAdmin.from("shipments").select("user_id").eq("id", ship.id).maybeSingle();
+    const { data: fullShip } = await supabaseAdmin
+      .from("shipments")
+      .select("user_id")
+      .eq("id", ship.id)
+      .maybeSingle();
     if (fullShip && fullShip.user_id) {
       const { dispatchWebhook } = await import("@/lib/webhooks.functions");
       await dispatchWebhook(fullShip.user_id, "shipment.status_updated", {
         shipment_id: ship.id,
         status: "delivered",
-        proof_of_delivery: pod
+        proof_of_delivery: pod,
       });
     }
 
@@ -606,15 +880,23 @@ export const submitProofOfDelivery = createServerFn({ method: "POST" })
   });
 
 export const updateTelemetry = createServerFn({ method: "POST" })
-  .validator((i) => z.object({
-    trackingNumber: z.string().min(4).max(64),
-    healthScore: z.number().min(0).max(100),
-    temperatureC: z.number(),
-    shockEvents: z.number().min(0),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        trackingNumber: z.string().min(4).max(64),
+        healthScore: z.number().min(0).max(100),
+        temperatureC: z.number(),
+        shockEvents: z.number().min(0),
+      })
+      .parse(i),
+  )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: ship } = await supabaseAdmin.from("shipments").select("id, package").eq("tracking_number", data.trackingNumber).maybeSingle();
+    const { data: ship } = await supabaseAdmin
+      .from("shipments")
+      .select("id, package")
+      .eq("tracking_number", data.trackingNumber)
+      .maybeSingle();
     if (!ship) throw new Error("Shipment not found");
 
     const telemetry = {
@@ -624,9 +906,11 @@ export const updateTelemetry = createServerFn({ method: "POST" })
       updatedAt: new Date().toISOString(),
     };
 
-    const { error } = await (supabaseAdmin.from("shipments").update({
-      telemetry
-    } as any) as any).eq("id", ship.id);
+    const { error } = await (
+      supabaseAdmin.from("shipments").update({
+        telemetry,
+      } as any) as any
+    ).eq("id", ship.id);
 
     if (error) dbFail(error);
     return { ok: true };
@@ -649,41 +933,43 @@ export const getCheckoutTransaction = createServerFn({ method: "POST" })
     return txn;
   });
 
-export const listPaymentMethods = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("payment_methods")
-      .select("*")
-      .eq("enabled", true)
-      .order("sort_order");
-    if (error) dbFail(error);
-    return data ?? [];
-  });
+export const listPaymentMethods = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("payment_methods")
+    .select("*")
+    .eq("enabled", true)
+    .order("sort_order");
+  if (error) dbFail(error);
+  return data ?? [];
+});
 
-export const listActiveWallets = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("wallets")
-      .select("*")
-      .eq("status", "active")
-      .order("sort_order");
-    if (error) dbFail(error);
-    return data ?? [];
-  });
+export const listActiveWallets = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("wallets")
+    .select("*")
+    .eq("status", "active")
+    .order("sort_order");
+  if (error) dbFail(error);
+  return data ?? [];
+});
 
 export const selectPaymentMethod = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({
-    transactionId: z.string().uuid(),
-    method: z.enum(["card", "bank_transfer", "crypto"]),
-    walletId: z.string().uuid().optional(),
-    cryptoCurrency: z.string().optional(),
-    cryptoNetwork: z.string().optional(),
-    cryptoAddress: z.string().optional(),
-    cryptoAmount: z.string().optional(),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        transactionId: z.string().uuid(),
+        method: z.enum(["card", "bank_transfer", "crypto"]),
+        walletId: z.string().uuid().optional(),
+        cryptoCurrency: z.string().optional(),
+        cryptoNetwork: z.string().optional(),
+        cryptoAddress: z.string().optional(),
+        cryptoAmount: z.string().optional(),
+      })
+      .parse(i),
+  )
   .handler(async ({ data, context }) => {
     const updates: any = {
       method: data.method,
@@ -708,17 +994,21 @@ export const selectPaymentMethod = createServerFn({ method: "POST" })
 
 export const markTransactionPaid = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({
-    transactionId: z.string().uuid(),
-    method: z.enum(["card", "bank_transfer", "crypto"]),
-    cardLast4: z.string().max(4).optional(),
-    bankReference: z.string().max(100).optional(),
-    cryptoTxHash: z.string().max(255).optional(),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        transactionId: z.string().uuid(),
+        method: z.enum(["card", "bank_transfer", "crypto"]),
+        cardLast4: z.string().max(4).optional(),
+        bankReference: z.string().max(100).optional(),
+        cryptoTxHash: z.string().max(255).optional(),
+      })
+      .parse(i),
+  )
   .handler(async ({ data, context }) => {
     // We auto-verify non-card methods for the MVP. Card is handled by Stripe Webhooks.
     const newStatus = data.method === "card" ? "processing" : "verified";
-    
+
     const updates: any = {
       method: data.method,
       status: newStatus,
@@ -752,9 +1042,10 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
         .eq("id", txn.shipments.id);
 
       // Send the email receipt in the background
-      const userProfile = await context.supabase.from("profiles").select("email").eq("id", context.userId).maybeSingle();
-      if (userProfile.data?.email) {
-        sendEmailReceipt({ transactionId: data.transactionId, email: userProfile.data.email }).catch(err => {
+      const authUser = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      const email = authUser.data?.user?.email;
+      if (email) {
+        sendEmailReceipt({ data: { transactionId: data.transactionId, email } }).catch((err) => {
           console.error("Failed to send background email receipt:", err);
         });
       }
@@ -764,31 +1055,35 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
   });
 
 export const sendEmailReceipt = createServerFn({ method: "POST" })
-  .validator((i) => z.object({ transactionId: z.string().uuid(), email: z.string().email() }).parse(i))
+  .validator((i) =>
+    z.object({ transactionId: z.string().uuid(), email: z.string().email() }).parse(i),
+  )
   .handler(async ({ data }) => {
     if (!process.env.RESEND_API_KEY) {
       console.log("Simulating email receipt to", data.email, "for txn", data.transactionId);
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1000));
       return { ok: true, simulated: true };
     }
-    
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: txn, error } = await supabaseAdmin
       .from("payment_transactions")
       .select("*, shipments(tracking_number, service)")
       .eq("id", data.transactionId)
       .maybeSingle();
-      
+
     if (error || !txn) return { ok: false };
 
     try {
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: 'SwiftArc Payments <receipts@swiftarc.net>',
-        to: data.email,
-        subject: `Receipt for Shipment ${txn.shipments.tracking_number}`,
-        html: `
+
+      await withRetry(() =>
+        resend.emails.send({
+          from: "SwiftArc Payments <receipts@swiftarc.net>",
+          to: data.email,
+          subject: `Receipt for Shipment ${txn.shipments.tracking_number}`,
+          html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #1E293B;">Payment Receipt</h2>
             <p>Thank you for booking with SwiftArc. Your payment has been received and your shipping label is ready.</p>
@@ -800,8 +1095,10 @@ export const sendEmailReceipt = createServerFn({ method: "POST" })
             </div>
             <p style="color: #64748B; font-size: 12px;">This is an automated receipt. If you have questions, please contact support.</p>
           </div>
-        `
-      });
+        `,
+        }),
+      );
+
       return { ok: true };
     } catch (err) {
       console.error("Resend API Error:", err);
@@ -822,18 +1119,20 @@ export const createPaymentIntent = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (error || !txn) throw new Error("Forbidden or not found");
-    
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(Number(txn.amount) * 100), // Stripe expects cents
-      currency: txn.currency.toLowerCase(),
-      metadata: {
-        reference: txn.reference,
-        transactionId: txn.id,
-      },
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
+
+    const paymentIntent = await withRetry(() =>
+      stripe.paymentIntents.create({
+        amount: Math.round(Number(txn.amount) * 100), // Stripe expects cents
+        currency: txn.currency.toLowerCase(),
+        metadata: {
+          reference: txn.reference,
+          transactionId: txn.id,
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      }),
+    );
 
     return { clientSecret: paymentIntent.client_secret };
   });

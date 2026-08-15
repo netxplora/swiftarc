@@ -57,11 +57,18 @@ function AdminSupport() {
       .channel(`admin-chat-${activeId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages", filter: `conversation_id=eq.${activeId}` },
-        () => qc.invalidateQueries({ queryKey: ["admin-chat-msgs", activeId] })
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `conversation_id=eq.${activeId}`,
+        },
+        () => qc.invalidateQueries({ queryKey: ["admin-chat-msgs", activeId] }),
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [activeId, qc]);
 
   useEffect(() => {
@@ -104,7 +111,9 @@ function AdminSupport() {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-mono truncate max-w-[150px]">{c.id.split("-")[0]}</span>
+                <span className="text-xs text-muted-foreground font-mono truncate max-w-[150px]">
+                  {c.id.split("-")[0]}
+                </span>
                 {c.status === "open" ? (
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 ) : (
@@ -114,7 +123,9 @@ function AdminSupport() {
             </button>
           ))}
           {convos.data?.length === 0 && (
-            <div className="p-8 text-center text-sm text-muted-foreground">No active conversations.</div>
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              No active conversations.
+            </div>
           )}
         </div>
       </div>
@@ -134,7 +145,7 @@ function AdminSupport() {
                 <p className="text-xs text-muted-foreground font-mono">{activeId}</p>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {msgs.data?.map((m: Msg) => {
                 const isAdmin = m.sender_role === "agent" || m.sender_role === "admin";
@@ -146,13 +157,15 @@ function AdminSupport() {
                         isSystem
                           ? "max-w-[80%] rounded-xl bg-secondary px-4 py-2 text-xs text-muted-foreground"
                           : isAdmin
-                          ? "max-w-[70%] rounded-2xl rounded-br-sm bg-navy-deep px-4 py-2 text-sm text-cream"
-                          : "max-w-[70%] rounded-2xl rounded-bl-sm bg-background border border-border px-4 py-2 text-sm text-foreground shadow-sm"
+                            ? "max-w-[70%] rounded-2xl rounded-br-sm bg-navy-deep px-4 py-2 text-sm text-cream"
+                            : "max-w-[70%] rounded-2xl rounded-bl-sm bg-background border border-border px-4 py-2 text-sm text-foreground shadow-sm"
                       }
                     >
                       {m.body}
                       {!isSystem && (
-                        <div className={`text-[10px] mt-1 ${isAdmin ? "text-cream/50 text-right" : "text-muted-foreground"}`}>
+                        <div
+                          className={`text-[10px] mt-1 ${isAdmin ? "text-cream/50 text-right" : "text-muted-foreground"}`}
+                        >
                           {format(new Date(m.created_at), "HH:mm")}
                         </div>
                       )}
@@ -177,7 +190,12 @@ function AdminSupport() {
                 disabled={send.isPending}
                 className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-amber"
               />
-              <Button type="submit" disabled={!text.trim() || send.isPending} size="icon" className="bg-amber text-navy-deep hover:bg-amber-soft">
+              <Button
+                type="submit"
+                disabled={!text.trim() || send.isPending}
+                size="icon"
+                className="bg-amber text-navy-deep hover:bg-amber-soft"
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </form>

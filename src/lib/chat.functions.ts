@@ -3,7 +3,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 function fail(err: unknown, msg = "Chat operation failed."): never {
-  // eslint-disable-next-line no-console
   console.error("[chat]", err);
   throw new Error(msg);
 }
@@ -52,14 +51,22 @@ export const listMessages = createServerFn({ method: "POST" })
 
 export const sendMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((i) => z.object({
-    conversationId: z.string().uuid(),
-    body: z.string().min(1).max(4000),
-  }).parse(i))
+  .validator((i) =>
+    z
+      .object({
+        conversationId: z.string().uuid(),
+        body: z.string().min(1).max(4000),
+      })
+      .parse(i),
+  )
   .handler(async ({ data, context }) => {
     // Determine sender role
     const { data: roleRow } = await context.supabase
-      .from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
     const senderRole = roleRow ? "agent" : "user";
     const { error } = await context.supabase.from("chat_messages").insert({
       conversation_id: data.conversationId,
@@ -80,7 +87,11 @@ export const adminListConversations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data: roleRow } = await context.supabase
-      .from("user_roles").select("role").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
     if (!roleRow) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin

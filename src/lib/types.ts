@@ -1,18 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ShipmentStatus =
-  | "label_created"
+  | "created"
+  | "confirmed"
+  | "assigned"
   | "picked_up"
   | "in_transit"
-  | "out_for_delivery"
+  | "near_destination"
   | "delivered"
-  | "exception";
+  | "exception"
+  // Legacy states for backwards compatibility
+  | "booking_created"
+  | "awaiting_confirmation"
+  | "driver_assigned"
+  | "driver_en_route"
+  | "driver_arrived"
+  | "package_picked_up"
+  | "completed"
+  | "label_created"
+  | "out_for_delivery";
 
 export const statusLabels: Record<ShipmentStatus | string, string> = {
-  label_created: "Label created",
-  picked_up: "Picked up",
-  in_transit: "In transit",
-  out_for_delivery: "Out for delivery",
+  created: "Created",
+  confirmed: "Confirmed",
+  assigned: "Assigned",
+  picked_up: "Picked Up",
+  in_transit: "In Transit",
+  near_destination: "Near Destination",
   delivered: "Delivered",
   exception: "Exception",
+  // Legacy mappings
+  booking_created: "Created",
+  awaiting_confirmation: "Pending",
+  driver_assigned: "Assigned",
+  driver_en_route: "Assigned",
+  driver_arrived: "Assigned",
+  package_picked_up: "Picked Up",
+  label_created: "Created",
+  out_for_delivery: "Near Destination",
+  completed: "Delivered",
 };
 
 export interface LocationSnapshot {
@@ -44,7 +69,16 @@ export interface LiveShipmentData {
   sender: string;
   reference: string;
   checkpoints: any[];
-  // AI fields
+  driver?: {
+    name: string;
+    phone: string;
+    vehicle: string;
+    rating: number;
+    lat: number;
+    lng: number;
+  };
+  remainingDistanceKm?: number;
+  remainingDurationMins?: number;
   onTimeConfidence: number;
   aiNote?: string;
   healthScore?: number;

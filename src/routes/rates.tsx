@@ -15,9 +15,16 @@ export const Route = createFileRoute("/rates")({
   head: () => ({
     meta: [
       { title: "Rate & Transit Calculator — SwiftArc" },
-      { name: "description", content: "Instant multi-service quotes with estimated transit times across the SwiftArc network." },
+      {
+        name: "description",
+        content:
+          "Instant multi-service quotes with estimated transit times across the SwiftArc network.",
+      },
       { property: "og:title", content: "Rate & Transit Calculator — SwiftArc" },
-      { property: "og:description", content: "Compare service levels and transit times in seconds." },
+      {
+        property: "og:description",
+        content: "Compare service levels and transit times in seconds.",
+      },
     ],
   }),
   component: Rates,
@@ -32,8 +39,10 @@ const icons = {
 
 function Rates() {
   const [weight, setWeight] = useState(4.2);
-  const [zone, setZone] = useState<"regional" | "international" | "intercontinental">("international");
-  
+  const [zone, setZone] = useState<"regional" | "international" | "intercontinental">(
+    "international",
+  );
+
   const fetchRates = useServerFn(calculateRates);
   const { data: quotes, isFetching } = useQuery({
     queryKey: ["rates", weight, zone],
@@ -63,12 +72,22 @@ function Rates() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">Origin ZIP / city</Label>
-                    <Input className="mt-1.5 h-11 transition-shadow focus-visible:ring-amber" placeholder="Rotterdam, NL" />
+                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                      Origin ZIP / city
+                    </Label>
+                    <Input
+                      className="mt-1.5 h-11 transition-shadow focus-visible:ring-amber"
+                      placeholder="Rotterdam, NL"
+                    />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">Destination ZIP / city</Label>
-                    <Input className="mt-1.5 h-11 transition-shadow focus-visible:ring-amber" placeholder="Milan, IT" />
+                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                      Destination ZIP / city
+                    </Label>
+                    <Input
+                      className="mt-1.5 h-11 transition-shadow focus-visible:ring-amber"
+                      placeholder="Milan, IT"
+                    />
                   </div>
                 </div>
 
@@ -89,7 +108,9 @@ function Rates() {
                 </div>
 
                 <div>
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">Zone</Label>
+                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                    Zone
+                  </Label>
                   <div className="mt-2 grid grid-cols-3 gap-2">
                     {(["regional", "international", "intercontinental"] as const).map((z) => (
                       <button
@@ -97,7 +118,9 @@ function Rates() {
                         type="button"
                         onClick={() => setZone(z)}
                         className={`h-11 rounded-md border text-sm font-medium capitalize transition-all ${
-                          zone === z ? "border-navy-deep bg-navy-deep text-cream shadow-md" : "border-border bg-card hover:border-amber/50 hover:bg-secondary"
+                          zone === z
+                            ? "border-navy-deep bg-navy-deep text-cream shadow-md"
+                            : "border-border bg-card hover:border-amber/50 hover:bg-secondary"
                         }`}
                       >
                         {z}
@@ -106,7 +129,9 @@ function Rates() {
                   </div>
                 </div>
 
-                <Button className="h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft">Recalculate</Button>
+                <Button className="h-11 w-full bg-amber text-navy-deep hover:bg-amber-soft">
+                  Recalculate
+                </Button>
               </CardContent>
             </Card>
           </motion.div>
@@ -115,41 +140,44 @@ function Rates() {
             {(quotes ?? []).map((q, i) => {
               const Icon = icons[q.id as keyof typeof icons] || Package;
               return (
-              <motion.div
-                key={q.name}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                className={`grid items-center gap-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-[auto_1fr_auto] ${isFetching ? 'opacity-50' : ''}`}
-              >
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-navy-deep text-cream">
-                  <Icon className="h-5 w-5 text-amber" />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-baseline gap-x-3">
-                    <h3 className="font-display text-lg">{q.name}</h3>
-                    <span className="text-xs uppercase tracking-widest text-muted-foreground">
-                      ~{q.days} business day{q.days > 1 ? "s" : ""}
-                    </span>
+                <motion.div
+                  key={q.name}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  className={`grid items-center gap-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-[auto_1fr_auto] ${isFetching ? "opacity-50" : ""}`}
+                >
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-navy-deep text-cream">
+                    <Icon className="h-5 w-5 text-amber" />
                   </div>
-                  <div className="mt-1 h-1 w-full max-w-xs overflow-hidden rounded-full bg-secondary">
-                    <motion.div
-                      key={`${q.name}-${weight}-${zone}`}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(100, (q.price / 400) * 100)}%` }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                      className="h-full rounded-full bg-amber"
-                    />
+                  <div>
+                    <div className="flex flex-wrap items-baseline gap-x-3">
+                      <h3 className="font-display text-lg">{q.name}</h3>
+                      <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                        ~{q.days} business day{q.days > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-1 w-full max-w-xs overflow-hidden rounded-full bg-secondary">
+                      <motion.div
+                        key={`${q.name}-${weight}-${zone}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, (q.price / 400) * 100)}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="h-full rounded-full bg-amber"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-display text-3xl font-bold text-navy-deep">
-                    €{q.price.toFixed(2)}
+                  <div className="text-right">
+                    <div className="font-display text-3xl font-bold text-navy-deep">
+                      €{q.price.toFixed(2)}
+                    </div>
+                    <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                      All-in
+                    </div>
                   </div>
-                  <div className="text-xs uppercase tracking-widest text-muted-foreground">All-in</div>
-                </div>
-              </motion.div>
-            )})}
+                </motion.div>
+              );
+            })}
             <p className="text-xs text-muted-foreground">
               Illustrative pricing only. Log in for negotiated rates and fuel surcharges.
             </p>

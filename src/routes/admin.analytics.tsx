@@ -1,29 +1,53 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminAnalytics } from "@/lib/admin.functions";
+import { adminAnalytics, adminListShipments } from "@/lib/admin.functions";
 import { statusLabels } from "@/lib/types";
 import { motion } from "motion/react";
 import {
-  DollarSign, Package2, Users, TrendingUp, AlertTriangle, CheckCircle2,
-  MapPin, ArrowUpRight
+  DollarSign,
+  Package2,
+  Users,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  MapPin,
+  ArrowUpRight,
 } from "lucide-react";
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, Cell, PieChart, Pie
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Cell,
+  PieChart,
+  Pie,
 } from "recharts";
+import { predictDelayRisk } from "@/lib/ai-delays";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({
-    meta: [
-      { title: "Analytics — Admin — SwiftArc" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Analytics — Admin — SwiftArc" }, { name: "robots", content: "noindex" }],
   }),
   component: AdminAnalytics,
 });
 
-const COLORS = ["#1E293B", "#D4A843", "#10b981", "#6366f1", "#f43f5e", "#06b6d4", "#8b5cf6", "#f59e0b"];
+const COLORS = [
+  "#1E293B",
+  "#D4A843",
+  "#10b981",
+  "#6366f1",
+  "#f43f5e",
+  "#06b6d4",
+  "#8b5cf6",
+  "#f59e0b",
+];
 
 function AdminAnalytics() {
   const fn = useServerFn(adminAnalytics);
@@ -33,17 +57,54 @@ function AdminAnalytics() {
     staleTime: 60_000,
   });
 
+  const listFn = useServerFn(adminListShipments);
+  const { data: shipments } = useQuery({ queryKey: ["admin-shipments"], queryFn: () => listFn() });
+
   const fmt = (n: number) =>
-    new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(n);
 
   const summary = data?.summary;
 
   const kpis = [
-    { label: "Revenue (30d)", value: fmt(summary?.totalRevenue ?? 0), icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-    { label: "Shipments (30d)", value: (summary?.totalShipments ?? 0).toLocaleString(), icon: Package2, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Delivery Rate", value: `${summary?.deliveryRate ?? 0}%`, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Exceptions", value: (summary?.exceptionCount ?? 0).toLocaleString(), icon: AlertTriangle, color: "text-red-500", bg: "bg-red-500/10" },
-    { label: "New Users (30d)", value: (summary?.newUserCount ?? 0).toLocaleString(), icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    {
+      label: "Revenue (30d)",
+      value: fmt(summary?.totalRevenue ?? 0),
+      icon: DollarSign,
+      color: "text-emerald-600",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Shipments (30d)",
+      value: (summary?.totalShipments ?? 0).toLocaleString(),
+      icon: Package2,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      label: "Delivery Rate",
+      value: `${summary?.deliveryRate ?? 0}%`,
+      icon: CheckCircle2,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Exceptions",
+      value: (summary?.exceptionCount ?? 0).toLocaleString(),
+      icon: AlertTriangle,
+      color: "text-red-500",
+      bg: "bg-red-500/10",
+    },
+    {
+      label: "New Users (30d)",
+      value: (summary?.newUserCount ?? 0).toLocaleString(),
+      icon: Users,
+      color: "text-indigo-500",
+      bg: "bg-indigo-500/10",
+    },
   ];
 
   if (isLoading) {
@@ -82,7 +143,9 @@ function AdminAnalytics() {
             transition={{ delay: i * 0.06 }}
             className="rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-shadow relative overflow-hidden group"
           >
-            <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full ${k.bg} transition-transform group-hover:scale-150`} />
+            <div
+              className={`absolute -right-6 -top-6 h-24 w-24 rounded-full ${k.bg} transition-transform group-hover:scale-150`}
+            />
             <k.icon className={`h-5 w-5 ${k.color} relative z-10`} />
             <p className="mt-4 font-display text-3xl font-bold text-navy-deep relative z-10">
               {k.value}
@@ -106,7 +169,10 @@ function AdminAnalytics() {
           </div>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data?.revenueByDay ?? []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <AreaChart
+                data={data?.revenueByDay ?? []}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="revGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -134,11 +200,27 @@ function AdminAnalytics() {
                   width={50}
                 />
                 <Tooltip
-                  contentStyle={{ borderRadius: "8px", border: "1px solid #E2E8F0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid #E2E8F0",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
                   formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
-                  labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                  labelFormatter={(label) =>
+                    new Date(label).toLocaleDateString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fill="url(#revGradient)" />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  fill="url(#revGradient)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -178,7 +260,10 @@ function AdminAnalytics() {
           <div className="mt-2 grid grid-cols-2 gap-2">
             {(data?.byService ?? []).map((s, i) => (
               <div key={s.name} className="flex items-center gap-2 text-xs">
-                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                <div
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                />
                 <span className="text-muted-foreground truncate">{s.name}</span>
                 <span className="ml-auto font-semibold">{s.value}</span>
               </div>
@@ -194,9 +279,18 @@ function AdminAnalytics() {
           <h2 className="font-display text-lg font-bold mb-4">Status Breakdown</h2>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data?.byStatus ?? []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} layout="vertical">
+              <BarChart
+                data={data?.byStatus ?? []}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                layout="vertical"
+              >
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#94a3b8" }} />
+                <XAxis
+                  type="number"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                />
                 <YAxis
                   dataKey="name"
                   type="category"
@@ -216,10 +310,13 @@ function AdminAnalytics() {
                     <Cell
                       key={index}
                       fill={
-                        entry.name === "delivered" ? "#10b981" :
-                        entry.name === "exception" ? "#ef4444" :
-                        entry.name === "in_transit" ? "#D4A843" :
-                        COLORS[index % COLORS.length]
+                        entry.name === "delivered"
+                          ? "#10b981"
+                          : entry.name === "exception"
+                            ? "#ef4444"
+                            : entry.name === "in_transit"
+                              ? "#D4A843"
+                              : COLORS[index % COLORS.length]
                       }
                     />
                   ))}
@@ -241,7 +338,9 @@ function AdminAnalytics() {
               const pct = Math.round((d.count / maxCount) * 100);
               return (
                 <div key={d.city} className="flex items-center gap-3">
-                  <span className="w-5 text-xs font-bold text-muted-foreground text-right">{i + 1}</span>
+                  <span className="w-5 text-xs font-bold text-muted-foreground text-right">
+                    {i + 1}
+                  </span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium text-navy-deep truncate">{d.city}</span>
@@ -260,54 +359,124 @@ function AdminAnalytics() {
               );
             })}
             {(data?.topDestinations ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">No destination data available yet.</p>
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No destination data available yet.
+              </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* User Growth */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg font-bold flex items-center gap-2">
-            <Users className="h-5 w-5 text-indigo-500" />
-            New User Registrations (14 Days)
-          </h2>
+      {/* User Growth & AI Predictions */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg font-bold flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-500" />
+              New User Registrations (14 Days)
+            </h2>
+          </div>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={data?.usersByDay ?? []}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  dy={10}
+                  tickFormatter={(val) => {
+                    const d = new Date(val);
+                    return `${d.getMonth() + 1}/${d.getDate()}`;
+                  }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  width={30}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{ borderRadius: "8px", border: "1px solid #E2E8F0" }}
+                  formatter={(value: number) => [value, "New users"]}
+                  labelFormatter={(label) =>
+                    new Date(label).toLocaleDateString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
+                <Bar dataKey="users" radius={[4, 4, 0, 0]}>
+                  {(data?.usersByDay ?? []).map((_, index) => (
+                    <Cell
+                      key={index}
+                      fill={index === (data?.usersByDay?.length ?? 1) - 1 ? "#6366f1" : "#1E293B"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="h-[200px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data?.usersByDay ?? []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-              <XAxis
-                dataKey="date"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 10, fill: "#94a3b8" }}
-                dy={10}
-                tickFormatter={(val) => {
-                  const d = new Date(val);
-                  return `${d.getMonth() + 1}/${d.getDate()}`;
-                }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 10, fill: "#94a3b8" }}
-                width={30}
-                allowDecimals={false}
-              />
-              <Tooltip
-                contentStyle={{ borderRadius: "8px", border: "1px solid #E2E8F0" }}
-                formatter={(value: number) => [value, "New users"]}
-                labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
-              />
-              <Bar dataKey="users" radius={[4, 4, 0, 0]}>
-                {(data?.usersByDay ?? []).map((_, index) => (
-                  <Cell key={index} fill={index === (data?.usersByDay?.length ?? 1) - 1 ? "#6366f1" : "#1E293B"} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+
+        {/* AI Predictions */}
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg font-bold flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-deep" />
+              AI Delay Predictions
+            </h2>
+          </div>
+          <div className="space-y-3 overflow-y-auto max-h-[200px] pr-2">
+            {(() => {
+              const active = (shipments ?? []).filter(
+                (s: any) => s.status && s.status !== "delivered" && s.status !== "exception",
+              );
+              const atRisk = active
+                .map((s: any) => ({
+                  shipment: s,
+                  risk: predictDelayRisk(
+                    (s.origin as any)?.city || "",
+                    (s.destination as any)?.city || "",
+                    s.status,
+                    s.created_at,
+                  ),
+                }))
+                .filter((x: any) => x.risk.isDelayed)
+                .sort((a: any, b: any) => b.risk.confidence - a.risk.confidence);
+
+              if (atRisk.length === 0) {
+                return (
+                  <p className="text-sm text-muted-foreground py-6 text-center">
+                    No high-risk shipments detected.
+                  </p>
+                );
+              }
+
+              return atRisk.map((item: any) => (
+                <div
+                  key={item.shipment.id}
+                  className="flex flex-col gap-1 p-3 rounded-lg border border-amber/20 bg-amber/5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-semibold">
+                      {item.shipment.tracking_number}
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-deep bg-amber/20 px-2 py-0.5 rounded">
+                      {Math.round(item.risk.confidence * 100)}% RISK
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{item.risk.reason}</p>
+                </div>
+              ));
+            })()}
+          </div>
         </div>
       </div>
     </div>
