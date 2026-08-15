@@ -211,7 +211,7 @@ function TrackingDetail() {
           type: "hold_placed"
         });
         
-        if (hold.status === "released" || hold.payment_status === "verified") {
+        if (hold.status === "released" || hold.payment_status === "paid") {
           holdEvents.push({
             id: `release-${hold.id}`,
             timestamp: hold.released_at ?? hold.updated_at ?? new Date().toISOString(),
@@ -334,7 +334,7 @@ function TrackingDetail() {
   const hasCustomsHold = realtimeStatus === "customs_hold" || activeHold;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 pb-16">
+    <div className="min-h-screen bg-background text-foreground pb-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -460,7 +460,7 @@ function TrackingDetail() {
             {/* Customs Hold Alert */}
             {/* Customs Hold Alert */}
             {hasCustomsHold && (() => {
-              const isResolved = activeHold?.status === "released" || activeHold?.payment_status === "verified";
+              const isResolved = activeHold?.status === "released" || activeHold?.payment_status === "paid";
               const alertStyle = isResolved
                 ? "bg-emerald-50 text-emerald-900 border-emerald-200"
                 : "bg-red-50 text-red-900 border-red-200";
