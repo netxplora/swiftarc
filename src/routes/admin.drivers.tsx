@@ -73,7 +73,7 @@ function DriverDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit Driver" : "Add Driver"}</DialogTitle>
         </DialogHeader>
@@ -284,94 +284,96 @@ function AdminDriversPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Driver</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Vehicle</th>
-                <th className="px-4 py-3 font-medium">Zone</th>
-                <th className="px-4 py-3 font-medium">Performance</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isLoading && (
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                    Loading drivers...
-                  </td>
+                  <th className="px-4 py-3 font-medium">Driver</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Vehicle</th>
+                  <th className="px-4 py-3 font-medium">Zone</th>
+                  <th className="px-4 py-3 font-medium">Performance</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
-              )}
-              {!isLoading && filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    No drivers found.
-                  </td>
-                </tr>
-              )}
-              {!isLoading &&
-                filtered.map((d) => (
-                  <tr key={d.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground">
-                          {d.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-medium">{d.name}</div>
-                          <div className="text-xs text-muted-foreground">{d.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor(d.status)}`}
-                      >
-                        {d.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-muted-foreground">
-                      {d.fleet_vehicles?.[0] ? d.fleet_vehicles[0].model : "Unassigned"}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{d.zone}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5 text-xs font-medium">
-                        <Star className="h-3.5 w-3.5 text-amber fill-amber" />
-                        <span>{d.rating?.toFixed(2)}</span>
-                        <span className="text-muted-foreground ml-1">
-                          ({d.deliveries?.toLocaleString()} del.)
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5"
-                          onClick={() => {
-                            setEditingDriver(d);
-                            setDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(d.id, d.name)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {isLoading && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                      Loading drivers...
                     </td>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                )}
+                {!isLoading && filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      No drivers found.
+                    </td>
+                  </tr>
+                )}
+                {!isLoading &&
+                  filtered.map((d) => (
+                    <tr key={d.id} className="hover:bg-secondary/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center font-bold text-muted-foreground">
+                            {d.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="font-medium">{d.name}</div>
+                            <div className="text-xs text-muted-foreground">{d.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor(d.status)}`}
+                        >
+                          {d.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-muted-foreground">
+                        {d.fleet_vehicles?.[0] ? d.fleet_vehicles[0].model : "Unassigned"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{d.zone}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5 text-xs font-medium">
+                          <Star className="h-3.5 w-3.5 text-amber fill-amber" />
+                          <span>{d.rating?.toFixed(2)}</span>
+                          <span className="text-muted-foreground ml-1">
+                            ({d.deliveries?.toLocaleString()} del.)
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2.5"
+                            onClick={() => {
+                              setEditingDriver(d);
+                              setDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(d.id, d.name)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

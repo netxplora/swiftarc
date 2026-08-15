@@ -298,73 +298,79 @@ function AdminReportsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Title</th>
-                  <th className="px-4 py-3 font-medium">Category</th>
-                  <th className="px-4 py-3 font-medium">Period</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Size</th>
-                  <th className="px-4 py-3 font-medium">Generated</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.length === 0 && (
+            <div className="overflow-x-auto w-full pb-4">
+              <table className="w-full min-w-[600px] text-sm text-left">
+                <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
-                      <FileText className="mx-auto h-8 w-8 mb-2 opacity-40" />
-                      No reports found. Click "Generate Report" to create one.
-                    </td>
+                    <th className="px-4 py-3 font-medium">Title</th>
+                    <th className="px-4 py-3 font-medium">Category</th>
+                    <th className="px-4 py-3 font-medium">Period</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Size</th>
+                    <th className="px-4 py-3 font-medium">Generated</th>
+                    <th className="px-4 py-3 font-medium text-right">Actions</th>
                   </tr>
-                )}
-                {filtered.map((r: any) => (
-                  <tr key={r.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{r.name}</div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{r.category}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{r.period}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusBadge(r.status)}`}
-                      >
-                        {statusIcon(r.status)} {r.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {formatBytes(r.size_bytes ?? 0)}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {new Date(r.created_at).toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {r.status === "ready" && (
-                          <Button size="sm" variant="outline" onClick={() => handleDownload(r.id)}>
-                            <Download className="mr-1.5 h-3.5 w-3.5" /> CSV
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDelete(r.id, r.name)}
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                        <FileText className="mx-auto h-8 w-8 mb-2 opacity-40" />
+                        No reports found. Click "Generate Report" to create one.
+                      </td>
+                    </tr>
+                  )}
+                  {filtered.map((r: any) => (
+                    <tr key={r.id} className="hover:bg-secondary/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{r.name}</div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{r.category}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{r.period}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusBadge(r.status)}`}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          {statusIcon(r.status)} {r.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {formatBytes(r.size_bytes ?? 0)}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {new Date(r.created_at).toLocaleString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {r.status === "ready" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownload(r.id)}
+                            >
+                              <Download className="mr-1.5 h-3.5 w-3.5" /> CSV
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDelete(r.id, r.name)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

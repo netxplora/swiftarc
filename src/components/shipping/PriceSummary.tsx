@@ -57,59 +57,63 @@ export function PriceSummary({ priceBreakdown, isLoading, distanceKm, travelTime
           )}
         </div>
       </div>
-      
+
       <div className="p-5 space-y-3 text-sm">
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Base Fee</span>
           <span>${breakdown.base_fee.toFixed(2)}</span>
         </div>
-        
+
         {breakdown.distance_charge > 0 && (
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Distance Charge</span>
             <span>${breakdown.distance_charge.toFixed(2)}</span>
           </div>
         )}
-        
+
         {breakdown.weight_charge > 0 && (
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Weight Charge</span>
             <span>${breakdown.weight_charge.toFixed(2)}</span>
           </div>
         )}
-        
+
         {breakdown.insurance_charge > 0 && (
           <div className="flex justify-between items-center text-amber-600">
-            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> Insurance</span>
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> Insurance
+            </span>
             <span>${breakdown.insurance_charge.toFixed(2)}</span>
           </div>
         )}
-        
+
         {breakdown.hazmat_charge > 0 && (
           <div className="flex justify-between items-center text-red-600">
-            <span className="flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Hazmat Surcharge</span>
+            <span className="flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" /> Hazmat Surcharge
+            </span>
             <span>${breakdown.hazmat_charge.toFixed(2)}</span>
           </div>
         )}
-        
+
         {breakdown.signature_charge > 0 && (
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Signature Fee</span>
             <span>${breakdown.signature_charge.toFixed(2)}</span>
           </div>
         )}
-        
+
         <div className="border-t pt-3 mt-3 flex justify-between items-center">
           <span className="text-muted-foreground">Subtotal</span>
           <span>${breakdown.subtotal.toFixed(2)}</span>
         </div>
-        
+
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Tax ({breakdown.tax_rate}%)</span>
           <span>${breakdown.tax.toFixed(2)}</span>
         </div>
       </div>
-      
+
       <div className="bg-navy text-cream p-5 flex justify-between items-center">
         <span className="font-medium text-lg">Total Shipping Fee</span>
         <span className="font-display text-2xl font-bold">${total.toFixed(2)}</span>

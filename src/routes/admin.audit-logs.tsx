@@ -134,58 +134,62 @@ function AdminAuditLogsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Log ID</th>
-                <th className="px-4 py-3 font-medium">Severity</th>
-                <th className="px-4 py-3 font-medium">Action Event</th>
-                <th className="px-4 py-3 font-medium">Actor</th>
-                <th className="px-4 py-3 font-medium">Target / Entity</th>
-                <th className="px-4 py-3 font-medium">IP Address</th>
-                <th className="px-4 py-3 font-medium text-right">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isLoading ? (
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-                  </td>
+                  <th className="px-4 py-3 font-medium">Log ID</th>
+                  <th className="px-4 py-3 font-medium">Severity</th>
+                  <th className="px-4 py-3 font-medium">Action Event</th>
+                  <th className="px-4 py-3 font-medium">Actor</th>
+                  <th className="px-4 py-3 font-medium">Target / Entity</th>
+                  <th className="px-4 py-3 font-medium">IP Address</th>
+                  <th className="px-4 py-3 font-medium text-right">Timestamp</th>
                 </tr>
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                    No events matching your filter criteria.
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((log) => (
-                  <tr key={log.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-navy-deep dark:text-cream">
-                      {log.id}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${severityBadge(log.severity as Severity)}`}
-                      >
-                        {severityIcon(log.severity as Severity)} {log.severity}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-navy-deep dark:text-cream">
-                      {log.action}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{log.actor}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{log.target}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{log.ip}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground">
-                      {log.timestamp}
+              </thead>
+              <tbody className="divide-y divide-border">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin" />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                      No events matching your filter criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((log) => (
+                    <tr key={log.id} className="hover:bg-secondary/50 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-navy-deep dark:text-cream">
+                        {log.id}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${severityBadge(log.severity as Severity)}`}
+                        >
+                          {severityIcon(log.severity as Severity)} {log.severity}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-navy-deep dark:text-cream">
+                        {log.action}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{log.actor}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{log.target}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                        {log.ip}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground">
+                        {log.timestamp}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

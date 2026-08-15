@@ -220,47 +220,49 @@ function AdminOverview() {
             </Link>
           </div>
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3 font-medium">Tracking</th>
-                  <th className="px-5 py-3 font-medium">Service</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
-                  <th className="px-5 py-3 font-medium text-right">Created</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {(adminData?.recentShipments ?? []).length === 0 ? (
+            <div className="overflow-x-auto w-full pb-4">
+              <table className="w-full min-w-[600px] text-sm text-left">
+                <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                   <tr>
-                    <td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">
-                      No recent network activity.
-                    </td>
+                    <th className="px-5 py-3 font-medium">Tracking</th>
+                    <th className="px-5 py-3 font-medium">Service</th>
+                    <th className="px-5 py-3 font-medium">Status</th>
+                    <th className="px-5 py-3 font-medium text-right">Created</th>
                   </tr>
-                ) : (
-                  (adminData?.recentShipments ?? []).map((r) => (
-                    <tr key={r.id} className="hover:bg-secondary/50 transition-colors">
-                      <td className="px-5 py-3 font-mono font-medium text-foreground">
-                        {r.tracking_number}
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground">{r.service}</td>
-                      <td className="px-5 py-3">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.status === "delivered" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber/10 text-amber"}`}
-                        >
-                          {statusLabels[r.status] || r.status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-right text-muted-foreground text-xs">
-                        {new Date(r.created_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {(adminData?.recentShipments ?? []).length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">
+                        No recent network activity.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    (adminData?.recentShipments ?? []).map((r) => (
+                      <tr key={r.id} className="hover:bg-secondary/50 transition-colors">
+                        <td className="px-5 py-3 font-mono font-medium text-foreground">
+                          {r.tracking_number}
+                        </td>
+                        <td className="px-5 py-3 text-muted-foreground">{r.service}</td>
+                        <td className="px-5 py-3">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.status === "delivered" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber/10 text-amber"}`}
+                          >
+                            {statusLabels[r.status] || r.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-right text-muted-foreground text-xs">
+                          {new Date(r.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -280,28 +282,30 @@ function AdminOverview() {
             </Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs uppercase tracking-widest text-red-800/60 border-b border-red-200">
-                <tr>
-                  <th className="px-5 py-3 font-medium">Tracking</th>
-                  <th className="px-5 py-3 font-medium">Service</th>
-                  <th className="px-5 py-3 font-medium text-right">Created</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-red-200">
-                {(adminData?.criticalExceptions ?? []).map((r: any) => (
-                  <tr key={r.id} className="hover:bg-red-100/50 transition-colors">
-                    <td className="px-5 py-3 font-mono font-medium text-red-900">
-                      {r.tracking_number}
-                    </td>
-                    <td className="px-5 py-3 text-red-800">{r.service}</td>
-                    <td className="px-5 py-3 text-right text-red-800 text-xs">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </td>
+            <div className="overflow-x-auto w-full pb-4">
+              <table className="w-full min-w-[600px] text-sm text-left">
+                <thead className="text-xs uppercase tracking-widest text-red-800/60 border-b border-red-200">
+                  <tr>
+                    <th className="px-5 py-3 font-medium">Tracking</th>
+                    <th className="px-5 py-3 font-medium">Service</th>
+                    <th className="px-5 py-3 font-medium text-right">Created</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-red-200">
+                  {(adminData?.criticalExceptions ?? []).map((r: any) => (
+                    <tr key={r.id} className="hover:bg-red-100/50 transition-colors">
+                      <td className="px-5 py-3 font-mono font-medium text-red-900">
+                        {r.tracking_number}
+                      </td>
+                      <td className="px-5 py-3 text-red-800">{r.service}</td>
+                      <td className="px-5 py-3 text-right text-red-800 text-xs">
+                        {new Date(r.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -314,36 +318,38 @@ function AdminOverview() {
           </h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3 font-medium rounded-l-lg">Courier</th>
-                <th className="px-5 py-3 font-medium">Deliveries (7d)</th>
-                <th className="px-5 py-3 font-medium">SLA Compliance</th>
-                <th className="px-5 py-3 font-medium rounded-r-lg text-right">Avg Time</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {(adminData?.courierPerformance ?? []).map((c: any) => (
-                <tr key={c.name}>
-                  <td className="px-5 py-4 font-medium text-foreground">{c.name}</td>
-                  <td className="px-5 py-4 text-muted-foreground">{c.deliveries}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${c.sla >= 98 ? "bg-success" : "bg-warning"}`}
-                          style={{ width: `${c.sla}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-semibold">{c.sla}%</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-right text-muted-foreground">{c.avgTime}</td>
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
+                <tr>
+                  <th className="px-5 py-3 font-medium rounded-l-lg">Courier</th>
+                  <th className="px-5 py-3 font-medium">Deliveries (7d)</th>
+                  <th className="px-5 py-3 font-medium">SLA Compliance</th>
+                  <th className="px-5 py-3 font-medium rounded-r-lg text-right">Avg Time</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {(adminData?.courierPerformance ?? []).map((c: any) => (
+                  <tr key={c.name}>
+                    <td className="px-5 py-4 font-medium text-foreground">{c.name}</td>
+                    <td className="px-5 py-4 text-muted-foreground">{c.deliveries}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${c.sla >= 98 ? "bg-success" : "bg-warning"}`}
+                            style={{ width: `${c.sla}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold">{c.sla}%</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-right text-muted-foreground">{c.avgTime}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

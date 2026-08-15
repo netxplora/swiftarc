@@ -19,7 +19,7 @@ export const Route = createFileRoute("/shipping")({
 
 function ShippingInfo() {
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-background">
       <PageHero
         eyebrow="Shipping Update"
         title="Shipping Services"
@@ -32,19 +32,19 @@ function ShippingInfo() {
             <Building2 className="w-10 h-10 text-primary" />
           </div>
 
-          <h2 className="text-3xl font-light tracking-tight text-slate-900">
+          <h2 className="text-3xl font-light tracking-tight text-foreground">
             Office-First Shipping Model
           </h2>
 
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-muted-foreground leading-relaxed">
             To ensure the highest level of security, compliance, and accurate weighing for all
             packages,
             <strong> customers can no longer create shipments directly online.</strong>
           </p>
 
           <div className="bg-card p-8 rounded-2xl border border-border shadow-sm text-left mt-8">
-            <h3 className="text-xl font-medium mb-4 text-slate-900">How to ship with SwiftArc:</h3>
-            <ol className="list-decimal list-inside space-y-4 text-slate-600">
+            <h3 className="text-xl font-medium mb-4 text-foreground">How to ship with SwiftArc:</h3>
+            <ol className="list-decimal list-inside space-y-4 text-muted-foreground">
               <li>Bring your physical package to the nearest SwiftArc courier office.</li>
               <li>Our staff will inspect, weigh, and measure your package accurately.</li>
               <li>An agent will create your shipment record and process your payment on-site.</li>

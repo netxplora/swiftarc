@@ -144,48 +144,50 @@ function CommercialInvoice() {
 
         {/* Line Items */}
         <div className="mb-12">
-          <table className="w-full text-sm text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-black">
-                <th className="py-2 font-bold w-[10%]">Qty</th>
-                <th className="py-2 font-bold w-[45%]">Full Description of Goods</th>
-                <th className="py-2 font-bold w-[20%]">HS Code</th>
-                <th className="py-2 font-bold w-[10%]">Country of Origin</th>
-                <th className="py-2 font-bold w-[15%] text-right">Value (USD)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-gray-200">
-                <td className="py-4 align-top">{p.pieces}</td>
-                <td className="py-4 align-top pr-4">
-                  <p className="font-semibold">
-                    {c?.description || p.description || "General Merchandise"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Export purpose: Commercial sample / Personal use
-                  </p>
-                </td>
-                <td className="py-4 align-top">{c?.hs_code || "N/A"}</td>
-                <td className="py-4 align-top">{o.country_code}</td>
-                <td className="py-4 align-top text-right font-semibold">
-                  {fmt(s.declared_value || 0)}
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={3} className="py-4 text-xs text-gray-500 italic align-bottom">
-                  These commodities, technology, or software were exported from the origin country
-                  in accordance with the Export Administration Regulations. Diversion contrary to
-                  law is prohibited.
-                </td>
-                <td className="py-4 text-right font-bold pt-6 border-t-2 border-black">TOTAL:</td>
-                <td className="py-4 text-right font-bold pt-6 border-t-2 border-black text-lg">
-                  {fmt(s.declared_value || 0)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-black">
+                  <th className="py-2 font-bold w-[10%]">Qty</th>
+                  <th className="py-2 font-bold w-[45%]">Full Description of Goods</th>
+                  <th className="py-2 font-bold w-[20%]">HS Code</th>
+                  <th className="py-2 font-bold w-[10%]">Country of Origin</th>
+                  <th className="py-2 font-bold w-[15%] text-right">Value (USD)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 align-top">{p.pieces}</td>
+                  <td className="py-4 align-top pr-4">
+                    <p className="font-semibold">
+                      {c?.description || p.description || "General Merchandise"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Export purpose: Commercial sample / Personal use
+                    </p>
+                  </td>
+                  <td className="py-4 align-top">{c?.hs_code || "N/A"}</td>
+                  <td className="py-4 align-top">{o.country_code}</td>
+                  <td className="py-4 align-top text-right font-semibold">
+                    {fmt(s.declared_value || 0)}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={3} className="py-4 text-xs text-gray-500 italic align-bottom">
+                    These commodities, technology, or software were exported from the origin country
+                    in accordance with the Export Administration Regulations. Diversion contrary to
+                    law is prohibited.
+                  </td>
+                  <td className="py-4 text-right font-bold pt-6 border-t-2 border-black">TOTAL:</td>
+                  <td className="py-4 text-right font-bold pt-6 border-t-2 border-black text-lg">
+                    {fmt(s.declared_value || 0)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
 
         {/* Signatures */}

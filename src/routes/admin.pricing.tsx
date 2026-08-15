@@ -276,72 +276,74 @@ function AdminPricingPage() {
             <Truck className="h-5 w-5 text-amber" /> Vehicle Category Rates
           </h2>
           <div className="overflow-x-auto mt-4">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Vehicle Type</th>
-                  <th className="px-4 py-3 font-medium">Base Rate</th>
-                  <th className="px-4 py-3 font-medium">Per KM</th>
-                  <th className="px-4 py-3 font-medium">Per KG</th>
-                  <th className="px-4 py-3 font-medium">Max Weight</th>
-                </tr>
-              </thead>
-              <tbody>
-                {VEHICLE_RATES_DEFAULT.map((v) => {
-                  const rates = vehicleRates[v.key] || {};
-                  return (
-                    <tr key={v.key} className="border-t border-border">
-                      <td className="px-4 py-3 font-medium">
-                        <span className="mr-2">{v.icon}</span> {v.type}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Input
-                          type="number"
-                          step="0.5"
-                          className="w-24 h-8 text-xs"
-                          value={rates.base ?? 0}
-                          onChange={(e) =>
-                            setVehicleRates({
-                              ...vehicleRates,
-                              [v.key]: { ...rates, base: Number(e.target.value) },
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <Input
-                          type="number"
-                          step="0.1"
-                          className="w-24 h-8 text-xs"
-                          value={rates.perKm ?? 0}
-                          onChange={(e) =>
-                            setVehicleRates({
-                              ...vehicleRates,
-                              [v.key]: { ...rates, perKm: Number(e.target.value) },
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <Input
-                          type="number"
-                          step="0.1"
-                          className="w-24 h-8 text-xs"
-                          value={rates.perKg ?? 0}
-                          onChange={(e) =>
-                            setVehicleRates({
-                              ...vehicleRates,
-                              [v.key]: { ...rates, perKg: Number(e.target.value) },
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{v.capacity}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto w-full pb-4">
+              <table className="w-full min-w-[600px] text-sm text-left">
+                <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Vehicle Type</th>
+                    <th className="px-4 py-3 font-medium">Base Rate</th>
+                    <th className="px-4 py-3 font-medium">Per KM</th>
+                    <th className="px-4 py-3 font-medium">Per KG</th>
+                    <th className="px-4 py-3 font-medium">Max Weight</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {VEHICLE_RATES_DEFAULT.map((v) => {
+                    const rates = vehicleRates[v.key] || {};
+                    return (
+                      <tr key={v.key} className="border-t border-border">
+                        <td className="px-4 py-3 font-medium">
+                          <span className="mr-2">{v.icon}</span> {v.type}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            type="number"
+                            step="0.5"
+                            className="w-24 h-8 text-xs"
+                            value={rates.base ?? 0}
+                            onChange={(e) =>
+                              setVehicleRates({
+                                ...vehicleRates,
+                                [v.key]: { ...rates, base: Number(e.target.value) },
+                              })
+                            }
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            type="number"
+                            step="0.1"
+                            className="w-24 h-8 text-xs"
+                            value={rates.perKm ?? 0}
+                            onChange={(e) =>
+                              setVehicleRates({
+                                ...vehicleRates,
+                                [v.key]: { ...rates, perKm: Number(e.target.value) },
+                              })
+                            }
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            type="number"
+                            step="0.1"
+                            className="w-24 h-8 text-xs"
+                            value={rates.perKg ?? 0}
+                            onChange={(e) =>
+                              setVehicleRates({
+                                ...vehicleRates,
+                                [v.key]: { ...rates, perKg: Number(e.target.value) },
+                              })
+                            }
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground text-xs">{v.capacity}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -351,37 +353,39 @@ function AdminPricingPage() {
             <Globe className="h-5 w-5 text-amber" /> Zone Multipliers
           </h2>
           <div className="overflow-x-auto mt-4">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Zone</th>
-                  <th className="px-4 py-3 font-medium">Multiplier</th>
-                  <th className="px-4 py-3 font-medium">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ZONE_DEFAULTS.map((z) => (
-                  <tr key={z.key} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium">{z.zone}</td>
-                    <td className="px-4 py-3">
-                      <Input
-                        type="number"
-                        step="0.05"
-                        className="w-24 h-8 text-xs"
-                        value={zoneMultipliers[z.key] ?? 1.0}
-                        onChange={(e) =>
-                          setZoneMultipliers({
-                            ...zoneMultipliers,
-                            [z.key]: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{z.description}</td>
+            <div className="overflow-x-auto w-full pb-4">
+              <table className="w-full min-w-[600px] text-sm text-left">
+                <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Zone</th>
+                    <th className="px-4 py-3 font-medium">Multiplier</th>
+                    <th className="px-4 py-3 font-medium">Description</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {ZONE_DEFAULTS.map((z) => (
+                    <tr key={z.key} className="border-t border-border">
+                      <td className="px-4 py-3 font-medium">{z.zone}</td>
+                      <td className="px-4 py-3">
+                        <Input
+                          type="number"
+                          step="0.05"
+                          className="w-24 h-8 text-xs"
+                          value={zoneMultipliers[z.key] ?? 1.0}
+                          onChange={(e) =>
+                            setZoneMultipliers({
+                              ...zoneMultipliers,
+                              [z.key]: Number(e.target.value),
+                            })
+                          }
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">{z.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

@@ -94,82 +94,84 @@ function AdminInvoices() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
-                  <tr className="border-b border-border">
-                    <th className="p-3">Invoice</th>
-                    <th className="p-3">Amount</th>
-                    <th className="p-3">Due</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(q.data ?? []).map((i) => (
-                    <tr key={i.id} className="border-b border-border last:border-0">
-                      <td className="p-3 font-mono text-xs">{i.number}</td>
-                      <td className="p-3">
-                        {i.currency} {Number(i.total).toLocaleString()}
-                      </td>
-                      <td className="p-3 text-xs text-muted-foreground">{i.due_date}</td>
-                      <td className="p-3">
-                        <select
-                          value={i.status ?? "sent"}
-                          onChange={(e) =>
-                            mut.mutate({
-                              id: i.id,
-                              status: e.target.value as (typeof STATUSES)[number],
-                            })
-                          }
-                          className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => downloadPdf(i)}
-                            className="text-amber-deep hover:text-amber hover:bg-amber/10 h-8 px-2"
-                            title="Download PDF"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 px-2 text-destructive hover:bg-destructive/10"
-                            onClick={async () => {
-                              if (confirm("Delete invoice?")) {
-                                const del = (await import("@/lib/admin.functions"))
-                                  .adminDeleteInvoice;
-                                del({ data: { id: i.id } }).then(() =>
-                                  qc.invalidateQueries({ queryKey: ["admin-invoices"] }),
-                                );
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
+              <div className="overflow-x-auto w-full pb-4">
+                <table className="w-full min-w-[600px] text-sm">
+                  <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+                    <tr className="border-b border-border">
+                      <th className="p-3">Invoice</th>
+                      <th className="p-3">Amount</th>
+                      <th className="p-3">Due</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">Actions</th>
                     </tr>
-                  ))}
-                  {(q.data ?? []).length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="p-10 text-center text-xs text-muted-foreground">
-                        No invoices.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {(q.data ?? []).map((i) => (
+                      <tr key={i.id} className="border-b border-border last:border-0">
+                        <td className="p-3 font-mono text-xs">{i.number}</td>
+                        <td className="p-3">
+                          {i.currency} {Number(i.total).toLocaleString()}
+                        </td>
+                        <td className="p-3 text-xs text-muted-foreground">{i.due_date}</td>
+                        <td className="p-3">
+                          <select
+                            value={i.status ?? "sent"}
+                            onChange={(e) =>
+                              mut.mutate({
+                                id: i.id,
+                                status: e.target.value as (typeof STATUSES)[number],
+                              })
+                            }
+                            className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                          >
+                            {STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => downloadPdf(i)}
+                              className="text-amber-deep hover:text-amber hover:bg-amber/10 h-8 px-2"
+                              title="Download PDF"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 px-2 text-destructive hover:bg-destructive/10"
+                              onClick={async () => {
+                                if (confirm("Delete invoice?")) {
+                                  const del = (await import("@/lib/admin.functions"))
+                                    .adminDeleteInvoice;
+                                  del({ data: { id: i.id } }).then(() =>
+                                    qc.invalidateQueries({ queryKey: ["admin-invoices"] }),
+                                  );
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {(q.data ?? []).length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="p-10 text-center text-xs text-muted-foreground">
+                          No invoices.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </CardContent>
@@ -208,7 +210,7 @@ function InvoiceForm({ onSuccess }: { onSuccess: () => void }) {
           <Plus className="mr-2 h-4 w-4" /> New Invoice
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create Invoice</DialogTitle>
         </DialogHeader>

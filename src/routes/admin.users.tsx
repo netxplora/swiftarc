@@ -109,121 +109,123 @@ function AdminUsers() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary/50 text-left text-[11px] uppercase tracking-widest text-muted-foreground">
-                  <tr className="border-b border-border">
-                    <th className="px-4 py-3 font-medium">User</th>
-                    <th className="px-4 py-3 font-medium hidden md:table-cell">Email</th>
-                    <th className="px-4 py-3 font-medium">Roles</th>
-                    <th className="px-4 py-3 font-medium hidden sm:table-cell">Joined</th>
-                    <th className="px-4 py-3 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((u) => {
-                    const isAdmin = u.roles.includes("admin");
-                    const roleColors: Record<string, string> = {
-                      admin: "bg-amber/15 text-amber-deep border-amber/30",
-                      moderator: "bg-violet-500/15 text-violet-700 border-violet-300",
-                      business: "bg-sky-500/15 text-sky-700 border-sky-300",
-                      courier: "bg-emerald-500/15 text-emerald-700 border-emerald-300",
-                    };
-                    return (
-                      <tr
-                        key={u.id}
-                        className="border-b border-border last:border-0 hover:bg-secondary/40 transition-colors"
-                      >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">
-                              {(u.displayName || "U").slice(0, 1).toUpperCase()}
+              <div className="overflow-x-auto w-full pb-4">
+                <table className="w-full min-w-[600px] text-sm">
+                  <thead className="bg-secondary/50 text-left text-[11px] uppercase tracking-widest text-muted-foreground">
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-3 font-medium">User</th>
+                      <th className="px-4 py-3 font-medium hidden md:table-cell">Email</th>
+                      <th className="px-4 py-3 font-medium">Roles</th>
+                      <th className="px-4 py-3 font-medium hidden sm:table-cell">Joined</th>
+                      <th className="px-4 py-3 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((u) => {
+                      const isAdmin = u.roles.includes("admin");
+                      const roleColors: Record<string, string> = {
+                        admin: "bg-amber/15 text-amber-deep border-amber/30",
+                        moderator: "bg-violet-500/15 text-violet-700 border-violet-300",
+                        business: "bg-sky-500/15 text-sky-700 border-sky-300",
+                        courier: "bg-emerald-500/15 text-emerald-700 border-emerald-300",
+                      };
+                      return (
+                        <tr
+                          key={u.id}
+                          className="border-b border-border last:border-0 hover:bg-secondary/40 transition-colors"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">
+                                {(u.displayName || "U").slice(0, 1).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground">
+                                  {u.displayName || "â€”"}
+                                </p>
+                                <p className="font-mono text-[10px] text-muted-foreground">
+                                  {u.id.slice(0, 8)}â€¦
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {u.displayName || "â€”"}
-                              </p>
-                              <p className="font-mono text-[10px] text-muted-foreground">
-                                {u.id.slice(0, 8)}â€¦
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 hidden md:table-cell">
-                          <span className="text-xs text-muted-foreground">
-                            {(u as any).email || "â€”"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {u.roles.length === 0 && (
-                              <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                user
-                              </span>
-                            )}
-                            {u.roles.map((r) => (
-                              <span
-                                key={r}
-                                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${roleColors[r] ?? "bg-secondary border-border"}`}
-                              >
-                                {r}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">
-                          {new Date(u.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="p-3 text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant={isAdmin ? "outline" : "default"}
-                              onClick={() =>
-                                roleMut.mutate({ userId: u.id, role: "admin", grant: !isAdmin })
-                              }
-                              disabled={roleMut.isPending}
-                            >
-                              {isAdmin ? (
-                                <>
-                                  <ShieldOff className="mr-1 h-3 w-3" /> Revoke admin
-                                </>
-                              ) : (
-                                <>
-                                  <Shield className="mr-1 h-3 w-3" /> Make admin
-                                </>
+                          </td>
+                          <td className="px-4 py-3 hidden md:table-cell">
+                            <span className="text-xs text-muted-foreground">
+                              {(u as any).email || "â€”"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {u.roles.length === 0 && (
+                                <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                  user
+                                </span>
                               )}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={async () => {
-                                if (
-                                  confirm("Delete user account entirely? This cannot be undone.")
-                                ) {
-                                  const del = (await import("@/lib/admin.functions"))
-                                    .adminDeleteUser;
-                                  del({ data: { id: u.id } }).then(() =>
-                                    qc.invalidateQueries({ queryKey: ["admin-users"] }),
-                                  );
+                              {u.roles.map((r) => (
+                                <span
+                                  key={r}
+                                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${roleColors[r] ?? "bg-secondary border-border"}`}
+                                >
+                                  {r}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">
+                            {new Date(u.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="p-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant={isAdmin ? "outline" : "default"}
+                                onClick={() =>
+                                  roleMut.mutate({ userId: u.id, role: "admin", grant: !isAdmin })
                                 }
-                              }}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
+                                disabled={roleMut.isPending}
+                              >
+                                {isAdmin ? (
+                                  <>
+                                    <ShieldOff className="mr-1 h-3 w-3" /> Revoke admin
+                                  </>
+                                ) : (
+                                  <>
+                                    <Shield className="mr-1 h-3 w-3" /> Make admin
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={async () => {
+                                  if (
+                                    confirm("Delete user account entirely? This cannot be undone.")
+                                  ) {
+                                    const del = (await import("@/lib/admin.functions"))
+                                      .adminDeleteUser;
+                                    del({ data: { id: u.id } }).then(() =>
+                                      qc.invalidateQueries({ queryKey: ["admin-users"] }),
+                                    );
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filtered.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="p-10 text-center text-xs text-muted-foreground">
+                          No users found.
                         </td>
                       </tr>
-                    );
-                  })}
-                  {filtered.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="p-10 text-center text-xs text-muted-foreground">
-                        No users found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </CardContent>

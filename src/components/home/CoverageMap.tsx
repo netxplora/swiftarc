@@ -57,7 +57,12 @@ export function CoverageMap() {
   }
 
   if (!isLoaded) {
-    return <div className="h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-navy-deep animate-pulse rounded-2xl" aria-hidden />;
+    return (
+      <div
+        className="h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-navy-deep animate-pulse rounded-2xl"
+        aria-hidden
+      />
+    );
   }
 
   return (

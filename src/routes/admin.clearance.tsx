@@ -21,10 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { adminVerifyPaymentSubmission, adminGetCryptoAssets } from "@/lib/payment.functions";
-import {
-  adminListCustomsCases,
-  adminGetPaymentSubmissions,
-} from "@/lib/admin.functions";
+import { adminListCustomsCases, adminGetPaymentSubmissions } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/clearance")({
   head: () => ({
@@ -35,23 +32,35 @@ export const Route = createFileRoute("/admin/clearance")({
 
 function statusColor(s: string) {
   switch (s) {
-    case "verified": return "bg-green-100 text-green-800 border-green-200";
-    case "verification_required": return "bg-amber-100 text-amber-800 border-amber-200";
-    case "rejected": return "bg-red-100 text-red-800 border-red-200";
-    case "underpaid": return "bg-orange-100 text-orange-800 border-orange-200";
-    case "overpaid": return "bg-purple-100 text-purple-800 border-purple-200";
-    default: return "bg-muted text-muted-foreground border-border";
+    case "verified":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "verification_required":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    case "rejected":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "underpaid":
+      return "bg-orange-100 text-orange-800 border-orange-200";
+    case "overpaid":
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    default:
+      return "bg-muted text-muted-foreground border-border";
   }
 }
 
 function holdStatusColor(s: string) {
   switch (s) {
-    case "payment_required": return "bg-red-100 text-red-800";
-    case "payment_verification": return "bg-amber-100 text-amber-800";
-    case "clearance_processing": return "bg-blue-100 text-blue-800";
-    case "cleared": return "bg-green-100 text-green-800";
-    case "released": return "bg-emerald-100 text-emerald-800";
-    default: return "bg-muted text-muted-foreground";
+    case "payment_required":
+      return "bg-red-100 text-red-800";
+    case "payment_verification":
+      return "bg-amber-100 text-amber-800";
+    case "clearance_processing":
+      return "bg-blue-100 text-blue-800";
+    case "cleared":
+      return "bg-green-100 text-green-800";
+    case "released":
+      return "bg-emerald-100 text-emerald-800";
+    default:
+      return "bg-muted text-muted-foreground";
   }
 }
 
@@ -95,7 +104,7 @@ function AdminClearancePage() {
   const pending = submissions.filter((s) => s.status === "verification_required").length;
   const verified = submissions.filter((s) => s.status === "verified").length;
   const issues = submissions.filter((s) =>
-    ["rejected", "underpaid", "overpaid"].includes(s.status)
+    ["rejected", "underpaid", "overpaid"].includes(s.status),
   ).length;
 
   return (
@@ -114,7 +123,9 @@ function AdminClearancePage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Awaiting Review</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+            Awaiting Review
+          </p>
           <p className="text-3xl font-bold text-amber">{pending}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
@@ -122,7 +133,9 @@ function AdminClearancePage() {
           <p className="text-3xl font-bold text-green-600">{verified}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Requires Action</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+            Requires Action
+          </p>
           <p className="text-3xl font-bold text-red-600">{issues}</p>
         </div>
       </div>
@@ -158,10 +171,7 @@ function AdminClearancePage() {
             const isExpanded = expandedId === sub.id;
 
             return (
-              <div
-                key={sub.id}
-                className="rounded-xl border border-border bg-card overflow-hidden"
-              >
+              <div key={sub.id} className="rounded-xl border border-border bg-card overflow-hidden">
                 {/* Summary row */}
                 <button
                   className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left"
@@ -184,7 +194,9 @@ function AdminClearancePage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="text-right hidden sm:block">
-                      <p className="text-sm font-semibold">{Number(sub.amount_claimed).toFixed(6)} {asset?.symbol}</p>
+                      <p className="text-sm font-semibold">
+                        {Number(sub.amount_claimed).toFixed(6)} {asset?.symbol}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(sub.submitted_at).toLocaleDateString()}
                       </p>
@@ -213,13 +225,17 @@ function AdminClearancePage() {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Hold Status</p>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${holdStatusColor(hold?.status)}`}>
+                        <span
+                          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${holdStatusColor(hold?.status)}`}
+                        >
                           {hold?.status?.replace(/_/g, " ")}
                         </span>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Asset</p>
-                        <p className="font-medium">{asset?.symbol} / {sub.network}</p>
+                        <p className="font-medium">
+                          {asset?.symbol} / {sub.network}
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Amount Claimed</p>
@@ -270,7 +286,11 @@ function AdminClearancePage() {
                             disabled={verifyMut.isPending}
                             onClick={() =>
                               verifyMut.mutate({
-                                data: { submission_id: sub.id, status: "verified", notes: verifyNote },
+                                data: {
+                                  submission_id: sub.id,
+                                  status: "verified",
+                                  notes: verifyNote,
+                                },
                               })
                             }
                           >
@@ -284,7 +304,11 @@ function AdminClearancePage() {
                             disabled={verifyMut.isPending}
                             onClick={() =>
                               verifyMut.mutate({
-                                data: { submission_id: sub.id, status: "underpaid", notes: verifyNote },
+                                data: {
+                                  submission_id: sub.id,
+                                  status: "underpaid",
+                                  notes: verifyNote,
+                                },
                               })
                             }
                           >
@@ -298,7 +322,11 @@ function AdminClearancePage() {
                             disabled={verifyMut.isPending}
                             onClick={() =>
                               verifyMut.mutate({
-                                data: { submission_id: sub.id, status: "overpaid", notes: verifyNote },
+                                data: {
+                                  submission_id: sub.id,
+                                  status: "overpaid",
+                                  notes: verifyNote,
+                                },
                               })
                             }
                           >
@@ -311,7 +339,11 @@ function AdminClearancePage() {
                             disabled={verifyMut.isPending}
                             onClick={() =>
                               verifyMut.mutate({
-                                data: { submission_id: sub.id, status: "rejected", notes: verifyNote },
+                                data: {
+                                  submission_id: sub.id,
+                                  status: "rejected",
+                                  notes: verifyNote,
+                                },
                               })
                             }
                           >
@@ -325,8 +357,9 @@ function AdminClearancePage() {
                     {sub.status !== "verification_required" && (
                       <div className="border-t border-border pt-4 flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
-                        Decision recorded{sub.verified_at ? ` on ${new Date(sub.verified_at).toLocaleString()}` : ""}.
-                        {sub.notes && <span className="ml-1 italic">"{sub.notes}"</span>}
+                        Decision recorded
+                        {sub.verified_at ? ` on ${new Date(sub.verified_at).toLocaleString()}` : ""}
+                        .{sub.notes && <span className="ml-1 italic">"{sub.notes}"</span>}
                       </div>
                     )}
                   </div>

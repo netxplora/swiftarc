@@ -141,106 +141,108 @@ function TransactionsTab() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
-                <tr className="border-b border-border">
-                  <th className="p-4">Reference</th>
-                  <th className="p-4">Shipment</th>
-                  <th className="p-4">Amount</th>
-                  <th className="p-4">Method</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((t: any) => (
-                  <tr
-                    key={t.id}
-                    className="border-b border-border last:border-0 hover:bg-secondary/20"
-                  >
-                    <td className="p-4 font-mono font-medium">{t.reference}</td>
-                    <td className="p-4">{t.shipments?.tracking_number}</td>
-                    <td className="p-4 font-medium">
-                      {t.currency} {Number(t.amount).toFixed(2)}
-                    </td>
-                    <td className="p-4 capitalize">{t.method.replace("_", " ")}</td>
-                    <td className="p-4">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          t.status === "verified"
-                            ? "bg-success/20 text-success"
-                            : t.status === "processing"
-                              ? "bg-amber/20 text-amber-deep"
-                              : t.status === "rejected"
-                                ? "bg-destructive/20 text-destructive"
-                                : "bg-secondary text-muted-foreground"
-                        }`}
-                      >
-                        {t.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      {t.status === "processing" ? (
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => verifyMut.mutate({ id: t.id, action: "verify" })}
-                            disabled={verifyMut.isPending}
-                            className="bg-success text-white hover:bg-success/90 h-8 px-2"
-                            title="Verify Payment"
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => {
-                              const note = prompt("Reason for rejection:");
-                              if (note !== null)
-                                verifyMut.mutate({ id: t.id, action: "reject", note });
-                            }}
-                            disabled={verifyMut.isPending}
-                            className="h-8 px-2"
-                            title="Reject Payment"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : t.status === "verified" ? (
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={async () => {
-                              const { generatePaymentReceipt } = await import("@/lib/pdf");
-                              generatePaymentReceipt({
-                                id: t.reference || t.id,
-                                date: t.created_at,
-                                method: t.method.replace("_", " "),
-                                amount: t.amount,
-                                status: t.status,
-                                invoiceId: t.shipments?.tracking_number,
-                              });
-                            }}
-                            className="h-8 px-2 text-amber-deep hover:text-amber hover:bg-amber/10"
-                            title="Download Receipt"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : null}
-                    </td>
+            <div className="overflow-x-auto w-full pb-4">
+              <table className="w-full min-w-[600px] text-sm">
+                <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+                  <tr className="border-b border-border">
+                    <th className="p-4">Reference</th>
+                    <th className="p-4">Shipment</th>
+                    <th className="p-4">Amount</th>
+                    <th className="p-4">Method</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="p-10 text-center text-muted-foreground">
-                      No transactions found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filtered.map((t: any) => (
+                    <tr
+                      key={t.id}
+                      className="border-b border-border last:border-0 hover:bg-secondary/20"
+                    >
+                      <td className="p-4 font-mono font-medium">{t.reference}</td>
+                      <td className="p-4">{t.shipments?.tracking_number}</td>
+                      <td className="p-4 font-medium">
+                        {t.currency} {Number(t.amount).toFixed(2)}
+                      </td>
+                      <td className="p-4 capitalize">{t.method.replace("_", " ")}</td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            t.status === "verified"
+                              ? "bg-success/20 text-success"
+                              : t.status === "processing"
+                                ? "bg-amber/20 text-amber-deep"
+                                : t.status === "rejected"
+                                  ? "bg-destructive/20 text-destructive"
+                                  : "bg-secondary text-muted-foreground"
+                          }`}
+                        >
+                          {t.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {t.status === "processing" ? (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => verifyMut.mutate({ id: t.id, action: "verify" })}
+                              disabled={verifyMut.isPending}
+                              className="bg-success text-white hover:bg-success/90 h-8 px-2"
+                              title="Verify Payment"
+                            >
+                              <CheckCircle2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                const note = prompt("Reason for rejection:");
+                                if (note !== null)
+                                  verifyMut.mutate({ id: t.id, action: "reject", note });
+                              }}
+                              disabled={verifyMut.isPending}
+                              className="h-8 px-2"
+                              title="Reject Payment"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : t.status === "verified" ? (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={async () => {
+                                const { generatePaymentReceipt } = await import("@/lib/pdf");
+                                generatePaymentReceipt({
+                                  id: t.reference || t.id,
+                                  date: t.created_at,
+                                  method: t.method.replace("_", " "),
+                                  amount: t.amount,
+                                  status: t.status,
+                                  invoiceId: t.shipments?.tracking_number,
+                                });
+                              }}
+                              className="h-8 px-2 text-amber-deep hover:text-amber hover:bg-amber/10"
+                              title="Download Receipt"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-10 text-center text-muted-foreground">
+                        No transactions found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </CardContent>
@@ -362,7 +364,7 @@ function WalletForm({ wallet, onSuccess }: { wallet?: any; onSuccess: () => void
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{wallet ? "Edit Wallet" : "Add Crypto Wallet"}</DialogTitle>
         </DialogHeader>

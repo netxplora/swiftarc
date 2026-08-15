@@ -357,7 +357,7 @@ function FeaturedServices() {
         title="Move anything, anywhere on the arc."
         link={{ to: "/shipping", label: "All services" }}
       />
-      <div className="mt-10 flex sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
         {services.map((s, i) => (
           <motion.div
             key={s.title}
@@ -365,9 +365,9 @@ function FeaturedServices() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
-            className="min-w-[75vw] sm:min-w-0 shrink-0 snap-center"
+            className="flex"
           >
-            <Card className="group relative h-full overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <Card className="group relative w-full overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="aspect-[16/10] overflow-hidden">
                 <img
                   src={s.img}
@@ -426,7 +426,7 @@ function BusinessSolutions() {
           title="Built for the way your business ships."
           link={{ to: "/business", label: "Explore solutions" }}
         />
-        <div className="mt-12 flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
           {items.map((it, i) => (
             <motion.div
               key={it.title}
@@ -434,7 +434,7 @@ function BusinessSolutions() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group rounded-2xl border border-border bg-card p-4 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl min-w-[75vw] sm:min-w-0 shrink-0 snap-center flex flex-col"
+              className="group rounded-2xl border border-border bg-card p-4 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl flex flex-col w-full"
             >
               <div className="grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-xl bg-amber/15 text-amber">
                 <it.icon className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 group-hover:scale-110" />
@@ -556,7 +556,7 @@ function Testimonials() {
     <section className="bg-secondary/40 border-y border-border/50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:px-8">
         <SectionHead eyebrow="Customers" title="Trusted by teams that move product." />
-        <div className="mt-12 flex sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
           {items.map((t, i) => (
             <motion.figure
               key={t.name}
@@ -564,7 +564,7 @@ function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm flex flex-col min-w-[85vw] sm:min-w-0 shrink-0 snap-center"
+              className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm flex flex-col w-full"
             >
               <div className="flex gap-1 text-amber">
                 {Array.from({ length: 5 }).map((_, k) => (
@@ -631,7 +631,7 @@ function LatestNews() {
         title="Latest from SwiftArc."
         link={{ to: "/resources", label: "All stories" }}
       />
-      <div className="mt-10 flex sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 items-stretch">
         {news.map((n, i) => (
           <motion.article
             key={n.title}
@@ -639,7 +639,7 @@ function LatestNews() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
-            className="group rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer min-w-[80vw] sm:min-w-0 shrink-0 snap-center flex flex-col"
+            className="group rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer flex flex-col w-full"
           >
             <div className="aspect-[16/9] overflow-hidden bg-secondary">
               <img

@@ -515,7 +515,7 @@ function CreateShipmentDialog({ onSuccess }: { onSuccess: () => void }) {
           <Plus className="mr-2 h-4 w-4" /> New Shipment
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create Shipment</DialogTitle>
         </DialogHeader>
@@ -1581,7 +1581,9 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
     );
 
   const holds = holdsQ.data || [];
-  const activeHolds = holds.filter((h: any) => h.status === "open" || h.status === "payment_required");
+  const activeHolds = holds.filter(
+    (h: any) => h.status === "open" || h.status === "payment_required",
+  );
 
   return (
     <div className="space-y-6 pt-4">
@@ -1590,7 +1592,10 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
         <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm">
           <ShieldCheck className="h-5 w-5 text-red-500 shrink-0" />
           <span>
-            <strong>{activeHolds.length} active hold{activeHolds.length > 1 ? "s" : ""}</strong> on this shipment.
+            <strong>
+              {activeHolds.length} active hold{activeHolds.length > 1 ? "s" : ""}
+            </strong>{" "}
+            on this shipment.
             {trackingNumber && ` Tracking: ${trackingNumber}`}
           </span>
         </div>
@@ -1611,9 +1616,13 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
               onChange={(e) => setReason(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <option value="" disabled>Select reason</option>
+              <option value="" disabled>
+                Select reason
+              </option>
               {HOLD_REASONS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
           </div>
@@ -1665,12 +1674,7 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
             </select>
           </div>
 
-          <FormField
-            label="Amount Due"
-            type="number"
-            value={amount}
-            onChange={setAmount}
-          />
+          <FormField label="Amount Due" type="number" value={amount} onChange={setAmount} />
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
@@ -1683,7 +1687,9 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
             >
               <option value="">None / N/A</option>
               {REQUIRED_DOCUMENTS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
           </div>
@@ -1734,15 +1740,16 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
         ) : (
           <div className="space-y-3">
             {holds.map((h: any) => (
-              <div
-                key={h.id}
-                className="border border-border rounded-xl p-4 bg-card shadow-sm"
-              >
+              <div key={h.id} className="border border-border rounded-xl p-4 bg-card shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <Badge
-                        variant={h.status === "open" || h.status === "payment_required" ? "destructive" : "outline"}
+                        variant={
+                          h.status === "open" || h.status === "payment_required"
+                            ? "destructive"
+                            : "outline"
+                        }
                         className="text-[10px] uppercase shrink-0"
                       >
                         {h.status?.replace(/_/g, " ")}
@@ -1751,25 +1758,41 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
                     </div>
                     <div className="text-xs text-muted-foreground space-y-0.5">
                       {h.customs_authority && (
-                        <div>Authority: <span className="font-medium text-foreground">{h.customs_authority}</span></div>
-                      )}
-                      {(h.amount_due > 0) && (
                         <div>
-                          Charge: <span className="font-medium text-foreground">
-                            {h.currency} {Number(h.amount_due).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          Authority:{" "}
+                          <span className="font-medium text-foreground">{h.customs_authority}</span>
+                        </div>
+                      )}
+                      {h.amount_due > 0 && (
+                        <div>
+                          Charge:{" "}
+                          <span className="font-medium text-foreground">
+                            {h.currency}{" "}
+                            {Number(h.amount_due).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                            })}
                           </span>
                           {h.charge_category && ` (${h.charge_category.replace(/_/g, " ")})`}
                         </div>
                       )}
                       {h.required_action && (
-                        <div>Required: <span className="font-medium text-foreground">{h.required_action}</span></div>
+                        <div>
+                          Required:{" "}
+                          <span className="font-medium text-foreground">{h.required_action}</span>
+                        </div>
                       )}
                       {h.payment_status && h.payment_status !== "pending" && (
-                        <div>Payment: <span className="font-medium text-foreground capitalize">{h.payment_status.replace(/_/g, " ")}</span></div>
+                        <div>
+                          Payment:{" "}
+                          <span className="font-medium text-foreground capitalize">
+                            {h.payment_status.replace(/_/g, " ")}
+                          </span>
+                        </div>
                       )}
                       <div className="text-[10px] text-muted-foreground mt-1">
                         Created: {new Date(h.created_at).toLocaleString()}
-                        {h.released_at && ` · Released: ${new Date(h.released_at).toLocaleString()}`}
+                        {h.released_at &&
+                          ` · Released: ${new Date(h.released_at).toLocaleString()}`}
                       </div>
                     </div>
                   </div>
@@ -1783,10 +1806,16 @@ function HoldsTab({ shipmentId, trackingNumber }: { shipmentId: string; tracking
                             variant="destructive"
                             disabled={releaseMut.isPending}
                             onClick={() =>
-                              releaseMut.mutate({ data: { hold_id: h.id, shipment_id: shipmentId } })
+                              releaseMut.mutate({
+                                data: { hold_id: h.id, shipment_id: shipmentId },
+                              })
                             }
                           >
-                            {releaseMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Confirm"}
+                            {releaseMut.isPending ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              "Confirm"
+                            )}
                           </Button>
                           <Button
                             size="sm"

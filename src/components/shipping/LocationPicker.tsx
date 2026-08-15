@@ -199,9 +199,9 @@ export function LocationPicker({
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {
-           toast.error("Location permission denied. Please enter address manually.");
+          toast.error("Location permission denied. Please enter address manually.");
         } else {
-           toast.error("Unable to determine location. Try again or enter manually.");
+          toast.error("Unable to determine location. Try again or enter manually.");
         }
         setLocating(false);
       },

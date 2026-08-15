@@ -119,7 +119,7 @@ function VehicleDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[85vh] overflow-y-auto max-w-lg">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit Vehicle" : "Add Vehicle"}</DialogTitle>
         </DialogHeader>
@@ -379,100 +379,102 @@ function AdminFleetPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Vehicle</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Current Driver</th>
-                <th className="px-4 py-3 font-medium">Location</th>
-                <th className="px-4 py-3 font-medium">Fuel / Mileage</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isLoading && (
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                    Loading fleet data...
-                  </td>
+                  <th className="px-4 py-3 font-medium">Vehicle</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Current Driver</th>
+                  <th className="px-4 py-3 font-medium">Location</th>
+                  <th className="px-4 py-3 font-medium">Fuel / Mileage</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
-              )}
-              {!isLoading && filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    No vehicles found.
-                  </td>
-                </tr>
-              )}
-              {!isLoading &&
-                filtered.map((v) => (
-                  <tr key={v.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-navy-deep dark:text-cream">{v.model}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-                          {v.id.substring(0, 8)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{v.type}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusVariant(v.status)}`}
-                      >
-                        {v.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {v.drivers ? (
-                        <div className="font-medium">{v.drivers.name}</div>
-                      ) : (
-                        <span className="text-muted-foreground text-xs italic">Unassigned</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{v.location}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col gap-1.5 w-24">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-medium">{v.fuel_level}%</span>
-                          <span className="text-muted-foreground">
-                            {v.mileage?.toLocaleString()} km
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${fuelColor(v.fuel_level || 0)}`}
-                            style={{ width: `${v.fuel_level}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5"
-                          onClick={() => openEdit(v)}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(v.id, v.model)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {isLoading && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                      Loading fleet data...
                     </td>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                )}
+                {!isLoading && filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      No vehicles found.
+                    </td>
+                  </tr>
+                )}
+                {!isLoading &&
+                  filtered.map((v) => (
+                    <tr key={v.id} className="hover:bg-secondary/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-navy-deep dark:text-cream">{v.model}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
+                            {v.id.substring(0, 8)}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{v.type}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusVariant(v.status)}`}
+                        >
+                          {v.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {v.drivers ? (
+                          <div className="font-medium">{v.drivers.name}</div>
+                        ) : (
+                          <span className="text-muted-foreground text-xs italic">Unassigned</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{v.location}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1.5 w-24">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-medium">{v.fuel_level}%</span>
+                            <span className="text-muted-foreground">
+                              {v.mileage?.toLocaleString()} km
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${fuelColor(v.fuel_level || 0)}`}
+                              style={{ width: `${v.fuel_level}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2.5"
+                            onClick={() => openEdit(v)}
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(v.id, v.model)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

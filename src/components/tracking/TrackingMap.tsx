@@ -47,14 +47,25 @@ const currentIcon = createIcon("#3b82f6"); // Blue pulse
 const checkpointIcon = createIcon("#94a3b8"); // Slate
 
 // Generate a great circle arc between two points
-function getArcPoints(start: [number, number], end: [number, number], segments = 100): [number, number][] {
+function getArcPoints(
+  start: [number, number],
+  end: [number, number],
+  segments = 100,
+): [number, number][] {
   const points: [number, number][] = [];
   const lat1 = start[0] * (Math.PI / 180);
   const lon1 = start[1] * (Math.PI / 180);
   const lat2 = end[0] * (Math.PI / 180);
   const lon2 = end[1] * (Math.PI / 180);
-  const d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat1 - lat2) / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon1 - lon2) / 2), 2)));
-  
+  const d =
+    2 *
+    Math.asin(
+      Math.sqrt(
+        Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
+          Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon1 - lon2) / 2), 2),
+      ),
+    );
+
   if (d === 0) return [start, end];
 
   for (let i = 0; i <= segments; i++) {
@@ -105,8 +116,13 @@ export function TrackingMap({
   }, [origin, destination]);
 
   const allPoints = useMemo(() => {
-    const pts = [origin, destination, current, ...checkpoints.map(c => [c.lat, c.lng] as [number, number])];
-    return pts.filter(p => p[0] !== 0 || p[1] !== 0);
+    const pts = [
+      origin,
+      destination,
+      current,
+      ...checkpoints.map((c) => [c.lat, c.lng] as [number, number]),
+    ];
+    return pts.filter((p) => p[0] !== 0 || p[1] !== 0);
   }, [origin, destination, current, checkpoints]);
 
   if (!mounted) {
@@ -120,10 +136,13 @@ export function TrackingMap({
   }
 
   return (
-    <div style={{ height }} className="w-full overflow-hidden rounded-2xl border border-border bg-secondary relative z-0">
-      <MapContainer 
-        center={origin[0] !== 0 ? origin : [20, 0]} 
-        zoom={2} 
+    <div
+      style={{ height }}
+      className="w-full overflow-hidden rounded-2xl border border-border bg-secondary relative z-0"
+    >
+      <MapContainer
+        center={origin[0] !== 0 ? origin : [20, 0]}
+        zoom={2}
         scrollWheelZoom={true}
         style={{ width: "100%", height: "100%", zIndex: 0 }}
       >
@@ -131,14 +150,14 @@ export function TrackingMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        
+
         {/* Bounds management */}
         <MapBounds points={allPoints} />
 
         {/* Route Arc */}
         {arcPoints.length > 0 && (
-          <Polyline 
-            positions={arcPoints} 
+          <Polyline
+            positions={arcPoints}
             color="#f59e0b" // Amber color for route
             weight={3}
             dashArray="10, 10"
@@ -170,22 +189,28 @@ export function TrackingMap({
           <Marker position={current} icon={currentIcon} zIndexOffset={1000}>
             <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent>
               <div className="text-sm font-semibold">Current Location</div>
-              {driverName !== "Driver" && <div className="text-xs text-muted-foreground">{driverName}</div>}
+              {driverName !== "Driver" && (
+                <div className="text-xs text-muted-foreground">{driverName}</div>
+              )}
             </Tooltip>
           </Marker>
         )}
 
         {/* Past Checkpoints */}
-        {checkpoints.map((cp) => (
-          (cp.lat !== 0 && cp.lng !== 0) && (
-            <Marker key={cp.id} position={[cp.lat, cp.lng]} icon={checkpointIcon}>
-              <Tooltip direction="top" offset={[0, -10]}>
-                <div className="text-xs font-semibold">{cp.facility || cp.city}</div>
-                <div className="text-[10px] text-muted-foreground">{new Date(cp.timestamp).toLocaleString()}</div>
-              </Tooltip>
-            </Marker>
-          )
-        ))}
+        {checkpoints.map(
+          (cp) =>
+            cp.lat !== 0 &&
+            cp.lng !== 0 && (
+              <Marker key={cp.id} position={[cp.lat, cp.lng]} icon={checkpointIcon}>
+                <Tooltip direction="top" offset={[0, -10]}>
+                  <div className="text-xs font-semibold">{cp.facility || cp.city}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {new Date(cp.timestamp).toLocaleString()}
+                  </div>
+                </Tooltip>
+              </Marker>
+            ),
+        )}
       </MapContainer>
     </div>
   );

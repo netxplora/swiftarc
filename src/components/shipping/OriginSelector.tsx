@@ -8,7 +8,11 @@ import { BranchSelector } from "./BranchSelector";
 interface Props {
   value: LocationData;
   onChange: (patch: Partial<LocationData>) => void;
-  onSourceChange: (source: "gps" | "branch" | "manual" | "map_adjustment", branchId?: string, accuracy?: number) => void;
+  onSourceChange: (
+    source: "gps" | "branch" | "manual" | "map_adjustment",
+    branchId?: string,
+    accuracy?: number,
+  ) => void;
 }
 
 export function OriginSelector({ value, onChange, onSourceChange }: Props) {
@@ -44,13 +48,13 @@ export function OriginSelector({ value, onChange, onSourceChange }: Props) {
           const lng = pos.coords.longitude;
           const acc = Math.round(pos.coords.accuracy);
           setAccuracy(acc);
-          
+
           if (acc > 100) {
             toast.warning(`Low accuracy detected (±${acc}m). Please verify address.`);
           }
 
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
           );
           const data = await res.json();
           const a = data?.address;
@@ -85,7 +89,7 @@ export function OriginSelector({ value, onChange, onSourceChange }: Props) {
         setDetecting(false);
         setMode("choose");
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, [onChange]);
 
@@ -101,18 +105,26 @@ export function OriginSelector({ value, onChange, onSourceChange }: Props) {
             <Pencil className="w-3 h-3 mr-1" /> Edit
           </Button>
         </div>
-        
+
         <div className="bg-secondary/30 rounded-lg p-3 text-sm">
           <div className="flex gap-2">
             <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium">{source === 'branch' ? 'SwiftArc Branch' : source === 'gps' ? 'GPS Location' : 'Manual Address'}</p>
+              <p className="font-medium">
+                {source === "branch"
+                  ? "SwiftArc Branch"
+                  : source === "gps"
+                    ? "GPS Location"
+                    : "Manual Address"}
+              </p>
               <p className="text-muted-foreground mt-0.5">
-                {value.line1 && `${value.line1}, `}{value.city}, {value.region} {value.country_code} {value.postal_code}
+                {value.line1 && `${value.line1}, `}
+                {value.city}, {value.region} {value.country_code} {value.postal_code}
               </p>
               {value.lat && (
                 <p className="text-xs text-muted-foreground mt-1 font-mono">
-                  {value.lat.toFixed(5)}, {value.lng?.toFixed(5)} {accuracy ? `(±${accuracy}m)` : ''}
+                  {value.lat.toFixed(5)}, {value.lng?.toFixed(5)}{" "}
+                  {accuracy ? `(±${accuracy}m)` : ""}
                 </p>
               )}
             </div>
@@ -146,7 +158,9 @@ export function OriginSelector({ value, onChange, onSourceChange }: Props) {
             <Building2 className="w-6 h-6 text-amber-600" />
           </div>
           <span className="font-medium">Select Branch</span>
-          <span className="text-xs text-muted-foreground text-center mt-1">Pick a SwiftArc office</span>
+          <span className="text-xs text-muted-foreground text-center mt-1">
+            Pick a SwiftArc office
+          </span>
         </button>
 
         <button

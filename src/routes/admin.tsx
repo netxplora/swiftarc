@@ -15,6 +15,24 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
+function AnimatedOutletWrapper() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+      >
+        <Outlet />
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function AdminLayout() {
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -25,17 +43,7 @@ function AdminLayout() {
             <DashboardHeader />
             <div className="flex-1 w-full p-4 sm:p-6 lg:p-8 relative">
               <div className="mx-auto w-full max-w-7xl">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={useRouterState({ select: (s) => s.location.pathname })}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.22, ease: "easeOut" }}
-                  >
-                    <Outlet />
-                  </motion.div>
-                </AnimatePresence>
+                <AnimatedOutletWrapper />
               </div>
             </div>
           </SidebarInset>

@@ -87,7 +87,7 @@ function CMSPageDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto max-w-2xl">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit Page" : "Add Page"}</DialogTitle>
         </DialogHeader>
@@ -297,106 +297,110 @@ function AdminCMSPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Page Title</th>
-                <th className="px-4 py-3 font-medium">URL Route</th>
-                <th className="px-4 py-3 font-medium">Author</th>
-                <th className="px-4 py-3 font-medium">Views</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isLoading && (
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                    Loading pages...
-                  </td>
+                  <th className="px-4 py-3 font-medium">Page Title</th>
+                  <th className="px-4 py-3 font-medium">URL Route</th>
+                  <th className="px-4 py-3 font-medium">Author</th>
+                  <th className="px-4 py-3 font-medium">Views</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
-              )}
-              {!isLoading && filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    No pages found matching your search.
-                  </td>
-                </tr>
-              )}
-              {!isLoading &&
-                filtered.map((p) => (
-                  <tr key={p.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{p.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        Last updated: {new Date(p.updated_at).toLocaleDateString()}
-                      </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {isLoading && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                      Loading pages...
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.slug}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{p.author}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {(p.views || 0).toLocaleString()}
+                  </tr>
+                )}
+                {!isLoading && filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                      No pages found matching your search.
                     </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadge(p.status)}`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5"
-                          onClick={() => {
-                            setEditingPage(p);
-                            setDialogOpen(true);
-                          }}
+                  </tr>
+                )}
+                {!isLoading &&
+                  filtered.map((p) => (
+                    <tr key={p.id} className="hover:bg-secondary/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{p.title}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          Last updated: {new Date(p.updated_at).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                        {p.slug}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{p.author}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {(p.views || 0).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadge(p.status)}`}
                         >
-                          <PenLine className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5"
-                          onClick={() => toast.info(`Previewing ${p.slug}`)}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                        {p.status === "Published" && (
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 px-2.5 text-amber hover:text-amber"
+                            className="h-8 px-2.5"
                             onClick={() => {
-                              const mut = adminUpsertCmsPage({
-                                data: { ...p, status: "Draft" },
-                              }).then(() => {
-                                toast.success("Page unpublished");
-                                queryClient.invalidateQueries({ queryKey: ["admin_cms_pages"] });
-                              });
+                              setEditingPage(p);
+                              setDialogOpen(true);
                             }}
                           >
-                            <EyeOff className="h-3.5 w-3.5" />
+                            <PenLine className="h-3.5 w-3.5" />
                           </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2.5 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(p.id, p.title)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2.5"
+                            onClick={() => toast.info(`Previewing ${p.slug}`)}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          {p.status === "Published" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2.5 text-amber hover:text-amber"
+                              onClick={() => {
+                                const mut = adminUpsertCmsPage({
+                                  data: { ...p, status: "Draft" },
+                                }).then(() => {
+                                  toast.success("Page unpublished");
+                                  queryClient.invalidateQueries({ queryKey: ["admin_cms_pages"] });
+                                });
+                              }}
+                            >
+                              <EyeOff className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-2.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(p.id, p.title)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

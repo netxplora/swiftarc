@@ -52,49 +52,51 @@ function AdminOrdersPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-medium">Tracking #</th>
-                <th className="px-4 py-3 font-medium">Service</th>
-                <th className="px-4 py-3 font-medium">Origin → Destination</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Created</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.length === 0 ? (
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px] text-sm text-left">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-widest text-muted-foreground">
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                    No orders matching query.
-                  </td>
+                  <th className="px-4 py-3 font-medium">Tracking #</th>
+                  <th className="px-4 py-3 font-medium">Service</th>
+                  <th className="px-4 py-3 font-medium">Origin → Destination</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium text-right">Created</th>
                 </tr>
-              ) : (
-                filtered.map((s) => (
-                  <tr key={s.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-4 py-3 font-mono font-medium text-foreground">
-                      {s.tracking_number}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{s.service}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {(s.origin as any)?.city || "Origin"} →{" "}
-                      {(s.destination as any)?.city || "Destination"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.status === "delivered" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber/10 text-amber"}`}
-                      >
-                        {statusLabels[s.status as keyof typeof statusLabels] || s.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-xs text-muted-foreground">
-                      {new Date(s.created_at).toLocaleDateString()}
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                      No orders matching query.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filtered.map((s) => (
+                    <tr key={s.id} className="hover:bg-secondary/50 transition-colors">
+                      <td className="px-4 py-3 font-mono font-medium text-foreground">
+                        {s.tracking_number}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{s.service}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {(s.origin as any)?.city || "Origin"} →{" "}
+                        {(s.destination as any)?.city || "Destination"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.status === "delivered" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber/10 text-amber"}`}
+                        >
+                          {statusLabels[s.status as keyof typeof statusLabels] || s.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs text-muted-foreground">
+                        {new Date(s.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -66,89 +66,95 @@ function AdminPickups() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
-                  <tr className="border-b border-border">
-                    <th className="p-3">Date</th>
-                    <th className="p-3">Slot</th>
-                    <th className="p-3">Contact</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(q.data ?? []).map((p) => (
-                    <tr key={p.id} className="border-b border-border last:border-0">
-                      <td className="p-3">{p.pickup_date}</td>
-                      <td className="p-3 font-mono text-xs">{p.slot}</td>
-                      <td className="p-3">
-                        <p>{p.contact_name}</p>
-                        <p className="text-xs text-muted-foreground">{p.company ?? p.reference}</p>
-                      </td>
-                      <td className="p-3">
-                        <select
-                          value={p.status ?? "pending"}
-                          onChange={(e) =>
-                            mut.mutate({
-                              id: p.id,
-                              status: e.target.value as (typeof STATUSES)[number],
-                            })
-                          }
-                          className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="p-3 text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              const { generatePickupReceipt } = await import("@/lib/pdf");
-                              generatePickupReceipt(p);
-                              toast.success("Pickup receipt downloaded");
-                            }}
+              <div className="overflow-x-auto w-full pb-4">
+                <table className="w-full min-w-[600px] text-sm">
+                  <thead className="text-left text-xs uppercase tracking-widest text-muted-foreground">
+                    <tr className="border-b border-border">
+                      <th className="p-3">Date</th>
+                      <th className="p-3">Slot</th>
+                      <th className="p-3">Contact</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(q.data ?? []).map((p) => (
+                      <tr key={p.id} className="border-b border-border last:border-0">
+                        <td className="p-3">{p.pickup_date}</td>
+                        <td className="p-3 font-mono text-xs">{p.slot}</td>
+                        <td className="p-3">
+                          <p>{p.contact_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {p.company ?? p.reference}
+                          </p>
+                        </td>
+                        <td className="p-3">
+                          <select
+                            value={p.status ?? "pending"}
+                            onChange={(e) =>
+                              mut.mutate({
+                                id: p.id,
+                                status: e.target.value as (typeof STATUSES)[number],
+                              })
+                            }
+                            className="rounded-md border border-border bg-background px-2 py-1 text-xs"
                           >
-                            <Download className="h-3 w-3 mr-1" /> Receipt
-                          </Button>
-                          <PickupForm
-                            mode="edit"
-                            initial={p}
-                            onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-pickups"] })}
-                          />
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={async () => {
-                              if (confirm("Delete pickup?")) {
-                                const del = (await import("@/lib/admin.functions"))
-                                  .adminDeletePickup;
-                                del({ data: { id: p.id } }).then(() =>
-                                  qc.invalidateQueries({ queryKey: ["admin-pickups"] }),
-                                );
+                            {STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                const { generatePickupReceipt } = await import("@/lib/pdf");
+                                generatePickupReceipt(p);
+                                toast.success("Pickup receipt downloaded");
+                              }}
+                            >
+                              <Download className="h-3 w-3 mr-1" /> Receipt
+                            </Button>
+                            <PickupForm
+                              mode="edit"
+                              initial={p}
+                              onSuccess={() =>
+                                qc.invalidateQueries({ queryKey: ["admin-pickups"] })
                               }
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {(q.data ?? []).length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="p-10 text-center text-xs text-muted-foreground">
-                        No pickups.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={async () => {
+                                if (confirm("Delete pickup?")) {
+                                  const del = (await import("@/lib/admin.functions"))
+                                    .adminDeletePickup;
+                                  del({ data: { id: p.id } }).then(() =>
+                                    qc.invalidateQueries({ queryKey: ["admin-pickups"] }),
+                                  );
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {(q.data ?? []).length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-10 text-center text-xs text-muted-foreground">
+                          No pickups.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </CardContent>
@@ -211,7 +217,7 @@ function PickupForm({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Create Pickup" : "Edit Pickup"}</DialogTitle>
         </DialogHeader>

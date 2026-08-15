@@ -172,9 +172,10 @@ function TrackingDetail() {
       label: (data as any).events?.[0]?.location ?? "Processing",
     },
     weightKg: pkg.weight_kg ?? 0,
-    dimensions: pkg.length_cm && pkg.width_cm && pkg.height_cm
-      ? `${pkg.length_cm} × ${pkg.width_cm} × ${pkg.height_cm} cm`
-      : "N/A",
+    dimensions:
+      pkg.length_cm && pkg.width_cm && pkg.height_cm
+        ? `${pkg.length_cm} × ${pkg.width_cm} × ${pkg.height_cm} cm`
+        : "N/A",
     pieces: pkg.pieces ?? pkg.quantity ?? 1,
     packageType: pkg.type ?? "Parcel",
     description: pkg.description ?? pkg.contents ?? "",
@@ -195,7 +196,7 @@ function TrackingDetail() {
         status: e.description,
         lat: 0,
         lng: 0,
-        type: "standard"
+        type: "standard",
       }));
 
       const holdEvents: any[] = [];
@@ -209,9 +210,9 @@ function TrackingDetail() {
           status: `Customs Hold: ${hold.hold_reason}`,
           lat: 0,
           lng: 0,
-          type: "hold_placed"
+          type: "hold_placed",
         });
-        
+
         if (hold.status === "released" || hold.payment_status === "paid") {
           holdEvents.push({
             id: `release-${hold.id}`,
@@ -219,16 +220,19 @@ function TrackingDetail() {
             facility: hold.customs_authority || "Customs Authority",
             city: "",
             country: "",
-            status: hold.status === "released" ? "Customs Clearance Released" : "Payment Verified - Clearance in Progress",
+            status:
+              hold.status === "released"
+                ? "Customs Clearance Released"
+                : "Payment Verified - Clearance in Progress",
             lat: 0,
             lng: 0,
-            type: "hold_released"
+            type: "hold_released",
           });
         }
       });
-      
+
       return [...standardEvents, ...holdEvents].sort(
-        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
       );
     })(),
     customsHolds: s.customsHolds ?? [],
@@ -460,83 +464,98 @@ function TrackingDetail() {
 
             {/* Customs Hold Alert */}
             {/* Customs Hold Alert */}
-            {hasCustomsHold && (() => {
-              const isResolved = activeHold?.status === "released" || activeHold?.payment_status === "paid";
-              const alertStyle = isResolved
-                ? "bg-emerald-50 text-emerald-900 border-emerald-200"
-                : "bg-red-50 text-red-900 border-red-200";
-              const iconBg = isResolved ? "bg-emerald-100" : "bg-red-100";
-              const iconColor = isResolved ? "text-emerald-600" : "text-red-600";
-              const subText = isResolved ? "text-emerald-700/80" : "text-red-700/80";
-              const innerBox = isResolved ? "border-emerald-100" : "border-red-100";
+            {hasCustomsHold &&
+              (() => {
+                const isResolved =
+                  activeHold?.status === "released" || activeHold?.payment_status === "paid";
+                const alertStyle = isResolved
+                  ? "bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                  : "bg-red-50 text-red-900 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20";
+                const iconBg = isResolved ? "bg-emerald-100 dark:bg-emerald-500/20" : "bg-red-100 dark:bg-red-500/20";
+                const iconColor = isResolved ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400";
+                const subText = isResolved ? "text-emerald-700/80 dark:text-emerald-400/80" : "text-red-700/80 dark:text-red-400/80";
+                const innerBox = isResolved ? "border-emerald-100 dark:border-emerald-500/10 bg-white/60 dark:bg-black/20" : "border-red-100 dark:border-red-500/10 bg-white/60 dark:bg-black/20";
 
-              return (
-              <div className={`${alertStyle} rounded-2xl p-6 shadow-sm border`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`h-10 w-10 ${iconBg} rounded-full flex items-center justify-center shrink-0`}>
-                    {isResolved ? (
-                      <CheckCircle2 className={`h-5 w-5 ${iconColor}`} />
-                    ) : (
-                      <ShieldAlert className={`h-5 w-5 ${iconColor}`} />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg leading-tight">
-                      {isResolved ? "Clearance Complete" : "Clearance Hold"}
-                    </h3>
-                    <p className={`text-sm ${subText}`}>
-                      {isResolved ? "Shipment released" : "Action required"}
-                    </p>
-                  </div>
-                </div>
-                
-                {!isResolved && (
-                  <div className="space-y-3 mb-5 text-sm">
-                    <div className={`bg-white/60 rounded-lg p-3 border ${innerBox}`}>
-                      <p className={`text-xs ${subText} mb-0.5`}>Reason</p>
-                      <p className="font-medium">{activeHold?.hold_reason || "Customs Inspection Required"}</p>
+                return (
+                  <div className={`${alertStyle} rounded-2xl p-6 shadow-sm border`}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div
+                        className={`h-10 w-10 ${iconBg} rounded-full flex items-center justify-center shrink-0`}
+                      >
+                        {isResolved ? (
+                          <CheckCircle2 className={`h-5 w-5 ${iconColor}`} />
+                        ) : (
+                          <ShieldAlert className={`h-5 w-5 ${iconColor}`} />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg leading-tight">
+                          {isResolved ? "Clearance Complete" : "Clearance Hold"}
+                        </h3>
+                        <p className={`text-sm ${subText}`}>
+                          {isResolved ? "Shipment released" : "Action required"}
+                        </p>
+                      </div>
                     </div>
-                    {activeHold?.required_action && (
-                      <div className={`bg-white/60 rounded-lg p-3 border ${innerBox}`}>
-                        <p className={`text-xs ${subText} mb-0.5`}>Required Document</p>
-                        <p className="font-medium">{activeHold.required_action}</p>
-                      </div>
-                    )}
-                    {(activeHold?.amount_due > 0 || activeHold?.status === "payment_required" || activeHold?.payment_status === "verification_required") && (
-                      <div className={`bg-white/60 rounded-lg p-3 border ${innerBox} flex items-center justify-between`}>
-                        <div>
-                          <p className={`text-xs ${subText} mb-0.5`}>Clearance Charges</p>
-                          <p className="font-bold">{activeHold?.currency || "USD"} {Number(activeHold?.amount_due || 0).toFixed(2)}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-xs ${subText} mb-0.5`}>Status</p>
-                          <p className="font-bold capitalize">{activeHold?.payment_status?.replace(/_/g, " ") || "Pending"}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
 
-                {activeHold && ["payment_required", "open"].includes(activeHold.status) && (
-                  <Button
-                    asChild
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-11"
-                  >
-                    <Link to="/pay/$caseId" params={{ caseId: activeHold.id }}>
-                      Resolve & Proceed to Payment
-                    </Link>
-                  </Button>
-                )}
-                
-                {activeHold?.payment_status === "verification_required" && (
-                  <div className="text-center text-sm font-semibold text-amber-700 bg-amber-100/50 rounded-xl py-3 border border-amber-200 mt-5">
-                    <Clock className="h-4 w-4 inline mr-1.5" />
-                    Payment Verification Pending
+                    {!isResolved && (
+                      <div className="space-y-3 mb-5 text-sm">
+                        <div className={`rounded-lg p-3 border ${innerBox}`}>
+                          <p className={`text-xs ${subText} mb-0.5`}>Reason</p>
+                          <p className="font-medium">
+                            {activeHold?.hold_reason || "Customs Inspection Required"}
+                          </p>
+                        </div>
+                        {activeHold?.required_action && (
+                          <div className={`rounded-lg p-3 border ${innerBox}`}>
+                            <p className={`text-xs ${subText} mb-0.5`}>Required Document</p>
+                            <p className="font-medium">{activeHold.required_action}</p>
+                          </div>
+                        )}
+                        {(activeHold?.amount_due > 0 ||
+                          activeHold?.status === "payment_required" ||
+                          activeHold?.payment_status === "verification_required") && (
+                          <div
+                            className={`rounded-lg p-3 border ${innerBox} flex items-center justify-between`}
+                          >
+                            <div>
+                              <p className={`text-xs ${subText} mb-0.5`}>Clearance Charges</p>
+                              <p className="font-bold">
+                                {activeHold?.currency || "USD"}{" "}
+                                {Number(activeHold?.amount_due || 0).toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-xs ${subText} mb-0.5`}>Status</p>
+                              <p className="font-bold capitalize">
+                                {activeHold?.payment_status?.replace(/_/g, " ") || "Pending"}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeHold && ["payment_required", "open"].includes(activeHold.status) && (
+                      <Button
+                        asChild
+                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-11"
+                      >
+                        <Link to="/pay/$caseId" params={{ caseId: activeHold.id }}>
+                          Resolve & Proceed to Payment
+                        </Link>
+                      </Button>
+                    )}
+
+                    {activeHold?.payment_status === "verification_required" && (
+                      <div className="text-center text-sm font-semibold text-amber-700 dark:text-amber-400 bg-amber-100/50 dark:bg-amber-500/10 rounded-xl py-3 border border-amber-200 dark:border-amber-500/20 mt-5">
+                        <Clock className="h-4 w-4 inline mr-1.5" />
+                        Payment Verification Pending
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              );
-            })()}
+                );
+              })()}
 
             {/* Shipment Timeline */}
             <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border">
@@ -546,11 +565,13 @@ function TrackingDetail() {
 
                 {[...realtimeCheckpoints].reverse().map((c: any, i) => {
                   const isLatest = i === 0;
-                  
+
                   let Icon = isLatest ? Navigation : MapPin;
-                  let bgClass = isLatest ? "bg-emerald-500 text-white" : "bg-border text-muted-foreground";
+                  let bgClass = isLatest
+                    ? "bg-emerald-500 text-white"
+                    : "bg-border text-muted-foreground";
                   let textClass = isLatest ? "text-foreground" : "text-muted-foreground";
-                  
+
                   if (c.type === "hold_placed") {
                     Icon = ShieldAlert;
                     bgClass = "bg-red-500 text-white";
@@ -560,7 +581,7 @@ function TrackingDetail() {
                     bgClass = "bg-green-500 text-white";
                     textClass = "text-green-700 font-bold";
                   }
-                  
+
                   return (
                     <div key={c.id} className="relative flex gap-4">
                       <div
@@ -569,11 +590,7 @@ function TrackingDetail() {
                         <Icon className="h-3 w-3" />
                       </div>
                       <div>
-                        <p
-                          className={`font-bold text-sm ${textClass}`}
-                        >
-                          {c.status}
-                        </p>
+                        <p className={`font-bold text-sm ${textClass}`}>{c.status}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{c.facility}</p>
                         <p className="text-xs text-muted-foreground/70 mt-1">
                           {new Date(c.timestamp).toLocaleString(undefined, {
@@ -658,7 +675,10 @@ function TrackingDetail() {
                     <Ship className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm">{shipment.currentLocation.label || `${shipment.origin.city} → ${shipment.destination.city}`}</h4>
+                    <h4 className="font-bold text-sm">
+                      {shipment.currentLocation.label ||
+                        `${shipment.origin.city} → ${shipment.destination.city}`}
+                    </h4>
                     <p className="text-xs text-muted-foreground font-mono mt-0.5">
                       {livePos[0].toFixed(4)}° {livePos[0] >= 0 ? "N" : "S"},{" "}
                       {Math.abs(livePos[1]).toFixed(4)}° {livePos[1] >= 0 ? "E" : "W"}
@@ -668,11 +688,15 @@ function TrackingDetail() {
                 <div className="flex gap-6 text-xs">
                   <div>
                     <span className="text-muted-foreground">Origin:</span>{" "}
-                    <span className="font-semibold">{shipment.origin.city}, {shipment.origin.country}</span>
+                    <span className="font-semibold">
+                      {shipment.origin.city}, {shipment.origin.country}
+                    </span>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Destination:</span>{" "}
-                    <span className="font-semibold">{shipment.destination.city}, {shipment.destination.country}</span>
+                    <span className="font-semibold">
+                      {shipment.destination.city}, {shipment.destination.country}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -701,11 +725,11 @@ function TrackingDetail() {
                       </span>
                     </p>
                   </div>
-                  <span className={`font-bold text-[10px] px-2 py-1 rounded-md ${
-                    hasCustomsHold
-                      ? "bg-red-100 text-red-700"
-                      : "bg-amber/20 text-navy-deep"
-                  }`}>
+                  <span
+                    className={`font-bold text-[10px] px-2 py-1 rounded-md ${
+                      hasCustomsHold ? "bg-red-100 text-red-700" : "bg-amber/20 text-navy-deep"
+                    }`}
+                  >
                     {hasCustomsHold ? "On Hold" : "On Time"}
                   </span>
                 </div>
@@ -733,7 +757,11 @@ function TrackingDetail() {
               <StatBox icon={Truck} label="Service" value={shipment.service} />
               <StatBox icon={Navigation} label="Distance" value={shipment.distanceKm} />
               <StatBox icon={Clock} label="Travel Time" value={shipment.estimatedTravelTime} />
-              <StatBox icon={Package} label="Package" value={`${shipment.weightKg} kg · ${shipment.pieces} pcs`} />
+              <StatBox
+                icon={Package}
+                label="Package"
+                value={`${shipment.weightKg} kg · ${shipment.pieces} pcs`}
+              />
             </div>
 
             {/* Details & Notifications Grid */}
@@ -759,9 +787,13 @@ function TrackingDetail() {
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Sender</p>
                       <p className="font-bold text-sm">{shipment.origin.contact}</p>
-                      {shipment.origin.line1 && <p className="text-xs text-muted-foreground">{shipment.origin.line1}</p>}
+                      {shipment.origin.line1 && (
+                        <p className="text-xs text-muted-foreground">{shipment.origin.line1}</p>
+                      )}
                       <p className="text-xs text-muted-foreground">
-                        {shipment.origin.city}{shipment.origin.country ? `, ${shipment.origin.country}` : ""}{shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
+                        {shipment.origin.city}
+                        {shipment.origin.country ? `, ${shipment.origin.country}` : ""}
+                        {shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
                       </p>
                       {shipment.origin.phone && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -782,9 +814,15 @@ function TrackingDetail() {
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Receiver</p>
                       <p className="font-bold text-sm">{shipment.destination.contact}</p>
-                      {shipment.destination.line1 && <p className="text-xs text-muted-foreground">{shipment.destination.line1}</p>}
+                      {shipment.destination.line1 && (
+                        <p className="text-xs text-muted-foreground">
+                          {shipment.destination.line1}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">
-                        {shipment.destination.city}{shipment.destination.country ? `, ${shipment.destination.country}` : ""}{shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
+                        {shipment.destination.city}
+                        {shipment.destination.country ? `, ${shipment.destination.country}` : ""}
+                        {shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
                       </p>
                       {shipment.destination.phone && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -803,7 +841,9 @@ function TrackingDetail() {
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Service Type</p>
                     <p className="font-bold text-sm">{shipment.service}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{shipment.type} · {shipment.priority} Priority</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {shipment.type} · {shipment.priority} Priority
+                    </p>
                   </div>
 
                   {/* Package Info */}
@@ -811,7 +851,9 @@ function TrackingDetail() {
                     <ClipboardCheck className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Package Details</p>
-                      {shipment.description && <p className="font-bold text-sm">{shipment.description}</p>}
+                      {shipment.description && (
+                        <p className="font-bold text-sm">{shipment.description}</p>
+                      )}
                       <p className="text-xs text-muted-foreground">
                         {shipment.weightKg} kg · {shipment.dimensions} · {shipment.pieces} pcs
                       </p>
@@ -862,7 +904,9 @@ function TrackingDetail() {
                         <p className="font-semibold text-sm">In Transit Update</p>
                         <span className="text-[10px] text-muted-foreground">1 min ago</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">Your shipment is on the way</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Your shipment is on the way
+                      </p>
                     </div>
                   </div>
 
@@ -888,7 +932,9 @@ function TrackingDetail() {
                         <p className="font-semibold text-sm">ETA Update</p>
                         <span className="text-[10px] text-muted-foreground">2 hours ago</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">Estimated delivery updated</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Estimated delivery updated
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -965,7 +1011,8 @@ function TrackingDetail() {
                     Track on the go with SwiftArc Mobile App
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Stay updated wherever you are. Track your shipments, receive delivery notifications and follow your package in real time from your phone.
+                    Stay updated wherever you are. Track your shipments, receive delivery
+                    notifications and follow your package in real time from your phone.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <div className="h-10 px-4 bg-foreground rounded-lg flex items-center justify-center text-background text-xs font-bold gap-2 cursor-not-allowed opacity-80">
@@ -1011,7 +1058,9 @@ function StatBox({ icon: Icon, label, value }: { icon: any; label: string; value
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">{label}</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
+          {label}
+        </p>
         <p className="font-bold text-sm truncate">{value}</p>
       </div>
     </div>
@@ -1044,7 +1093,11 @@ function ProgressStep({
         {label}
       </p>
       {date && (
-        <p className={`text-[10px] mt-1 ${active ? "text-muted-foreground" : "text-muted-foreground/30"}`}>{date}</p>
+        <p
+          className={`text-[10px] mt-1 ${active ? "text-muted-foreground" : "text-muted-foreground/30"}`}
+        >
+          {date}
+        </p>
       )}
     </div>
   );

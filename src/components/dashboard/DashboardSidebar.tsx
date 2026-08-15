@@ -65,7 +65,7 @@ const adminNav = [
 const bottomNav = [{ to: "/support", label: "Support", icon: MessageSquare }];
 
 export function DashboardSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, roles } = useAuth();
@@ -94,6 +94,12 @@ export function DashboardSidebar() {
     return end ? pathname === to : pathname.startsWith(to);
   };
 
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -109,7 +115,7 @@ export function DashboardSidebar() {
               {adminNav.map(({ to, label, icon: Icon, end }) => (
                 <SidebarMenuItem key={to}>
                   <SidebarMenuButton asChild isActive={isActive(to, end)} tooltip={label}>
-                    <Link to={to} className="flex items-center gap-2">
+                    <Link to={to} className="flex items-center gap-2" onClick={handleLinkClick}>
                       <Icon className="h-4 w-4" />
                       <span>{label}</span>
                     </Link>
@@ -128,7 +134,7 @@ export function DashboardSidebar() {
               {bottomNav.map(({ to, label, icon: Icon }) => (
                 <SidebarMenuItem key={to}>
                   <SidebarMenuButton asChild isActive={isActive(to)} tooltip={label}>
-                    <Link to={to} className="flex items-center gap-2">
+                    <Link to={to} className="flex items-center gap-2" onClick={handleLinkClick}>
                       <Icon className="h-4 w-4" />
                       <span>{label}</span>
                     </Link>
