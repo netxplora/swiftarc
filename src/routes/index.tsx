@@ -784,7 +784,7 @@ function Features() {
             exceptions.
           </p>
         </div>
-        <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto pb-6 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 pb-6 items-stretch">
           {features.map((f, i) => (
             <motion.div
               key={i}
@@ -846,7 +846,7 @@ function HowItWorks() {
             like from your side.
           </p>
         </div>
-        <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-5 md:gap-8 relative overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-5 md:gap-8 relative pb-8 items-stretch">
           <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-border -z-10" />
           {steps.map((s, i) => (
             <motion.div
@@ -962,7 +962,7 @@ function Pricing() {
             that kick in automatically as your shipping grows.
           </p>
         </div>
-        <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-x-visible items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 pb-4 items-stretch">
           {plans.map((p, i) => (
             <Card
               key={i}
