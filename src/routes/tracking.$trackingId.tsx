@@ -33,6 +33,7 @@ import {
   ShieldAlert,
   BrainCircuit,
   Clock,
+  Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/hooks/use-locale";
@@ -547,8 +548,8 @@ function TrackingDetail() {
                   const isLatest = i === 0;
                   
                   let Icon = isLatest ? Navigation : MapPin;
-                  let bgClass = isLatest ? "bg-emerald-500 text-white" : "bg-border text-slate-400";
-                  let textClass = isLatest ? "text-foreground" : "text-slate-600";
+                  let bgClass = isLatest ? "bg-emerald-500 text-white" : "bg-border text-muted-foreground";
+                  let textClass = isLatest ? "text-foreground" : "text-muted-foreground";
                   
                   if (c.type === "hold_placed") {
                     Icon = ShieldAlert;
@@ -573,8 +574,8 @@ function TrackingDetail() {
                         >
                           {c.status}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5">{c.facility}</p>
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-muted-foreground mt-0.5">{c.facility}</p>
+                        <p className="text-xs text-muted-foreground/70 mt-1">
                           {new Date(c.timestamp).toLocaleString(undefined, {
                             month: "short",
                             day: "numeric",
@@ -617,8 +618,8 @@ function TrackingDetail() {
           {/* Right Column */}
           <div className="lg:col-span-9 space-y-6 flex flex-col">
             {/* Map Area */}
-            <div className="relative h-[420px] w-full bg-slate-100 rounded-3xl overflow-hidden shadow-sm border border-slate-200">
-              <Suspense fallback={<div className="h-full w-full bg-slate-100 animate-pulse" />}>
+            <div className="relative h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-muted rounded-3xl overflow-hidden shadow-sm border border-border">
+              <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
                 <TrackingMap
                   origin={[shipment.origin.lat, shipment.origin.lng]}
                   destination={[shipment.destination.lat, shipment.destination.lng]}
@@ -649,7 +650,7 @@ function TrackingDetail() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Current Location Card */}
               <div className="bg-card text-card-foreground rounded-2xl p-5 shadow-sm border border-border">
-                <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-3">
+                <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-3">
                   <Navigation className="h-3.5 w-3.5 text-blue-500" /> Current Location
                 </p>
                 <div className="flex items-center gap-4 mb-4">
@@ -658,7 +659,7 @@ function TrackingDetail() {
                   </div>
                   <div>
                     <h4 className="font-bold text-sm">{shipment.currentLocation.label || `${shipment.origin.city} → ${shipment.destination.city}`}</h4>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5">
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">
                       {livePos[0].toFixed(4)}° {livePos[0] >= 0 ? "N" : "S"},{" "}
                       {Math.abs(livePos[1]).toFixed(4)}° {livePos[1] >= 0 ? "E" : "W"}
                     </p>
@@ -666,11 +667,11 @@ function TrackingDetail() {
                 </div>
                 <div className="flex gap-6 text-xs">
                   <div>
-                    <span className="text-slate-500">Origin:</span>{" "}
+                    <span className="text-muted-foreground">Origin:</span>{" "}
                     <span className="font-semibold">{shipment.origin.city}, {shipment.origin.country}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Destination:</span>{" "}
+                    <span className="text-muted-foreground">Destination:</span>{" "}
                     <span className="font-semibold">{shipment.destination.city}, {shipment.destination.country}</span>
                   </div>
                 </div>
@@ -678,7 +679,7 @@ function TrackingDetail() {
 
               {/* Estimated Delivery Card */}
               <div className="bg-card text-card-foreground rounded-2xl p-5 shadow-sm border border-border">
-                <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 mb-3">
+                <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-3">
                   <Calendar className="h-3.5 w-3.5 text-emerald-500" /> Estimated Delivery
                 </p>
                 <div className="flex items-end justify-between mb-4">
@@ -695,7 +696,7 @@ function TrackingDetail() {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}{" "}
-                      <span className="text-slate-500 font-normal">
+                      <span className="text-muted-foreground font-normal">
                         ({Intl.DateTimeFormat().resolvedOptions().timeZone})
                       </span>
                     </p>
@@ -709,7 +710,7 @@ function TrackingDetail() {
                   </span>
                 </div>
                 <div className="mb-2 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       className="h-full bg-amber rounded-full"
                       initial={{ width: 0 }}
@@ -718,7 +719,7 @@ function TrackingDetail() {
                   </div>
                   <span className="text-xs font-bold">{realtimeProgress}%</span>
                 </div>
-                <div className="flex justify-between text-xs font-medium text-slate-600">
+                <div className="flex justify-between text-xs font-medium text-muted-foreground">
                   <span>{statusLabels[realtimeStatus] || "In Progress"}</span>
                   {shipment.estimatedTravelTime && shipment.estimatedTravelTime !== "N/A" && (
                     <span>Est. {shipment.estimatedTravelTime}</span>
@@ -739,25 +740,36 @@ function TrackingDetail() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Shipment Details */}
               <div className="md:col-span-2 bg-card text-card-foreground rounded-2xl p-6 lg:p-8 shadow-sm border border-border">
-                <h3 className="font-bold text-lg mb-6">Shipment Details</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-bold text-lg">Shipment Details</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-print-trigger
+                    onClick={() => window.print()}
+                    className="text-xs font-semibold rounded-lg h-9 px-4 gap-2 no-print"
+                  >
+                    <Printer className="h-3.5 w-3.5" /> Print Details
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
                   {/* Sender */}
                   <div className="flex gap-3">
-                    <User className="h-5 w-5 text-slate-400 shrink-0" />
+                    <User className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Sender</p>
+                      <p className="text-xs text-muted-foreground mb-1">Sender</p>
                       <p className="font-bold text-sm">{shipment.origin.contact}</p>
-                      {shipment.origin.line1 && <p className="text-xs text-slate-500">{shipment.origin.line1}</p>}
-                      <p className="text-xs text-slate-500">
+                      {shipment.origin.line1 && <p className="text-xs text-muted-foreground">{shipment.origin.line1}</p>}
+                      <p className="text-xs text-muted-foreground">
                         {shipment.origin.city}{shipment.origin.country ? `, ${shipment.origin.country}` : ""}{shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
                       </p>
                       {shipment.origin.phone && (
-                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <Phone className="h-3 w-3" /> {shipment.origin.phone}
                         </p>
                       )}
                       {shipment.origin.email && (
-                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Mail className="h-3 w-3" /> {shipment.origin.email}
                         </p>
                       )}
@@ -766,21 +778,21 @@ function TrackingDetail() {
 
                   {/* Receiver */}
                   <div className="flex gap-3">
-                    <User className="h-5 w-5 text-slate-400 shrink-0" />
+                    <User className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Receiver</p>
+                      <p className="text-xs text-muted-foreground mb-1">Receiver</p>
                       <p className="font-bold text-sm">{shipment.destination.contact}</p>
-                      {shipment.destination.line1 && <p className="text-xs text-slate-500">{shipment.destination.line1}</p>}
-                      <p className="text-xs text-slate-500">
+                      {shipment.destination.line1 && <p className="text-xs text-muted-foreground">{shipment.destination.line1}</p>}
+                      <p className="text-xs text-muted-foreground">
                         {shipment.destination.city}{shipment.destination.country ? `, ${shipment.destination.country}` : ""}{shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
                       </p>
                       {shipment.destination.phone && (
-                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <Phone className="h-3 w-3" /> {shipment.destination.phone}
                         </p>
                       )}
                       {shipment.destination.email && (
-                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Mail className="h-3 w-3" /> {shipment.destination.email}
                         </p>
                       )}
@@ -789,22 +801,22 @@ function TrackingDetail() {
 
                   {/* Service Type */}
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Service Type</p>
+                    <p className="text-xs text-muted-foreground mb-1">Service Type</p>
                     <p className="font-bold text-sm">{shipment.service}</p>
-                    <p className="text-xs text-slate-500 mt-1">{shipment.type} · {shipment.priority} Priority</p>
+                    <p className="text-xs text-muted-foreground mt-1">{shipment.type} · {shipment.priority} Priority</p>
                   </div>
 
                   {/* Package Info */}
                   <div className="flex gap-3">
-                    <ClipboardCheck className="h-5 w-5 text-slate-400 shrink-0" />
+                    <ClipboardCheck className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Package Details</p>
+                      <p className="text-xs text-muted-foreground mb-1">Package Details</p>
                       {shipment.description && <p className="font-bold text-sm">{shipment.description}</p>}
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {shipment.weightKg} kg · {shipment.dimensions} · {shipment.pieces} pcs
                       </p>
                       {shipment.declaredValue > 0 && (
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Declared Value: ${shipment.declaredValue.toFixed(2)}
                           {shipment.insurance && " · Insured"}
                         </p>
@@ -814,10 +826,10 @@ function TrackingDetail() {
 
                   {/* Booking Date & Reference */}
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Reference No.</p>
+                    <p className="text-xs text-muted-foreground mb-1">Reference No.</p>
                     <p className="font-bold text-sm">{shipment.referenceNumber}</p>
 
-                    <p className="text-xs text-slate-500 mt-4 mb-1">Booking Date</p>
+                    <p className="text-xs text-muted-foreground mt-4 mb-1">Booking Date</p>
                     <p className="font-bold text-sm">
                       {new Date(shipment.shipDate).toLocaleDateString(undefined, {
                         month: "short",
@@ -829,9 +841,9 @@ function TrackingDetail() {
 
                   {/* Route Info */}
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Route Distance</p>
+                    <p className="text-xs text-muted-foreground mb-1">Route Distance</p>
                     <p className="font-bold text-sm">{shipment.distanceKm}</p>
-                    <p className="text-xs text-slate-500 mt-4 mb-1">Shipping Fee</p>
+                    <p className="text-xs text-muted-foreground mt-4 mb-1">Shipping Fee</p>
                     <p className="font-bold text-sm">{shipment.shippingFee}</p>
                   </div>
                 </div>
@@ -848,9 +860,9 @@ function TrackingDetail() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <p className="font-semibold text-sm">In Transit Update</p>
-                        <span className="text-[10px] text-slate-400">1 min ago</span>
+                        <span className="text-[10px] text-muted-foreground">1 min ago</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">Your shipment is on the way</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Your shipment is on the way</p>
                     </div>
                   </div>
 
@@ -861,9 +873,9 @@ function TrackingDetail() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <p className="font-semibold text-sm">Location Update</p>
-                        <span className="text-[10px] text-slate-400">1 min ago</span>
+                        <span className="text-[10px] text-muted-foreground">1 min ago</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">New location available</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">New location available</p>
                     </div>
                   </div>
 
@@ -874,9 +886,9 @@ function TrackingDetail() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <p className="font-semibold text-sm">ETA Update</p>
-                        <span className="text-[10px] text-slate-400">2 hours ago</span>
+                        <span className="text-[10px] text-muted-foreground">2 hours ago</span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">Estimated delivery updated</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Estimated delivery updated</p>
                     </div>
                   </div>
                 </div>
@@ -891,7 +903,7 @@ function TrackingDetail() {
               <h3 className="font-bold text-lg mb-8">Shipment Progress</h3>
               <div className="relative">
                 {/* Connecting Line */}
-                <div className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-slate-100"></div>
+                <div className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-muted"></div>
                 <div
                   className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-amber"
                   style={{ width: `${realtimeProgress}%` }}
@@ -952,20 +964,21 @@ function TrackingDetail() {
                   <h3 className="font-bold text-lg mb-1">
                     Track on the go with SwiftArc Mobile App
                   </h3>
-                  <p className="text-xs text-slate-500 mb-4">
-                    Get real-time updates and push notifications
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Stay updated wherever you are. Track your shipments, receive delivery notifications and follow your package in real time from your phone.
                   </p>
-                  <div className="flex gap-2">
-                    <div className="h-10 w-32 bg-slate-900 rounded-lg shrink-0 flex items-center justify-center text-white text-xs font-bold px-2">
-                      <Search className="h-4 w-4 mr-2" /> App Store
+                  <div className="flex flex-wrap gap-2">
+                    <div className="h-10 px-4 bg-foreground rounded-lg flex items-center justify-center text-background text-xs font-bold gap-2 cursor-not-allowed opacity-80">
+                      <Search className="h-4 w-4" /> App Store
                     </div>
-                    <div className="h-10 w-32 bg-slate-900 rounded-lg shrink-0 flex items-center justify-center text-white text-xs font-bold px-2">
-                      <Search className="h-4 w-4 mr-2" /> Google Play
+                    <div className="h-10 px-4 bg-foreground rounded-lg flex items-center justify-center text-background text-xs font-bold gap-2 cursor-not-allowed opacity-80">
+                      <Search className="h-4 w-4" /> Google Play
                     </div>
                   </div>
+                  <p className="text-[10px] text-muted-foreground/70 mt-2">Coming Soon</p>
                 </div>
                 {/* Mockup phone image placeholder */}
-                <div className="absolute right-0 top-6 bottom-0 w-1/3 bg-slate-100 rounded-tl-2xl border-t-4 border-l-4 border-slate-800"></div>
+                <div className="absolute right-0 top-6 bottom-0 w-1/3 bg-muted rounded-tl-2xl border-t-4 border-l-4 border-border"></div>
               </div>
 
               <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex items-center justify-between overflow-hidden relative">
@@ -975,7 +988,7 @@ function TrackingDetail() {
                 </div>
                 <div className="z-10 ml-36">
                   <h3 className="font-bold text-lg mb-1">Need to ship something?</h3>
-                  <p className="text-xs text-slate-500 mb-4">
+                  <p className="text-xs text-muted-foreground mb-4">
                     Get a quote and book your shipment in minutes.
                   </p>
                   <Button className="bg-amber text-navy-deep hover:bg-amber/90 font-bold rounded-lg px-6 h-10">
@@ -998,7 +1011,7 @@ function StatBox({ icon: Icon, label, value }: { icon: any; label: string; value
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest truncate">{label}</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">{label}</p>
         <p className="font-bold text-sm truncate">{value}</p>
       </div>
     </div>
@@ -1021,17 +1034,17 @@ function ProgressStep({
   return (
     <div className="flex flex-col items-center w-16 text-center">
       <div
-        className={`h-12 w-12 rounded-2xl flex items-center justify-center mb-3 transition-colors ${current ? "bg-amber text-white shadow-lg shadow-amber/30 scale-110" : active ? "bg-[#E8F5E9] text-[#4CAF50]" : "bg-slate-100 text-slate-300"}`}
+        className={`h-12 w-12 rounded-2xl flex items-center justify-center mb-3 transition-colors ${current ? "bg-amber text-white shadow-lg shadow-amber/30 scale-110" : active ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-muted text-muted-foreground/50"}`}
       >
         <Icon className="h-5 w-5" />
       </div>
       <p
-        className={`text-[11px] font-bold leading-tight ${active ? "text-slate-800" : "text-slate-400"}`}
+        className={`text-[11px] font-bold leading-tight ${active ? "text-foreground" : "text-muted-foreground/50"}`}
       >
         {label}
       </p>
       {date && (
-        <p className={`text-[10px] mt-1 ${active ? "text-slate-500" : "text-slate-300"}`}>{date}</p>
+        <p className={`text-[10px] mt-1 ${active ? "text-muted-foreground" : "text-muted-foreground/30"}`}>{date}</p>
       )}
     </div>
   );

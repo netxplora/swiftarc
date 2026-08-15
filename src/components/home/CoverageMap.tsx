@@ -50,18 +50,18 @@ export function CoverageMap() {
 
   if (!GOOGLE_MAPS_KEY || loadError) {
     return (
-      <div className="h-[420px] w-full bg-[#0b1220] rounded-2xl flex items-center justify-center">
-        <p className="text-sm text-slate-500">Map unavailable — API key not configured.</p>
+      <div className="h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-navy-deep rounded-2xl flex items-center justify-center">
+        <p className="text-sm text-muted-foreground">Map unavailable — API key not configured.</p>
       </div>
     );
   }
 
   if (!isLoaded) {
-    return <div className="h-[420px] w-full bg-[#0b1220] animate-pulse rounded-2xl" aria-hidden />;
+    return <div className="h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-navy-deep animate-pulse rounded-2xl" aria-hidden />;
   }
 
   return (
-    <div className="h-[420px] w-full overflow-hidden rounded-2xl border border-border">
+    <div className="h-[300px] sm:h-[380px] lg:h-[420px] w-full overflow-hidden rounded-2xl border border-border">
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={{ lat: 30, lng: 15 }}
@@ -120,7 +120,7 @@ export function CoverageMap() {
         {/* Hub InfoWindow */}
         {selected && (
           <InfoWindow position={selected.pos} onCloseClick={() => setSelected(null)}>
-            <div className="p-1 bg-[#0b1220] text-white rounded">
+            <div className="p-1 bg-navy-deep text-cream rounded">
               <p className="font-bold text-sm">{selected.name} Hub</p>
               <p className="text-xs text-amber-400 uppercase tracking-widest mt-0.5">
                 {selected.region} • {hubs.indexOf(selected) < 3 ? "Gateway" : "Regional"}

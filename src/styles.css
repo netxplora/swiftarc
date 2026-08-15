@@ -241,25 +241,108 @@
     color: var(--color-navy-deep);
   }
 
-  /* Leaflet dark tweaks */
+  /* Leaflet base */
   .leaflet-container {
-    background: var(--color-navy);
+    background: var(--color-muted);
     font-family: inherit;
   }
-  .leaflet-tile {
-    filter: grayscale(0.6) contrast(1.05) brightness(0.9);
-  }
   .leaflet-control-attribution {
-    background: color-mix(in oklab, var(--color-navy-deep) 80%, transparent) !important;
-    color: var(--color-cream) !important;
+    background: color-mix(in oklab, var(--color-background) 85%, transparent) !important;
+    color: var(--color-foreground) !important;
+    font-size: 10px !important;
   }
   .leaflet-control-attribution a { color: var(--color-amber) !important; }
+
+  /* Light mode map tiles — clean, minimal filter */
+  .leaflet-tile {
+    filter: grayscale(0.15) contrast(1.02) brightness(1.0);
+  }
+
+  /* Dark mode map tiles — inverted to match dark UI */
+  .dark .leaflet-container {
+    background: var(--color-navy);
+  }
+  .dark .leaflet-tile {
+    filter: invert(1) grayscale(0.6) contrast(1.1) brightness(0.7) hue-rotate(180deg);
+  }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.001ms !important;
       transition-duration: 0.001ms !important;
     }
+  }
+}
+
+/* ==========================================
+   PRINT STYLESHEET
+   ========================================== */
+@media print {
+  /* Hide non-essential UI */
+  nav, header, footer,
+  .sidebar, [data-sidebar],
+  .glass-header,
+  button, a[role="button"],
+  .leaflet-control-zoom,
+  .leaflet-control-attribution,
+  [data-print-hide],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Allow print button itself to trigger but then hide */
+  [data-print-trigger] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for clean printing */
+  body, html {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Cards should have visible borders in print */
+  .bg-card, [class*="rounded-2xl"] {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #e2e2e2 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Ensure text is readable */
+  * {
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Keep brand amber for visual hierarchy */
+  .bg-amber, .text-amber {
+    color: #cc8a00 !important;
+  }
+
+  /* Map container — show at reduced height */
+  .leaflet-container {
+    height: 200px !important;
+    border: 1px solid #ccc;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  /* Prevent awkward page breaks */
+  h1, h2, h3, h4 {
+    break-after: avoid;
+  }
+
+  table, figure, .card {
+    break-inside: avoid;
   }
 }
 
@@ -323,6 +406,29 @@
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   border-bottom: 1px solid var(--color-border);
   box-shadow: 0 1px 12px var(--glass-shadow);
+}
+
+@layer components {
+  /* -------------------------------------
+     MOBILE-FIRST RESPONSIVE TYPOGRAPHY
+     ------------------------------------- */
+  .text-display { @apply text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight; }
+  .text-h1 { @apply text-3xl md:text-4xl lg:text-5xl font-display font-bold leading-tight; }
+  .text-h2 { @apply text-2xl md:text-3xl font-display font-semibold leading-snug; }
+  .text-h3 { @apply text-xl md:text-2xl font-display font-semibold leading-snug; }
+  .text-h4 { @apply text-lg md:text-xl font-display font-medium leading-normal; }
+  .text-body-lg { @apply text-base md:text-lg leading-relaxed text-text-secondary; }
+  .text-body { @apply text-sm md:text-base leading-relaxed text-text-secondary; }
+  .text-body-sm { @apply text-xs md:text-sm leading-normal text-text-muted; }
+  .text-caption { @apply text-[11px] md:text-xs text-text-muted uppercase tracking-wider font-semibold; }
+
+  /* -------------------------------------
+     MOBILE-FIRST RESPONSIVE SPACING
+     ------------------------------------- */
+  .section-padding { @apply py-12 md:py-16 lg:py-24; }
+  .container-padding { @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl w-full; }
+  .card-padding { @apply p-4 sm:p-6 lg:p-8; }
+  .grid-layout { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8; }
 }
 
 
