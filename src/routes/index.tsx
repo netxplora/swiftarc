@@ -357,7 +357,7 @@ function FeaturedServices() {
         title="Move anything, anywhere on the arc."
         link={{ to: "/shipping", label: "All services" }}
       />
-      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
+      <div className="mt-10 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
         {services.map((s, i) => (
           <motion.div
             key={s.title}
@@ -426,7 +426,7 @@ function BusinessSolutions() {
           title="Built for the way your business ships."
           link={{ to: "/business", label: "Explore solutions" }}
         />
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
+        <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
           {items.map((it, i) => (
             <motion.div
               key={it.title}
@@ -556,7 +556,7 @@ function Testimonials() {
     <section className="bg-secondary/40 border-y border-border/50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:px-8">
         <SectionHead eyebrow="Customers" title="Trusted by teams that move product." />
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
+        <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 items-stretch">
           {items.map((t, i) => (
             <motion.figure
               key={t.name}
@@ -631,7 +631,7 @@ function LatestNews() {
         title="Latest from SwiftArc."
         link={{ to: "/resources", label: "All stories" }}
       />
-      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 items-stretch">
+      <div className="mt-10 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 items-stretch">
         {news.map((n, i) => (
           <motion.article
             key={n.title}
@@ -784,7 +784,7 @@ function Features() {
             exceptions.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 pb-6 items-stretch">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 pb-6 items-stretch">
           {features.map((f, i) => (
             <motion.div
               key={i}
@@ -792,7 +792,7 @@ function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
-              className={`${i === 2 ? "sm:col-span-2 md:col-span-1" : ""} min-w-[85vw] sm:min-w-0 shrink-0 snap-center`}
+              className={`${i === 2 ? "col-span-2 sm:col-span-2 md:col-span-1" : ""}`}
             >
               <Card className="border-border bg-card h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <CardContent className="p-4 sm:p-8 space-y-3 sm:space-y-4">
@@ -846,7 +846,7 @@ function HowItWorks() {
             like from your side.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-5 md:gap-8 relative pb-8 items-stretch">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 md:gap-8 relative pb-8 items-stretch">
           <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-border -z-10" />
           {steps.map((s, i) => (
             <motion.div
@@ -855,7 +855,7 @@ function HowItWorks() {
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
-              className={`text-center flex flex-col items-center group ${i === 2 ? "sm:col-span-2 md:col-span-1" : ""} min-w-[75vw] sm:min-w-0 shrink-0 snap-center px-2`}
+              className={`text-center flex flex-col items-center group ${i === 2 ? "col-span-2 sm:col-span-2 md:col-span-1" : ""} px-2`}
             >
               <div className="h-10 w-10 sm:h-16 sm:w-16 rounded-full bg-primary text-primary-foreground font-display text-sm sm:text-2xl font-bold flex items-center justify-center mb-3 sm:mb-6 ring-4 sm:ring-8 ring-background shadow-md transition-transform duration-300 group-hover:scale-110">
                 {s.step}
@@ -962,11 +962,11 @@ function Pricing() {
             that kick in automatically as your shipping grows.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 pb-4 items-stretch">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 md:gap-8 pb-4 items-stretch">
           {plans.map((p, i) => (
             <Card
               key={i}
-              className={`min-w-[85vw] sm:min-w-0 snap-center shrink-0 relative flex flex-col justify-between transition-all duration-300 ${
+              className={`relative flex flex-col justify-between transition-all duration-300 ${
                 p.highlight
                   ? "border-2 border-amber bg-card shadow-2xl sm:scale-105 z-10 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(245,158,11,0.15)]"
                   : "border-border bg-card text-card-foreground hover:shadow-lg hover:-translate-y-1"

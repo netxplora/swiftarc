@@ -14,10 +14,7 @@ export function MobileTabBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { signedIn } = useAuth();
 
-  const tabs = [
-    ...baseTabs,
-    { to: signedIn ? "/dashboard" : "/login", label: "Account", Icon: User },
-  ];
+  const tabs = [...baseTabs];
 
   return (
     <nav
@@ -25,7 +22,7 @@ export function MobileTabBar() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-5">
+      <ul className="mx-auto grid max-w-lg grid-cols-4">
         {tabs.map(({ to, label, Icon }) => {
           const active = pathname === to || (to !== "/" && pathname.startsWith(to));
           return (
