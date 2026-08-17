@@ -442,7 +442,6 @@
 
 @media print {
   /* Hide everything on page by default */
-  body > *,
   body header,
   body footer,
   body nav,
