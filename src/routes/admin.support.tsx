@@ -14,7 +14,8 @@ export const Route = createFileRoute("/admin/support")({
 
 type Conversation = {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  guest_id: string | null;
   subject: string | null;
   status: string;
   last_message_at: string | null;
@@ -147,15 +148,23 @@ function AdminSupport() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {msgs.data?.map((m: Msg) => {
+              {msgs.data?.map((m: Msg, i: number, arr: Msg[]) => {
                 const isAdmin = m.sender_role === "agent" || m.sender_role === "admin";
                 const isSystem = m.sender_role === "system";
+                const prevMsg = i > 0 ? arr[i - 1] : null;
+                const showLabel = !prevMsg || prevMsg.sender_role !== m.sender_role;
+
                 return (
-                  <div key={m.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
+                  <div key={m.id} className={`flex flex-col ${isAdmin ? "items-end" : "items-start"}`}>
+                    {showLabel && !isSystem && (
+                      <span className="text-[10px] font-semibold text-muted-foreground mb-1 px-1">
+                        {isAdmin ? "You (Admin)" : "Customer"}
+                      </span>
+                    )}
                     <div
                       className={
                         isSystem
-                          ? "max-w-[80%] rounded-xl bg-secondary px-4 py-2 text-xs text-muted-foreground"
+                          ? "max-w-[80%] rounded-xl bg-secondary px-4 py-2 text-xs text-muted-foreground self-center mt-2 mb-2"
                           : isAdmin
                             ? "max-w-[70%] rounded-2xl rounded-br-sm bg-navy-deep px-4 py-2 text-sm text-cream"
                             : "max-w-[70%] rounded-2xl rounded-bl-sm bg-background border border-border px-4 py-2 text-sm text-foreground shadow-sm"

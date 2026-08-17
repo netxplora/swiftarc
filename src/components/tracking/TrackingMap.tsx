@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Polyline, Tooltip, useMap } from "reac
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix Leaflet's default icon path issues
+// Fix Leaflet default icon paths
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -31,43 +31,51 @@ interface Props {
   driverName?: string;
 }
 
-// Custom Icons
-const createIcon = (color: string) => {
-  return L.divIcon({
+// ── Icons ──────────────────────────────────────────────────────────────────
+const createDotIcon = (color: string, size = 16) =>
+  L.divIcon({
     className: "custom-div-icon",
-    html: `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
+    html: `<div style="background-color:${color};width:${size}px;height:${size}px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
-};
 
-const originIcon = createIcon("#1e293b"); // Navy
-const destIcon = createIcon("#f59e0b"); // Amber
-const currentIcon = createIcon("#3b82f6"); // Blue pulse
-const checkpointIcon = createIcon("#94a3b8"); // Slate
+const createCurrentIcon = () =>
+  L.divIcon({
+    className: "custom-div-icon",
+    html: `
+      <div style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;width:22px;height:22px;border-radius:50%;background:rgba(59,130,246,0.25);animation:sw-pulse 2s infinite;"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#3b82f6;border:2.5px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.6);position:relative;z-index:1;"></div>
+      </div>
+      <style>@keyframes sw-pulse{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.8);opacity:0.1}}</style>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
 
-// Generate a great circle arc between two points
+const originIcon      = createDotIcon("#1e293b", 18); // navy
+const destIcon        = createDotIcon("#f59e0b", 18); // amber
+const checkpointIcon  = createDotIcon("#94a3b8", 11); // slate
+
+// ── Great-circle arc ───────────────────────────────────────────────────────
 function getArcPoints(
   start: [number, number],
   end: [number, number],
-  segments = 100,
+  segments = 80,
 ): [number, number][] {
-  const points: [number, number][] = [];
-  const lat1 = start[0] * (Math.PI / 180);
-  const lon1 = start[1] * (Math.PI / 180);
-  const lat2 = end[0] * (Math.PI / 180);
-  const lon2 = end[1] * (Math.PI / 180);
+  const toRad = (d: number) => d * (Math.PI / 180);
+  const toDeg = (r: number) => r * (180 / Math.PI);
+  const lat1 = toRad(start[0]), lon1 = toRad(start[1]);
+  const lat2 = toRad(end[0]),   lon2 = toRad(end[1]);
   const d =
-    2 *
-    Math.asin(
+    2 * Math.asin(
       Math.sqrt(
         Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
           Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon1 - lon2) / 2), 2),
       ),
     );
-
   if (d === 0) return [start, end];
-
+  const pts: [number, number][] = [];
   for (let i = 0; i <= segments; i++) {
     const f = i / segments;
     const A = Math.sin((1 - f) * d) / Math.sin(d);
@@ -75,25 +83,23 @@ function getArcPoints(
     const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
     const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
     const z = A * Math.sin(lat1) + B * Math.sin(lat2);
-    const lat = Math.atan2(z, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-    const lon = Math.atan2(y, x);
-    points.push([lat * (180 / Math.PI), lon * (180 / Math.PI)]);
+    pts.push([toDeg(Math.atan2(z, Math.sqrt(x * x + y * y))), toDeg(Math.atan2(y, x))]);
   }
-  return points;
+  return pts;
 }
 
-// Component to handle auto-fitting bounds based on points
+// ── Auto-fit bounds ────────────────────────────────────────────────────────
 function MapBounds({ points }: { points: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
     if (points.length > 0) {
-      const bounds = L.latLngBounds(points);
-      map.fitBounds(bounds, { padding: [50, 50], animate: true });
+      map.fitBounds(L.latLngBounds(points), { padding: [60, 60], animate: true });
     }
   }, [map, points]);
   return null;
 }
 
+// ── Component ──────────────────────────────────────────────────────────────
 export function TrackingMap({
   origin,
   destination,
@@ -103,35 +109,41 @@ export function TrackingMap({
   driverName = "Driver",
 }: Props) {
   const [mounted, setMounted] = useState(false);
+  // memoised so the icon object isn't recreated each render
+  const currentIcon = useMemo(() => createCurrentIcon(), []);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  const arcPoints = useMemo(() => {
-    // Only draw arc if valid coordinates
-    if (origin[0] === 0 && origin[1] === 0) return [];
-    if (destination[0] === 0 && destination[1] === 0) return [];
-    return getArcPoints(origin, destination);
-  }, [origin, destination]);
+  const hasOrigin  = origin[0]      !== 0 || origin[1]      !== 0;
+  const hasDest    = destination[0] !== 0 || destination[1] !== 0;
+  const hasCurrent = current[0]     !== 0 || current[1]     !== 0;
+
+  /** Full planned-route arc — dashed grey */
+  const fullArc = useMemo(
+    () => (hasOrigin && hasDest ? getArcPoints(origin, destination) : []),
+    [origin, destination, hasOrigin, hasDest],
+  );
+
+  /** Travelled arc — solid amber, origin → current */
+  const travelledArc = useMemo(
+    () => (hasOrigin && hasCurrent ? getArcPoints(origin, current) : []),
+    [origin, current, hasOrigin, hasCurrent],
+  );
 
   const allPoints = useMemo(() => {
-    const pts = [
-      origin,
-      destination,
-      current,
-      ...checkpoints.map((c) => [c.lat, c.lng] as [number, number]),
-    ];
-    return pts.filter((p) => p[0] !== 0 || p[1] !== 0);
-  }, [origin, destination, current, checkpoints]);
+    const pts: [number, number][] = [];
+    if (hasOrigin)  pts.push(origin);
+    if (hasDest)    pts.push(destination);
+    if (hasCurrent) pts.push(current);
+    checkpoints.forEach((c) => {
+      if (c.lat !== 0 || c.lng !== 0) pts.push([c.lat, c.lng]);
+    });
+    return pts;
+  }, [origin, destination, current, checkpoints, hasOrigin, hasDest, hasCurrent]);
 
   if (!mounted) {
     return (
-      <div
-        style={{ height }}
-        className="w-full animate-pulse rounded-2xl bg-secondary"
-        aria-hidden
-      />
+      <div style={{ height }} className="w-full animate-pulse rounded-2xl bg-secondary" aria-hidden />
     );
   }
 
@@ -141,9 +153,9 @@ export function TrackingMap({
       className="w-full overflow-hidden rounded-2xl border border-border bg-secondary relative z-0"
     >
       <MapContainer
-        center={origin[0] !== 0 ? origin : [20, 0]}
+        center={hasOrigin ? origin : [20, 0]}
         zoom={2}
-        scrollWheelZoom={true}
+        scrollWheelZoom
         style={{ width: "100%", height: "100%", zIndex: 0 }}
       >
         <TileLayer
@@ -151,44 +163,41 @@ export function TrackingMap({
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
-        {/* Bounds management */}
         <MapBounds points={allPoints} />
 
-        {/* Route Arc */}
-        {arcPoints.length > 0 && (
-          <Polyline
-            positions={arcPoints}
-            color="#f59e0b" // Amber color for route
-            weight={3}
-            dashArray="10, 10"
-            opacity={0.8}
-            className="animate-pulse"
-          />
+        {/* Full planned route — light dashed */}
+        {fullArc.length > 0 && (
+          <Polyline positions={fullArc} color="#d1d5db" weight={2} dashArray="8,10" opacity={0.7} />
         )}
 
-        {/* Origin Marker */}
-        {origin[0] !== 0 && (
+        {/* Travelled portion — solid amber */}
+        {travelledArc.length > 0 && (
+          <Polyline positions={travelledArc} color="#f59e0b" weight={3.5} opacity={0.95} />
+        )}
+
+        {/* Origin */}
+        {hasOrigin && (
           <Marker position={origin} icon={originIcon}>
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-              <div className="text-sm font-semibold">Origin</div>
+              <span className="text-sm font-semibold">Origin</span>
             </Tooltip>
           </Marker>
         )}
 
-        {/* Destination Marker */}
-        {destination[0] !== 0 && (
+        {/* Destination */}
+        {hasDest && (
           <Marker position={destination} icon={destIcon}>
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-              <div className="text-sm font-semibold">Destination</div>
+              <span className="text-sm font-semibold">Destination</span>
             </Tooltip>
           </Marker>
         )}
 
-        {/* Current Location Marker */}
-        {current[0] !== 0 && (
+        {/* Current location — pulsing blue */}
+        {hasCurrent && (
           <Marker position={current} icon={currentIcon} zIndexOffset={1000}>
-            <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent>
-              <div className="text-sm font-semibold">Current Location</div>
+            <Tooltip direction="top" offset={[0, -14]} opacity={1} permanent>
+              <span className="text-sm font-semibold">Current Location</span>
               {driverName !== "Driver" && (
                 <div className="text-xs text-muted-foreground">{driverName}</div>
               )}
@@ -196,13 +205,12 @@ export function TrackingMap({
           </Marker>
         )}
 
-        {/* Past Checkpoints */}
+        {/* Past checkpoints */}
         {checkpoints.map(
           (cp) =>
-            cp.lat !== 0 &&
-            cp.lng !== 0 && (
+            (cp.lat !== 0 || cp.lng !== 0) && (
               <Marker key={cp.id} position={[cp.lat, cp.lng]} icon={checkpointIcon}>
-                <Tooltip direction="top" offset={[0, -10]}>
+                <Tooltip direction="top" offset={[0, -8]}>
                   <div className="text-xs font-semibold">{cp.facility || cp.city}</div>
                   <div className="text-[10px] text-muted-foreground">
                     {new Date(cp.timestamp).toLocaleString()}

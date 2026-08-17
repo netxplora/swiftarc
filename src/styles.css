@@ -434,6 +434,12 @@
 /* ============================================================
    PRINT STYLES — Shipment Waybill Document
    ============================================================ */
+
+/* Hide waybill on screen — media print will override this */
+#print-waybill {
+  display: none;
+}
+
 @media print {
   /* Hide everything on page by default */
   body > *,

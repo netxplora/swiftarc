@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -42,6 +42,12 @@ import { statusLabels } from "@/lib/types";
 import { resolveTracking } from "@/lib/api.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackingSkeleton } from "@/components/skeletons/TrackingSkeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const TrackingMap = lazy(() =>
   import("@/components/tracking/TrackingMap").then((m) => ({ default: m.TrackingMap })),
@@ -244,6 +250,7 @@ function TrackingDetail() {
   const [realtimeCheckpoints, setRealtimeCheckpoints] = useState(shipment.checkpoints);
   const [realtimeStatus, setRealtimeStatus] = useState(shipment.status);
   const [realtimeProgress, setRealtimeProgress] = useState(shipment.progress);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   useEffect(() => {
     if (data.kind !== "db") return;
@@ -343,7 +350,7 @@ function TrackingDetail() {
       {/* ========================================================== */}
       {/* PRINT WAYBILL â€” Only visible when printing                  */}
       {/* ========================================================== */}
-      <div id="print-waybill" style={{ display: "none" }}>
+      <div id="print-waybill">
         <div className="waybill-header">
           <div className="brand-block">
             <div className="brand-name">SwiftArc</div>
@@ -464,12 +471,22 @@ function TrackingDetail() {
           <div className="lg:col-span-3 space-y-6">
             {/* Status Card */}
             <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border">
-              <Link
-                to="/"
-                className="inline-flex items-center text-sm font-medium text-amber hover:underline mb-6"
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" /> Home
-              </Link>
+              <div className="flex items-center justify-between mb-6">
+                <Link
+                  to="/"
+                  className="inline-flex items-center text-sm font-medium text-amber hover:underline"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1" /> Home
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.print()}
+                  className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <Printer className="h-3.5 w-3.5" /> Print Waybill
+                </Button>
+              </div>
 
               <div className="mb-6">
                 <p className="text-xs text-muted-foreground mb-1">Tracking ID</p>
@@ -504,9 +521,9 @@ function TrackingDetail() {
                     minute: "2-digit",
                   })}
                 </p>
-                <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-                  <CheckCircle2 className="h-3.5 w-3.5" />{" "}
-                  {hasCustomsHold ? "Exception" : "On Time"}
+                <div className={`inline-flex items-center gap-1.5 text-xs font-semibold ${hasCustomsHold ? activeHold?.status === 'released' || activeHold?.payment_status === 'paid' ? 'text-emerald-600' : 'text-red-600' : 'text-emerald-600'}`}>
+                  {hasCustomsHold && activeHold?.status !== 'released' && activeHold?.payment_status !== 'paid' ? <AlertCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                  {hasCustomsHold ? activeHold?.status === 'released' || activeHold?.payment_status === 'paid' ? 'Released' : 'Exception' : 'On Time'}
                 </div>
               </div>
 
@@ -651,7 +668,7 @@ function TrackingDetail() {
               <div className="relative space-y-6">
                 <div className="absolute left-3.5 top-2 bottom-2 w-px bg-border"></div>
 
-                {[...realtimeCheckpoints].reverse().map((c: any, i) => {
+                {[...realtimeCheckpoints].slice().reverse().map((c: any, i) => {
                   const isLatest = i === 0;
 
                   let Icon = isLatest ? Navigation : MapPin;
@@ -940,10 +957,18 @@ function TrackingDetail() {
                   </div>
                   <span
                     className={`font-bold text-[10px] px-2 py-1 rounded-md ${
-                      hasCustomsHold ? "bg-red-100 text-red-700" : "bg-amber/20 text-navy-deep"
+                      hasCustomsHold
+                        ? activeHold?.status === "released" || activeHold?.payment_status === "paid"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-red-100 text-red-700"
+                        : "bg-amber/20 text-navy-deep"
                     }`}
                   >
-                    {hasCustomsHold ? "On Hold" : "On Time"}
+                    {hasCustomsHold 
+                      ? activeHold?.status === "released" || activeHold?.payment_status === "paid"
+                        ? "Released"
+                        : "On Hold"
+                      : "On Time"}
                   </span>
                 </div>
                 <div className="mb-2 flex items-center gap-2">
@@ -1024,7 +1049,7 @@ function TrackingDetail() {
                   </div>
                 </div>
               </div>
-              <Button variant="link" className="w-full mt-4 text-amber font-semibold">
+              <Button onClick={() => setNotifOpen(true)} variant="link" className="w-full mt-4 text-amber font-semibold">
                 View All Notifications
               </Button>
             </div>
@@ -1032,15 +1057,17 @@ function TrackingDetail() {
             {/* Shipment Progress Horizontal Stepper */}
             <div className="bg-card text-card-foreground rounded-2xl p-6 sm:p-8 shadow-sm border border-border">
               <h3 className="font-bold text-lg mb-8">Shipment Progress</h3>
-              <div className="relative">
-                {/* Connecting Line */}
-                <div className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-muted"></div>
-                <div
-                  className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-amber"
-                  style={{ width: `${realtimeProgress}%` }}
-                ></div>
+              <div className="relative overflow-x-auto hide-scrollbar pb-4 -mb-4">
+                <div className="min-w-[700px] relative mt-2 px-2">
+                  {/* Track background */}
+                  <div className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-muted"></div>
+                  {/* Amber fill — width is % of the 90% track span */}
+                  <div
+                    className="absolute left-[5%] top-6 h-0.5 bg-amber transition-all duration-1000"
+                    style={{ width: `calc(${realtimeProgress / 100} * 90%)` }}
+                  ></div>
 
-                <div className="flex justify-between relative z-10">
+                  <div className="flex justify-between relative z-10">
                   <ProgressStep
                     icon={ClipboardCheck}
                     label="Booked"
@@ -1087,6 +1114,7 @@ function TrackingDetail() {
                 </div>
               </div>
             </div>
+          </div>
 
             {/* Bottom Banners */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -1130,6 +1158,49 @@ function TrackingDetail() {
           </div>
         </div>
       </div>
+
+      <Dialog open={notifOpen} onOpenChange={setNotifOpen}>
+        <DialogContent className="max-w-md bg-card text-foreground">
+          <DialogHeader>
+            <DialogTitle>All Notifications</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2 space-y-4">
+            {realtimeCheckpoints.map((event: any, i: number) => (
+              <div key={event.id || i} className="flex gap-4 p-3 rounded-lg border border-border bg-background shadow-sm">
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
+                  event.type === 'hold_placed' ? 'bg-red-100 text-red-600' :
+                  event.type === 'hold_released' ? 'bg-emerald-100 text-emerald-600' :
+                  'bg-amber/10 text-amber'
+                }`}>
+                  {event.type === 'hold_placed' ? <ShieldAlert className="h-5 w-5" /> :
+                   event.type === 'hold_released' ? <CheckCircle2 className="h-5 w-5" /> :
+                   <MapPin className="h-5 w-5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <p className="font-semibold text-sm leading-tight text-foreground">{event.status}</p>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap pt-0.5">
+                      {new Date(event.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">
+                    {event.facility}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                    {new Date(event.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {realtimeCheckpoints.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Bell className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                <p>No notifications yet</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

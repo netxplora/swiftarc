@@ -1,13 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { MessageCircle, Send, X, Headphones } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { getOrCreateConversation, listMessages, sendMessage } from "@/lib/chat.functions";
+import { 
+  getOrCreateConversation, 
+  listMessages, 
+  sendMessage,
+  guestGetOrCreateConversation,
+  guestListMessages,
+  guestSendMessage
+} from "@/lib/chat.functions";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Msg = {
   id: string;
@@ -17,28 +25,60 @@ type Msg = {
   created_at: string;
 };
 
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const { signedIn, user } = useAuth();
   const [text, setText] = useState("");
   const qc = useQueryClient();
   const bottomRef = useRef<HTMLDivElement>(null);
+  
+  const [guestId, setGuestId] = useState<string | null>(null);
+  const [guestSetupComplete, setGuestSetupComplete] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
 
-  const startConvo = useServerFn(getOrCreateConversation);
-  const fetchMsgs = useServerFn(listMessages);
-  const postMsg = useServerFn(sendMessage);
+  useEffect(() => {
+    if (!signedIn) {
+      let storedId = localStorage.getItem("swiftarc_guest_id");
+      if (!storedId) {
+        storedId = generateUUID();
+        localStorage.setItem("swiftarc_guest_id", storedId);
+      }
+      setGuestId(storedId);
+      setGuestSetupComplete(localStorage.getItem("swiftarc_guest_setup") === "true");
+    }
+  }, [signedIn]);
+
+  const authStartConvo = useServerFn(getOrCreateConversation);
+  const authFetchMsgs = useServerFn(listMessages);
+  const authPostMsg = useServerFn(sendMessage);
+
+  const guestStartConvo = useServerFn(guestGetOrCreateConversation);
+  const guestFetchMsgs = useServerFn(guestListMessages);
+  const guestPostMsg = useServerFn(guestSendMessage);
 
   const convo = useQuery({
-    queryKey: ["chat", "convo", user?.id],
-    enabled: open && !!signedIn,
-    queryFn: () => startConvo(),
+    queryKey: ["chat", "convo", signedIn ? user?.id : guestId],
+    enabled: open && (signedIn ? !!user?.id : !!guestId && guestSetupComplete),
+    queryFn: () => signedIn 
+      ? authStartConvo() 
+      : guestStartConvo({ data: { guestId: guestId!, name: guestName, email: guestEmail } }),
     staleTime: 60_000,
   });
 
   const msgs = useQuery({
     queryKey: ["chat", "msgs", convo.data?.id],
     enabled: !!convo.data?.id,
-    queryFn: () => fetchMsgs({ data: { conversationId: convo.data!.id } }),
+    queryFn: () => signedIn
+      ? authFetchMsgs({ data: { conversationId: convo.data!.id } })
+      : guestFetchMsgs({ data: { conversationId: convo.data!.id, guestId: guestId! } }),
   });
 
   // Realtime subscription
@@ -67,7 +107,9 @@ export function ChatWidget() {
   }, [msgs.data, open]);
 
   const send = useMutation({
-    mutationFn: (body: string) => postMsg({ data: { conversationId: convo.data!.id, body } }),
+    mutationFn: (body: string) => signedIn
+      ? authPostMsg({ data: { conversationId: convo.data!.id, body } })
+      : guestPostMsg({ data: { conversationId: convo.data!.id, guestId: guestId!, body } }),
     onSuccess: () => {
       setText("");
       qc.invalidateQueries({ queryKey: ["chat", "msgs", convo.data?.id] });
@@ -113,73 +155,109 @@ export function ChatWidget() {
               </div>
             </div>
 
-            {!signedIn ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-                <MessageCircle className="h-10 w-10 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  Sign in to chat with the SwiftArc support team.
-                </p>
-                <div className="flex gap-2">
-                  <Button size="sm" asChild>
-                    <Link to="/login">Log in</Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/register">Sign up</Link>
-                  </Button>
+            {!signedIn && !guestSetupComplete ? (
+              <div className="flex flex-1 flex-col justify-center p-6 bg-background">
+                <div className="text-center mb-6">
+                  <MessageCircle className="h-12 w-12 text-amber mx-auto mb-3" />
+                  <h3 className="font-bold text-lg">Welcome to Live Chat</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Please introduce yourself to start chatting with our support team.</p>
                 </div>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (guestName.trim()) {
+                      localStorage.setItem("swiftarc_guest_setup", "true");
+                      setGuestSetupComplete(true);
+                    }
+                  }}
+                  className="space-y-3"
+                >
+                  <Input 
+                    placeholder="Your Name (required)" 
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    required
+                    className="h-11 rounded-xl"
+                  />
+                  <Input 
+                    placeholder="Email Address (optional)" 
+                    type="email"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    className="h-11 rounded-xl"
+                  />
+                  <Button type="submit" className="w-full h-11 font-bold bg-amber text-navy-deep hover:bg-amber/90 rounded-xl mt-2">
+                    Start Chat
+                  </Button>
+                </form>
               </div>
             ) : (
               <>
                 <div className="flex-1 space-y-2 overflow-y-auto bg-background p-3">
-                  {(msgs.data ?? []).map((m: Msg) => {
-                    const mine = m.sender_id && m.sender_id === user?.id;
-                    const isSystem = m.sender_role === "system";
-                    return (
-                      <motion.div
-                        key={m.id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${mine ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={
-                            isSystem
-                              ? "max-w-[80%] rounded-xl bg-secondary px-3 py-2 text-xs text-muted-foreground"
-                              : mine
-                                ? "max-w-[80%] rounded-2xl rounded-br-sm bg-navy-deep px-3 py-2 text-sm text-cream"
-                                : "max-w-[80%] rounded-2xl rounded-bl-sm bg-secondary px-3 py-2 text-sm"
-                          }
-                        >
-                          {m.body}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                  <div ref={bottomRef} />
-                </div>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (text.trim() && convo.data?.id) send.mutate(text.trim());
-                  }}
-                  className="flex items-center gap-2 border-t border-border bg-card p-2"
-                >
-                  <input
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Type your message…"
-                    className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber/50"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!text.trim() || send.isPending}
-                    className="grid h-9 w-9 place-items-center rounded-lg bg-amber text-navy-deep disabled:opacity-50"
-                    aria-label="Send"
+                  {(msgs.data ?? []).map((m: Msg, i: number, arr: Msg[]) => {
+                const mine = m.sender_role === "user";
+                const isSystem = m.sender_role === "system";
+                const prevMsg = i > 0 ? arr[i - 1] : null;
+                const showLabel = !prevMsg || prevMsg.sender_role !== m.sender_role;
+
+                return (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex flex-col ${mine ? "items-end" : "items-start"}`}
                   >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </form>
-              </>
+                    {showLabel && !isSystem && (
+                      <span className="text-[10px] font-semibold text-muted-foreground mb-1 px-1">
+                        {mine ? "You" : "Support"}
+                      </span>
+                    )}
+                    <div
+                      className={
+                        isSystem
+                          ? "max-w-[80%] rounded-xl bg-secondary px-3 py-2 text-xs text-muted-foreground self-center mt-2 mb-2 text-center"
+                          : mine
+                            ? "max-w-[80%] rounded-2xl rounded-br-sm bg-navy-deep px-3 py-2 text-sm text-cream"
+                            : "max-w-[80%] rounded-2xl rounded-bl-sm bg-secondary px-3 py-2 text-sm"
+                      }
+                    >
+                      {m.body}
+                      {!isSystem && (
+                        <div
+                          className={`text-[9px] mt-1 ${mine ? "text-cream/50 text-right" : "text-muted-foreground"}`}
+                        >
+                          {format(new Date(m.created_at), "HH:mm")}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+              <div ref={bottomRef} />
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (text.trim() && convo.data?.id) send.mutate(text.trim());
+              }}
+              className="flex items-center gap-2 border-t border-border bg-card p-2"
+            >
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Type your message…"
+                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber/50"
+              />
+              <button
+                type="submit"
+                disabled={!text.trim() || send.isPending}
+                className="grid h-9 w-9 place-items-center rounded-lg bg-amber text-navy-deep disabled:opacity-50"
+                aria-label="Send"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </form>
+            </>
             )}
           </motion.div>
         )}

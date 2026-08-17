@@ -96,9 +96,113 @@ export const adminListConversations = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("chat_conversations")
-      .select("id, user_id, subject, status, last_message_at, created_at")
+      .select("id, user_id, subject, status, last_message_at, created_at, guest_id")
       .order("last_message_at", { ascending: false })
       .limit(200);
     if (error) fail(error);
     return data ?? [];
+  });
+
+/** GUEST CHAT FUNCTIONS */
+
+export const guestGetOrCreateConversation = createServerFn({ method: "POST" })
+  .validator((i) => z.object({ 
+    guestId: z.string().uuid(),
+    name: z.string().optional(),
+    email: z.string().optional()
+  }).parse(i))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: existing } = await supabaseAdmin
+      .from("chat_conversations")
+      .select("id, status, last_message_at, created_at")
+      .eq("guest_id", data.guestId)
+      .eq("status", "open")
+      .order("last_message_at", { ascending: false })
+      .maybeSingle();
+    
+    if (existing) return existing;
+    
+    const subject = data.name 
+      ? `Guest Chat: ${data.name}${data.email ? ` (${data.email})` : ''}` 
+      : "Guest Support chat";
+
+    const { data: newConvo, error } = await supabaseAdmin
+      .from("chat_conversations")
+      .insert({ guest_id: data.guestId, subject })
+      .select("id, status, last_message_at, created_at")
+      .single();
+    
+    if (error) fail(error);
+    
+    await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: newConvo!.id,
+      sender_role: "system",
+      body: "Hi! You're chatting with SwiftArc Support as a guest. Send us a message and we'll respond shortly.",
+    });
+    
+    return newConvo!;
+  });
+
+export const guestListMessages = createServerFn({ method: "POST" })
+  .validator((i) => z.object({ conversationId: z.string().uuid(), guestId: z.string().uuid() }).parse(i))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    // Verify this conversation belongs to the guest
+    const { data: convo } = await supabaseAdmin
+      .from("chat_conversations")
+      .select("id")
+      .eq("id", data.conversationId)
+      .eq("guest_id", data.guestId)
+      .maybeSingle();
+      
+    if (!convo) throw new Error("Not found");
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("chat_messages")
+      .select("id, sender_id, sender_role, body, created_at, read_at")
+      .eq("conversation_id", data.conversationId)
+      .order("created_at", { ascending: true })
+      .limit(500);
+      
+    if (error) fail(error);
+    return rows ?? [];
+  });
+
+export const guestSendMessage = createServerFn({ method: "POST" })
+  .validator((i) =>
+    z.object({
+      conversationId: z.string().uuid(),
+      guestId: z.string().uuid(),
+      body: z.string().min(1).max(4000),
+    }).parse(i)
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    // Verify this conversation belongs to the guest
+    const { data: convo } = await supabaseAdmin
+      .from("chat_conversations")
+      .select("id")
+      .eq("id", data.conversationId)
+      .eq("guest_id", data.guestId)
+      .maybeSingle();
+      
+    if (!convo) throw new Error("Not found");
+
+    const { error } = await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: data.conversationId,
+      sender_role: "user",
+      body: data.body,
+    });
+    
+    if (error) fail(error);
+    
+    await supabaseAdmin
+      .from("chat_conversations")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", data.conversationId);
+      
+    return { ok: true };
   });
