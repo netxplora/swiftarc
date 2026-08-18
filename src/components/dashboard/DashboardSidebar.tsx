@@ -22,7 +22,15 @@ import {
   BarChart,
   ShieldAlert,
   BadgeDollarSign,
+  FileText,
+  ScrollText,
+  Car,
+  Tag,
+  Sliders,
+  ClipboardList,
+  Megaphone,
 } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -45,21 +53,52 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-// Main nav removed for admin-only structure
-
-const adminNav = [
-  { to: "/admin", label: "Admin Overview", icon: Shield, end: true },
-  { to: "/admin/analytics", label: "Analytics", icon: BarChart },
-  { to: "/admin/map", label: "Global Map", icon: Map },
-  { to: "/admin/shipments", label: "All Shipments", icon: Package2 },
-  { to: "/admin/users", label: "Customers", icon: Users },
-  { to: "/admin/pickups", label: "Couriers", icon: Truck },
-  { to: "/admin/payments", label: "Payments", icon: CreditCard },
-  { to: "/admin/payments-config", label: "Payment Config", icon: Settings },
-  { to: "/admin/clearance", label: "Clearance Payments", icon: ShieldAlert },
-  { to: "/admin/invoices", label: "All Invoices", icon: Receipt },
-  { to: "/admin/support", label: "Support Tickets", icon: MessageSquare },
-  { to: "/admin/broadcast", label: "Broadcasts", icon: Activity },
+// Grouped navigation structure
+const navGroups = [
+  {
+    label: "Overview",
+    items: [
+      { to: "/admin", label: "Dashboard", icon: Shield, end: true },
+      { to: "/admin/analytics", label: "Analytics", icon: BarChart },
+      { to: "/admin/map", label: "Global Map", icon: Map },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { to: "/admin/shipments", label: "All Shipments", icon: Package2 },
+      { to: "/admin/pickups", label: "Couriers & Pickups", icon: Truck },
+      { to: "/admin/drivers", label: "Drivers", icon: Users },
+      { to: "/admin/fleet", label: "Fleet", icon: Car },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { to: "/admin/payments", label: "Payments", icon: CreditCard },
+      { to: "/admin/payments-config", label: "Payment Config", icon: Sliders },
+      { to: "/admin/clearance", label: "Clearance", icon: ShieldAlert },
+      { to: "/admin/invoices", label: "Invoices", icon: Receipt },
+    ],
+  },
+  {
+    label: "Customers",
+    items: [
+      { to: "/admin/users", label: "Customers", icon: Users },
+      { to: "/admin/support", label: "Support Chat", icon: MessageSquare },
+      { to: "/admin/broadcast", label: "Broadcast", icon: Megaphone },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { to: "/admin/reports", label: "Reports", icon: ClipboardList },
+      { to: "/admin/cms", label: "CMS Pages", icon: FileText },
+      { to: "/admin/pricing", label: "Pricing Rules", icon: Tag },
+      { to: "/admin/settings", label: "Settings", icon: Settings },
+      { to: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },
+    ],
+  },
 ];
 
 const bottomNav = [{ to: "/support", label: "Support", icon: MessageSquare }];
@@ -108,23 +147,25 @@ export function DashboardSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Admin Controls</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminNav.map(({ to, label, icon: Icon, end }) => (
-                <SidebarMenuItem key={to}>
-                  <SidebarMenuButton asChild isActive={isActive(to, end)} tooltip={label}>
-                    <Link to={to} className="flex items-center gap-2" onClick={handleLinkClick}>
-                      <Icon className="h-4 w-4" />
-                      <span>{label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map(({ to, label, icon: Icon, end }) => (
+                  <SidebarMenuItem key={to}>
+                    <SidebarMenuButton asChild isActive={isActive(to, end)} tooltip={label}>
+                      <Link to={to} className="flex items-center gap-2" onClick={handleLinkClick}>
+                        <Icon className="h-4 w-4" />
+                        <span>{label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

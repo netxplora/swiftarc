@@ -1070,6 +1070,10 @@ export const adminUpdatePickup = createServerFn({ method: "POST" })
         id: z.string().uuid(),
         contact_name: z.string(),
         company: z.string().optional(),
+        address: z.string().optional(),
+        city: z.string().optional(),
+        postal_code: z.string().optional(),
+        reference: z.string().optional(),
         pickup_date: z.string(),
         slot: z.string(),
         status: z.string(),
@@ -1084,6 +1088,10 @@ export const adminUpdatePickup = createServerFn({ method: "POST" })
       .update({
         contact_name: data.contact_name,
         company: data.company,
+        ...(data.address ? { address: data.address } : {}),
+        ...(data.city ? { city: data.city } : {}),
+        ...(data.postal_code ? { postal_code: data.postal_code } : {}),
+        ...(data.reference ? { reference: data.reference } : {}),
         pickup_date: data.pickup_date,
         slot: data.slot,
         status: data.status,
@@ -1222,6 +1230,32 @@ export const adminBroadcastNotification = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("notifications").insert(rows);
     if (error) fail(error);
     return { ok: true, sent: rows.length };
+  });
+
+export const adminListBroadcasts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Fetch distinct broadcasts by title+body+created_at, grouped by announcement category
+    const { data, error } = await supabaseAdmin
+      .from("notifications")
+      .select("id, title, body, tone, category, created_at")
+      .eq("category", "announcement")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) fail(error);
+    // Deduplicate: group by title+body+created_at minute bucket
+    const seen = new Set<string>();
+    const unique: typeof data = [];
+    for (const n of data ?? []) {
+      const key = `${n.title}||${n.body}||${n.created_at?.slice(0, 16)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(n);
+      }
+    }
+    return unique;
   });
 
 // ---------- Payment Management ----------
