@@ -34,6 +34,7 @@ import {
   BrainCircuit,
   Clock,
   Printer,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/hooks/use-locale";
@@ -245,12 +246,14 @@ function TrackingDetail() {
     distanceKm: s.distanceKm ? `${Number(s.distanceKm).toFixed(0)} km` : "N/A",
     estimatedTravelTime: s.estimatedTravelTime ?? "N/A",
     shippingFee: s.shippingFee ? `$${Number(s.shippingFee).toFixed(2)}` : "N/A",
+    packageImage: s.packageImage ?? null,
   };
 
   const [realtimeCheckpoints, setRealtimeCheckpoints] = useState(shipment.checkpoints);
   const [realtimeStatus, setRealtimeStatus] = useState(shipment.status);
   const [realtimeProgress, setRealtimeProgress] = useState(shipment.progress);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
 
   useEffect(() => {
     if (data.kind !== "db") return;
@@ -838,6 +841,26 @@ function TrackingDetail() {
                     )}
                   </div>
                 </div>
+                
+                {/* Package Photo */}
+                {shipment.packageImage && (
+                  <div className="flex gap-3 sm:col-span-2">
+                    <Camera className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2">Package Photo</p>
+                      <button
+                        onClick={() => setImageModalOpen(true)}
+                        className="block rounded-xl overflow-hidden border border-border hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      >
+                        <img 
+                          src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl} 
+                          alt="Package Photo" 
+                          className="h-24 w-auto object-cover"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Booking Date & Reference */}
                 <div>
@@ -1197,6 +1220,20 @@ function TrackingDetail() {
                 <Bell className="h-8 w-8 mx-auto mb-3 opacity-20" />
                 <p>No notifications yet</p>
               </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+        <DialogContent className="max-w-3xl bg-background text-foreground border-none shadow-2xl p-0 overflow-hidden">
+          <div className="relative w-full h-[80vh] flex items-center justify-center bg-black/5">
+            {shipment.packageImage && (
+              <img 
+                src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl}
+                alt="Package Photo Full View"
+                className="max-w-full max-h-full object-contain"
+              />
             )}
           </div>
         </DialogContent>

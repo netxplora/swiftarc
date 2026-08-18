@@ -28,6 +28,8 @@ import {
 import { LocationPicker, type LocationData } from "@/components/shipping/LocationPicker";
 import { OriginSelector } from "@/components/shipping/OriginSelector";
 import { PriceSummary } from "@/components/shipping/PriceSummary";
+import { PackageImageUpload } from "@/components/shipping/PackageImageUpload";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/shipments_/create")({
   component: AdminCreateShipmentPage,
@@ -80,6 +82,7 @@ function AdminCreateShipmentPage() {
     pieces: 1,
     description: "",
   });
+  const [packageImagePath, setPackageImagePath] = useState<string | undefined>();
   const [declaredValue, setDeclaredValue] = useState(0);
   const [insurance, setInsurance] = useState(false);
   const [isHazmat, setIsHazmat] = useState(false);
@@ -184,6 +187,7 @@ function AdminCreateShipmentPage() {
         distance_km: routeInfo.distance_km,
         estimated_travel_time: routeInfo.duration_text,
         shipping_fee: priceInfo.total,
+        package_image_path: packageImagePath,
       },
     });
   };
@@ -527,6 +531,19 @@ function AdminCreateShipmentPage() {
                 </div>
               </div>
             </div>
+            
+            <div className="border-t pt-6 mt-2">
+              <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-widest mb-4">
+                Package Photo (Optional)
+              </h3>
+              <div className="max-w-md">
+                <PackageImageUpload 
+                  value={packageImagePath} 
+                  onChange={setPackageImagePath} 
+                />
+              </div>
+            </div>
+
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={() => setStep(2)}>
                 Back
@@ -617,6 +634,19 @@ function AdminCreateShipmentPage() {
                   <p className="text-sm font-medium">${priceInfo?.total.toFixed(2)}</p>
                 </div>
               </div>
+              
+              {packageImagePath && (
+                <div className="sm:col-span-2 border-t pt-4">
+                  <h4 className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-2">
+                    Package Photo
+                  </h4>
+                  <img 
+                    src={supabase.storage.from("shipment-package-images").getPublicUrl(packageImagePath).data.publicUrl}
+                    alt="Package"
+                    className="max-w-[200px] h-auto rounded-lg border shadow-sm"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between pt-4 mt-6 border-t border-border/50">

@@ -464,9 +464,10 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
           .default("manual"),
         origin_branch_id: z.string().uuid().optional(),
         origin_accuracy_m: z.number().optional(),
-        distance_km: z.number().optional(),
-        estimated_travel_time: z.string().optional(),
-        shipping_fee: z.number().optional(),
+        distance_km: z.number().optional().nullable(),
+        estimated_travel_time: z.string().optional().nullable(),
+        shipping_fee: z.number().optional().nullable(),
+        package_image_path: z.string().optional().nullable(),
       })
       .parse(i),
   )
@@ -635,6 +636,16 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
       location: origin.city ? `${origin.city}, ${origin.country_code || origin.region || ""}`.trim() : "Office",
       occurred_at: new Date().toISOString(),
     });
+
+    // --- Create package image if provided ---
+    if (data.package_image_path) {
+      await (supabaseAdmin as any).from("package_images").insert({
+        shipment_id: inserted!.id,
+        storage_path: data.package_image_path,
+        is_primary: true,
+        uploaded_by: context.userId,
+      });
+    }
 
     return { ok: true, shipment: inserted };
   });

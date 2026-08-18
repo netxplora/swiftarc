@@ -154,6 +154,24 @@ export const resolveTracking = createServerFn({ method: "POST" })
       .eq("shipment_id", ship.id)
       .order("hold_date", { ascending: false });
 
+    // Fetch primary package image if available
+    let packageImage = null;
+    try {
+      const { data: pkgImg } = await (supabaseAdmin as any)
+        .from("package_images")
+        .select("storage_path")
+        .eq("shipment_id", ship.id)
+        .eq("is_primary", true)
+        .order("uploaded_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (pkgImg) {
+        packageImage = pkgImg.storage_path;
+      }
+    } catch {
+      // Graceful fail if not yet applied
+    }
+
     return {
       kind: "db" as const,
       shipment: {
@@ -179,6 +197,7 @@ export const resolveTracking = createServerFn({ method: "POST" })
         distanceKm: extendedData.distance_km ?? null,
         estimatedTravelTime: extendedData.estimated_travel_time ?? null,
         shippingFee: extendedData.shipping_fee ?? null,
+        packageImage: packageImage,
       },
       events: evts,
     };
