@@ -862,7 +862,7 @@ function TrackingDetail() {
                   </div>
                 )}
 
-                {/* Booking Date & Reference */}
+                {/* Booking Date, Reference, & Estimated Delivery */}
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Reference No.</p>
                   <p className="font-bold text-sm">{shipment.referenceNumber}</p>
@@ -870,6 +870,15 @@ function TrackingDetail() {
                   <p className="text-xs text-muted-foreground mt-4 mb-1">Booking Date</p>
                   <p className="font-bold text-sm">
                     {new Date(shipment.shipDate).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+
+                  <p className="text-xs text-muted-foreground mt-4 mb-1">Estimated Delivery</p>
+                  <p className="font-bold text-sm">
+                    {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
