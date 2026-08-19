@@ -238,6 +238,8 @@ function RootComponent() {
   const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
   const isPrint = pathname.startsWith("/invoice");
   const isAdmin = pathname.startsWith("/admin");
+  const isAuth = pathname === "/login" || pathname === "/register" || pathname === "/reset-password";
+  const hideNavAndFooter = isDashboard || isPrint || isAuth;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -247,14 +249,14 @@ function RootComponent() {
             <ThemeProvider>
               <div
                 suppressHydrationWarning
-                className={`flex min-h-dvh flex-col bg-background ${isDashboard || isPrint ? "" : "pb-16 lg:pb-0"}`}
+                className={`flex min-h-dvh flex-col bg-background ${hideNavAndFooter ? "" : "pb-16 lg:pb-0"}`}
               >
                 <GlobalLoading />
-                {!isDashboard && !isPrint && <SiteHeader />}
+                {!hideNavAndFooter && <SiteHeader />}
                 <main className="flex-1 flex flex-col">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
-                      key={isDashboard ? "dashboard-app" : pathname}
+                      key={isDashboard ? "dashboard-app" : isAuth ? "auth-app" : pathname}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
@@ -265,11 +267,11 @@ function RootComponent() {
                     </motion.div>
                   </AnimatePresence>
                 </main>
-                {!isDashboard && !isPrint && <SiteFooter />}
-                {!isDashboard && !isPrint && <MobileTabBar />}
+                {!hideNavAndFooter && <SiteFooter />}
+                {!hideNavAndFooter && <MobileTabBar />}
                 <Suspense fallback={null}>
-                  {!isPrint && <CommandPalette />}
-                  {!isAdmin && !isPrint && <ChatWidget />}
+                  {!isPrint && !isAuth && <CommandPalette />}
+                  {!isAdmin && !isPrint && !isAuth && <ChatWidget />}
                 </Suspense>
                 <PwaInstallPrompt />
                 <Toaster richColors position="top-right" />
