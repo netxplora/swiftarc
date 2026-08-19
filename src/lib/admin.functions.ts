@@ -1042,6 +1042,11 @@ export const adminCreatePickup = createServerFn({ method: "POST" })
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Auto-generate reference if not provided
+    const ref = data.reference && data.reference.trim()
+      ? data.reference.trim()
+      : `PKP-${Date.now().toString(36).toUpperCase()}`;
+
     const { data: inserted, error } = await supabaseAdmin
       .from("pickups")
       .insert({
@@ -1051,10 +1056,10 @@ export const adminCreatePickup = createServerFn({ method: "POST" })
         address: data.address,
         city: data.city,
         postal_code: data.postal_code,
-        reference: data.reference ?? "",
+        reference: ref,
         pickup_date: data.pickup_date,
         slot: data.slot,
-        status: "requested",
+        status: data.status ?? "pending",
       })
       .select()
       .single();

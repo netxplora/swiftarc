@@ -131,10 +131,11 @@ function AdminShipments() {
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   const q = useQuery({ queryKey: ["admin-shipments"], queryFn: () => list() });
-  const usersQ = useQuery({
+  const uq = useQuery({
     queryKey: ["admin-users"],
     queryFn: () => listUsers(),
   });
+  const users = (uq.data ?? []).filter((u: any) => u.roles.includes("moderator") || u.roles.includes("admin"));
 
   useEffect(() => {
     const channel = supabase
@@ -410,7 +411,7 @@ function AdminShipments() {
                         {r.assigned_courier_id ? (
                           <span className="inline-flex items-center gap-1 text-xs text-navy-deep bg-navy/10 px-2 py-1 rounded-full">
                             <User className="h-3 w-3" />{" "}
-                            {(usersQ.data ?? []).find((u: any) => u.id === r.assigned_courier_id)
+                            {(uq.data ?? []).find((u: any) => u.id === r.assigned_courier_id)
                               ?.displayName ?? "Assigned"}
                           </span>
                         ) : (
@@ -437,7 +438,7 @@ function AdminShipments() {
                           />
                           <ShipmentEditDialog
                             shipmentId={r.id}
-                            users={usersQ.data ?? []}
+                            users={uq.data ?? []}
                             onSuccess={() =>
                               qc.invalidateQueries({ queryKey: ["admin-shipments"] })
                             }

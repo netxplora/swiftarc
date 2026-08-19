@@ -226,11 +226,26 @@ function RootComponent() {
   useEffect(() => {
     // Lazy import so SSR doesn't hit the client module at module scope
     import("@/integrations/supabase/client").then(({ supabase }) => {
-      const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-        if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-          if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      let currentUser = null;
+      
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+        const userId = session?.user?.id || null;
+        
+        // Only invalidate if the user actually changed (e.g. login/logout)
+        // This prevents full page refreshes when Supabase simply refreshes the token on window focus
+        if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+          if (userId !== currentUser) {
+            currentUser = userId;
+            if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+          }
         }
       });
+      
+      // Initialize currentUser
+      supabase.auth.getSession().then(({ data }) => {
+        currentUser = data.session?.user?.id || null;
+      });
+
       return () => sub.subscription.unsubscribe();
     });
   }, [queryClient]);
