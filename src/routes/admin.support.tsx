@@ -7,7 +7,6 @@ import {
   MessageSquare,
   Send,
   CheckCircle2,
-  X,
   User,
   UserRound,
   CircleDot,
