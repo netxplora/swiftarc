@@ -206,3 +206,95 @@ export const guestSendMessage = createServerFn({ method: "POST" })
       
     return { ok: true };
   });
+
+// ─── Admin message reading & replying (bypasses RLS via supabaseAdmin) ───
+
+/** Admin: fetch messages for ANY conversation (user or guest). */
+export const adminListMessages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) => z.object({ conversationId: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    // Verify caller is admin
+    const { data: roleRow } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("chat_messages")
+      .select("id, sender_id, sender_role, body, created_at, read_at")
+      .eq("conversation_id", data.conversationId)
+      .order("created_at", { ascending: true })
+      .limit(500);
+    if (error) fail(error);
+    return rows ?? [];
+  });
+
+/** Admin: send a reply to ANY conversation (user or guest). */
+export const adminSendMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) =>
+    z.object({
+      conversationId: z.string().uuid(),
+      body: z.string().min(1).max(4000),
+    }).parse(i),
+  )
+  .handler(async ({ context, data }) => {
+    // Verify caller is admin
+    const { data: roleRow } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: data.conversationId,
+      sender_id: context.userId,
+      sender_role: "agent",
+      body: data.body,
+    });
+    if (error) fail(error);
+
+    await supabaseAdmin
+      .from("chat_conversations")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", data.conversationId);
+    return { ok: true };
+  });
+
+/** Admin: close / resolve a conversation. */
+export const adminCloseConversation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) => z.object({ conversationId: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { data: roleRow } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("chat_conversations")
+      .update({ status: "closed" })
+      .eq("id", data.conversationId);
+    if (error) fail(error);
+
+    // Insert a system message
+    await supabaseAdmin.from("chat_messages").insert({
+      conversation_id: data.conversationId,
+      sender_role: "system",
+      body: "This conversation has been closed by support.",
+    });
+    return { ok: true };
+  });
+
