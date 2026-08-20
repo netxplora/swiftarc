@@ -26,6 +26,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS pickups_updated_at ON public.pickups;
 CREATE TRIGGER pickups_updated_at
 BEFORE UPDATE ON public.pickups
 FOR EACH ROW
@@ -39,24 +40,28 @@ CREATE INDEX IF NOT EXISTS idx_pickups_date ON public.pickups(pickup_date);
 ALTER TABLE public.pickups ENABLE ROW LEVEL SECURITY;
 
 -- Policy 1: Users can read their own pickups
+DROP POLICY IF EXISTS "Users can read own pickups" ON public.pickups;
 CREATE POLICY "Users can read own pickups" ON public.pickups
 FOR SELECT USING (
     auth.uid() = user_id
 );
 
 -- Policy 2: Users can insert their own pickups
+DROP POLICY IF EXISTS "Users can insert own pickups" ON public.pickups;
 CREATE POLICY "Users can insert own pickups" ON public.pickups
 FOR INSERT WITH CHECK (
     auth.uid() = user_id OR auth.uid() IS NULL
 );
 
 -- Policy 3: Users can update their own pickups
+DROP POLICY IF EXISTS "Users can update own pickups" ON public.pickups;
 CREATE POLICY "Users can update own pickups" ON public.pickups
 FOR UPDATE USING (
     auth.uid() = user_id
 );
 
 -- Policy 4: Admins can do everything
+DROP POLICY IF EXISTS "Admins can manage all pickups" ON public.pickups;
 CREATE POLICY "Admins can manage all pickups" ON public.pickups
 FOR ALL USING (
     EXISTS (SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND role = 'admin')

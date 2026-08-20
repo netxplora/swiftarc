@@ -99,12 +99,51 @@ function AdminPickups() {
 
   const statusMut = useMutation({
     mutationFn: (v: { id: string; status: Status }) => setStatus({ data: v }),
+    onMutate: async (v) => {
+      await qc.cancelQueries({ queryKey: ["admin-pickups"] });
+      const prev = qc.getQueryData(["admin-pickups"]);
+      qc.setQueryData(["admin-pickups"], (old: any[]) =>
+        old?.map((p) => (p.id === v.id ? { ...p, status: v.status } : p))
+      );
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["admin-pickups"], ctx.prev);
+      toast.error("Status update failed");
+    },
     onSuccess: () => {
       toast.success("Status updated");
       qc.invalidateQueries({ queryKey: ["admin-pickups"] });
     },
-    onError: () => toast.error("Update failed"),
   });
+
+  const exportCSV = () => {
+    if (filtered.length === 0) return toast.info("No data to export");
+    const rows = [
+      ["Reference", "Date", "Slot", "Contact", "Company", "Address", "City", "Postal", "Packages", "Status"].join(","),
+      ...filtered.map((p: any) =>
+        [
+          p.reference ?? "",
+          p.pickup_date,
+          p.slot,
+          `"${p.contact_name ?? ""}"`,
+          `"${p.company ?? ""}"`,
+          `"${p.address ?? ""}"`,
+          p.city ?? "",
+          p.postal_code ?? "",
+          p.package_count ?? 1,
+          p.status,
+        ].join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pickups_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const pickups = q.data ?? [];
 
@@ -142,10 +181,15 @@ function AdminPickups() {
             Manage courier pickup requests from customers.
           </p>
         </div>
-        <PickupForm
-          mode="create"
-          onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-pickups"] })}
-        />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={exportCSV} className="gap-2">
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+          <PickupForm
+            mode="create"
+            onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-pickups"] })}
+          />
+        </div>
       </div>
 
       {/* Stats Row */}
