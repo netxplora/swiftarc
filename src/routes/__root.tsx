@@ -22,6 +22,7 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import { LocaleProvider } from "@/hooks/use-locale";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { PlatformSettingsProvider } from "@/components/providers/PlatformSettingsProvider";
 
 const CommandPalette = React.lazy(() =>
   import("@/components/site/CommandPalette").then((m) => ({ default: m.CommandPalette })),
@@ -140,7 +141,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300..900;1,6..12,300..900&family=Source+Code+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap",
       },
     ],
     scripts: [
@@ -226,7 +227,7 @@ function RootComponent() {
   useEffect(() => {
     // Lazy import so SSR doesn't hit the client module at module scope
     import("@/integrations/supabase/client").then(({ supabase }) => {
-      let currentUser = null;
+      let currentUser: string | null = null;
       
       const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
         const userId = session?.user?.id || null;
@@ -258,43 +259,45 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <LocaleProvider>
-          <AuthProvider>
-            <ThemeProvider>
-              <div
-                suppressHydrationWarning
-                className={`flex min-h-dvh flex-col bg-background ${hideNavAndFooter ? "" : "pb-16 lg:pb-0"}`}
-              >
-                <GlobalLoading />
-                {!hideNavAndFooter && <SiteHeader />}
-                <main className="flex-1 flex flex-col">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={isDashboard ? "dashboard-app" : isAuth ? "auth-app" : pathname}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.22, ease: "easeOut" }}
-                      className="flex-1 flex flex-col"
-                    >
-                      <Outlet />
-                    </motion.div>
-                  </AnimatePresence>
-                </main>
-                {!hideNavAndFooter && <SiteFooter />}
-                {!hideNavAndFooter && <MobileTabBar />}
-                <Suspense fallback={null}>
-                  {!isPrint && !isAuth && <CommandPalette />}
-                  {!isAdmin && !isPrint && !isAuth && <ChatWidget />}
-                </Suspense>
-                <PwaInstallPrompt />
-                <Toaster richColors position="top-right" />
-              </div>
-            </ThemeProvider>
-          </AuthProvider>
-        </LocaleProvider>
-      </TooltipProvider>
+      <PlatformSettingsProvider>
+        <TooltipProvider>
+          <LocaleProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <div
+                  suppressHydrationWarning
+                  className={`flex min-h-dvh flex-col bg-background ${hideNavAndFooter ? "" : "pb-16 lg:pb-0"}`}
+                >
+                  <GlobalLoading />
+                  {!hideNavAndFooter && <SiteHeader />}
+                  <main className="flex-1 flex flex-col">
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.div
+                        key={isDashboard ? "dashboard-app" : isAuth ? "auth-app" : pathname}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        className="flex-1 flex flex-col"
+                      >
+                        <Outlet />
+                      </motion.div>
+                    </AnimatePresence>
+                  </main>
+                  {!hideNavAndFooter && <SiteFooter />}
+                  {!hideNavAndFooter && <MobileTabBar />}
+                  <Suspense fallback={null}>
+                    {!isPrint && !isAuth && <CommandPalette />}
+                    {!isAdmin && !isPrint && !isAuth && <ChatWidget />}
+                  </Suspense>
+                  <PwaInstallPrompt />
+                  <Toaster richColors position="top-right" />
+                </div>
+              </ThemeProvider>
+            </AuthProvider>
+          </LocaleProvider>
+        </TooltipProvider>
+      </PlatformSettingsProvider>
     </QueryClientProvider>
   );
 }

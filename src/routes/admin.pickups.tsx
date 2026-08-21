@@ -195,19 +195,21 @@ function AdminPickups() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
-          { label: "Total", value: stats.total, icon: <Package className="h-4 w-4" />, color: "text-foreground" },
-          { label: "Today", value: stats.today, icon: <CalendarClock className="h-4 w-4" />, color: "text-blue-600" },
-          { label: "Pending", value: stats.pending, icon: <Clock className="h-4 w-4" />, color: "text-amber-600" },
-          { label: "Confirmed", value: stats.confirmed, icon: <CheckCircle2 className="h-4 w-4" />, color: "text-blue-600" },
-          { label: "Completed", value: stats.completed, icon: <CheckCircle2 className="h-4 w-4" />, color: "text-emerald-600" },
-          { label: "Cancelled", value: stats.cancelled, icon: <XCircle className="h-4 w-4" />, color: "text-red-600" },
+          { label: "Total", value: stats.total, icon: <Package className="h-4 w-4" />, color: "text-secondary", bg: "bg-secondary/10 dark:bg-white/10 dark:text-white" },
+          { label: "Today", value: stats.today, icon: <CalendarClock className="h-4 w-4" />, color: "text-accent", bg: "bg-accent/10" },
+          { label: "Pending", value: stats.pending, icon: <Clock className="h-4 w-4" />, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Confirmed", value: stats.confirmed, icon: <CheckCircle2 className="h-4 w-4" />, color: "text-accent-hover", bg: "bg-accent-hover/10" },
+          { label: "Completed", value: stats.completed, icon: <CheckCircle2 className="h-4 w-4" />, color: "text-success", bg: "bg-success/10" },
+          { label: "Cancelled", value: stats.cancelled, icon: <XCircle className="h-4 w-4" />, color: "text-error", bg: "bg-error/10" },
         ].map((s) => (
           <Card key={s.label}>
             <CardContent className="flex items-center gap-3 p-4">
-              <span className={s.color}>{s.icon}</span>
+              <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[6px] ${s.bg} ${s.color}`}>
+                {s.icon}
+              </span>
               <div>
                 <p className="text-xl font-bold leading-none">{s.value}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
               </div>
             </CardContent>
           </Card>

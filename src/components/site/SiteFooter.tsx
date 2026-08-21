@@ -44,31 +44,31 @@ const columns: { title: string; links: { label: string; to: string }[] }[] = [
 export function SiteFooter() {
   return (
     <motion.footer
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6 }}
-      className="mt-24 border-t border-border bg-card text-foreground transition-colors duration-300"
+      transition={{ duration: 0.5 }}
+      className="mt-20 border-t border-border bg-muted text-secondary"
     >
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <Logo tone="auto" />
-            <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              An engineered logistics network moving priority freight and parcels across 220+
-              countries and territories, with real-time visibility at every stop.
+            <p className="mt-4 max-w-sm text-[14px] text-muted-foreground leading-relaxed">
+              Global logistics and parcel delivery network operating across 220+ countries and
+              territories, with real-time shipment status tracking.
             </p>
-            <div className="mt-6 grid max-w-sm grid-cols-3 gap-3 text-center text-xs uppercase tracking-widest text-muted-foreground">
+            <div className="mt-6 grid max-w-sm grid-cols-3 gap-3 text-center text-[12px] uppercase tracking-wider text-muted-foreground">
               <div>
-                <div className="font-display text-2xl font-bold text-amber">220+</div>
+                <div className="font-display text-[24px] font-bold text-accent">220+</div>
                 Countries
               </div>
               <div>
-                <div className="font-display text-2xl font-bold text-amber">15M</div>
+                <div className="font-display text-[24px] font-bold text-accent">15M</div>
                 Daily parcels
               </div>
               <div>
-                <div className="font-display text-2xl font-bold text-amber">99.4%</div>
+                <div className="font-display text-[24px] font-bold text-accent">99.4%</div>
                 On-time
               </div>
             </div>
@@ -77,13 +77,13 @@ export function SiteFooter() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {columns.map((col) => (
               <div key={col.title}>
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-amber">
+                <h3 className="text-[12px] font-bold uppercase tracking-[0.05em] text-secondary">
                   {col.title}
                 </h3>
-                <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+                <ul className="mt-4 space-y-2.5 text-[14px] text-muted-foreground">
                   {col.links.map((l) => (
                     <li key={l.label}>
-                      <Link to={l.to} className="transition-colors hover:text-amber">
+                      <Link to={l.to} className="transition-colors hover:text-accent">
                         {l.label}
                       </Link>
                     </li>
@@ -94,19 +94,19 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 flex flex-col gap-4 border-t border-border pt-6 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} SwiftArc Global Logistics. All rights reserved.</p>
           <div className="flex flex-wrap gap-4">
-            <Link to="/privacy" className="hover:text-amber transition-colors">
+            <Link to="/privacy" className="hover:text-accent transition-colors">
               Privacy
             </Link>
-            <Link to="/terms" className="hover:text-amber transition-colors">
+            <Link to="/terms" className="hover:text-accent transition-colors">
               Terms
             </Link>
-            <Link to="/accessibility" className="hover:text-amber transition-colors">
+            <Link to="/accessibility" className="hover:text-accent transition-colors">
               Accessibility
             </Link>
-            <Link to="/contact" className="hover:text-amber transition-colors">
+            <Link to="/contact" className="hover:text-accent transition-colors">
               Contact
             </Link>
           </div>
@@ -115,3 +115,4 @@ export function SiteFooter() {
     </motion.footer>
   );
 }
+

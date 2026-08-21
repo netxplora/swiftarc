@@ -1542,6 +1542,50 @@ export const adminUpdateSettings = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminUpdatePlatformSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i) =>
+    z
+      .object({
+        visual_assets: z.any().optional(),
+        design_system: z.any().optional(),
+        contact_info: z.any().optional(),
+        compliance_legal: z.any().optional(),
+        global_seo: z.any().optional(),
+        notifications_alerts: z.any().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Only update the fields provided in `data`
+    const payload = {
+      ...data,
+      updated_at: new Date().toISOString(),
+      updated_by: context.userId,
+    };
+
+    const { error } = await (supabaseAdmin as any)
+      .from("platform_settings")
+      .update(payload)
+      .eq("is_singleton", true);
+
+    if (error) fail(error);
+
+    await writeAuditLog({
+      action: "Platform Settings Updated",
+      actor: context.userId,
+      actor_id: context.userId,
+      target: "platform_settings",
+      details: data,
+      severity: "warning",
+    });
+
+    return { ok: true };
+  });
+
 // ---------- CMS Pages ----------
 
 export const adminListCmsPages = createServerFn({ method: "GET" })

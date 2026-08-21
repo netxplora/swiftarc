@@ -62,7 +62,6 @@ export function DashboardHeader() {
   const markOne = useServerFn(markNotificationRead);
   const markAll = useServerFn(markAllNotificationsRead);
 
-  // We only really need to fetch unread notifs here, but we'll fetch all and filter for now to share cache with main page
   const notifs = useQuery({
     queryKey: ["notifications"],
     queryFn: () => fetchNotifs(),
@@ -98,15 +97,15 @@ export function DashboardHeader() {
   });
 
   return (
-    <div className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur shadow-sm">
+    <div className="sticky top-0 z-20 flex h-[56px] w-full items-center justify-between border-b border-border bg-white px-4 shadow-[0_2px_4px_rgba(0,0,0,0.1)] dark:bg-secondary dark:border-white/10">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        <div className="hidden sm:flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-3 py-1.5 text-sm text-muted-foreground w-64 focus-within:border-amber focus-within:bg-background transition-colors">
-          <Search className="h-4 w-4 shrink-0" />
+        <div className="hidden sm:flex h-[36px] items-center gap-2 rounded-[4px] border border-border bg-muted px-3 text-[14px] text-muted-foreground w-64 focus-within:border-accent focus-within:bg-white transition-colors dark:bg-white/10 dark:border-white/20 dark:text-white">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground dark:text-white/70" />
           <input
             type="text"
             placeholder="Search tracking, invoices..."
-            className="bg-transparent outline-none w-full text-foreground placeholder:text-muted-foreground"
+            className="bg-transparent outline-none w-full text-[13px] text-secondary placeholder:text-muted-foreground dark:text-white dark:placeholder:text-white/50"
           />
         </div>
       </div>
@@ -116,30 +115,30 @@ export function DashboardHeader() {
           type="button"
           onClick={toggle}
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-          className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card hover:bg-secondary transition-colors text-foreground"
+          className="relative grid h-9 w-9 place-items-center rounded-[4px] border border-border bg-white hover:bg-muted transition-colors text-secondary dark:bg-white/10 dark:border-white/20 dark:text-white"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
 
         <Popover>
           <PopoverTrigger asChild>
-            <button className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card hover:bg-secondary transition-colors">
-              <Bell className="h-4 w-4 text-foreground" />
+            <button className="relative grid h-9 w-9 place-items-center rounded-[4px] border border-border bg-white hover:bg-muted transition-colors dark:bg-white/10 dark:border-white/20">
+              <Bell className="h-4 w-4 text-secondary dark:text-white" />
               {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-amber border-2 border-background animate-pulse"></span>
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent animate-pulse"></span>
               )}
             </button>
           </PopoverTrigger>
           <PopoverContent
             align="end"
-            className="w-80 p-0 rounded-xl overflow-hidden shadow-xl border-border bg-card"
+            className="w-80 p-0 rounded-[8px] overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.12)] border-border bg-white dark:bg-secondary dark:border-white/20"
           >
-            <div className="flex items-center justify-between border-b border-border p-4 bg-secondary/30">
-              <h3 className="font-semibold text-sm">Notifications</h3>
+            <div className="flex items-center justify-between border-b border-border p-4 bg-muted dark:bg-white/5 dark:border-white/10">
+              <h3 className="font-bold text-[14px] text-secondary dark:text-white">Notifications</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllMut.mutate()}
-                  className="text-[10px] uppercase font-bold text-navy-deep hover:underline"
+                  className="text-[11px] uppercase font-bold text-accent hover:underline"
                 >
                   Mark all as read
                 </button>
@@ -151,31 +150,31 @@ export function DashboardHeader() {
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
               ) : items.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground">
+                <div className="p-8 text-center text-[13px] text-muted-foreground dark:text-white/70">
                   You have no notifications.
                 </div>
               ) : (
-                <div className="flex flex-col divide-y divide-border">
+                <div className="flex flex-col divide-y divide-[#D8DDE6] dark:divide-white/10">
                   {items.map((n) => {
                     const Icon = iconFor(n.category);
                     return (
                       <div
                         key={n.id}
-                        className={`flex gap-3 p-4 transition-colors hover:bg-secondary/50 ${n.read ? "opacity-70" : "bg-amber/5"}`}
+                        className={`flex gap-3 p-4 transition-colors hover:bg-muted dark:hover:bg-white/5 ${n.read ? "opacity-70" : "bg-accent/5"}`}
                       >
                         <div
-                          className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${toneClass(n.tone)}`}
+                          className={`grid h-8 w-8 shrink-0 place-items-center rounded-[4px] ${toneClass(n.tone)}`}
                         >
                           <Icon className="h-3.5 w-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-semibold truncate pr-2">{n.title}</p>
-                            <span className="text-[10px] text-muted-foreground shrink-0">
+                            <p className="text-[13px] font-semibold text-secondary dark:text-white truncate pr-2">{n.title}</p>
+                            <span className="text-[11px] text-muted-foreground dark:text-white/60 shrink-0">
                               {relative(n.created_at)}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                          <p className="text-[12px] text-muted-foreground dark:text-white/70 line-clamp-1 mt-0.5">
                             {n.body}
                           </p>
                         </div>
@@ -185,7 +184,7 @@ export function DashboardHeader() {
                 </div>
               )}
             </div>
-            <div className="border-t border-border bg-secondary/30 p-2 text-center text-xs font-semibold text-muted-foreground p-2">
+            <div className="border-t border-border bg-muted p-2 text-center text-[11px] font-bold text-muted-foreground uppercase tracking-wider dark:bg-white/5 dark:border-white/10 dark:text-white/70">
               All caught up
             </div>
           </PopoverContent>
@@ -193,12 +192,12 @@ export function DashboardHeader() {
 
         <Link
           to="/admin/settings"
-          className="flex items-center gap-2 rounded-full border border-border p-1 pr-3 hover:bg-secondary transition-colors"
+          className="flex items-center gap-2 rounded-full border border-border p-1 pr-3 hover:bg-muted transition-colors dark:border-white/20 dark:hover:bg-white/10"
         >
-          <div className="grid h-7 w-7 place-items-center rounded-full bg-navy-deep text-xs font-semibold text-cream">
+          <div className="grid h-7 w-7 place-items-center rounded-full bg-accent text-[12px] font-bold text-white">
             {initials}
           </div>
-          <span className="hidden sm:block text-xs font-semibold">{name}</span>
+          <span className="hidden sm:block text-[13px] font-semibold text-secondary dark:text-white">{name}</span>
         </Link>
       </div>
     </div>

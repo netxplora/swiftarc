@@ -31,13 +31,13 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:gap-6 lg:px-8">
-        <Link to="/" className="shrink-0" aria-label="SwiftArc home">
+    <header className="sticky top-0 z-40 h-[56px] border-b border-accent/20 bg-secondary text-white shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+      <div className="mx-auto flex h-[56px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:gap-6 lg:px-8">
+        <Link to="/" className="shrink-0 text-white" aria-label="SwiftArc home">
           <Logo />
         </Link>
 
-        <nav className="hidden flex-1 items-center gap-1 lg:flex" aria-label="Main">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
           {nav.slice(1).map((item) => {
             const active =
               pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to));
@@ -46,13 +46,13 @@ export function SiteHeader() {
                 key={item.to}
                 to={item.to as any}
                 className={cn(
-                  "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  "relative flex h-[56px] items-center px-3 text-[14px] font-normal transition-colors",
+                  active ? "text-white font-semibold" : "text-white/80 hover:text-white",
                 )}
               >
                 {item.tKey ? t(item.tKey) : item.label}
                 {active && (
-                  <span className="absolute inset-x-3 -bottom-[1px] h-[2px] rounded-full bg-amber" />
+                  <span className="absolute inset-x-2 bottom-0 h-[3px] rounded-t-sm bg-accent" />
                 )}
               </Link>
             );
@@ -61,25 +61,25 @@ export function SiteHeader() {
 
         <form
           onSubmit={onTrack}
-          className="hidden items-center rounded-full border border-border bg-card px-3 py-1.5 shadow-sm md:flex"
+          className="mx-auto hidden h-[36px] max-w-xs flex-1 items-center rounded-[4px] bg-white/15 px-3 text-white shadow-inner transition-colors focus-within:bg-white/20 md:flex"
         >
-          <Search className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden />
+          <Search className="mr-2 h-4 w-4 text-white/70" aria-hidden />
           <input
             aria-label="Enter tracking number"
             value={track}
             onChange={(e) => setTrack(e.target.value)}
-            placeholder="Track a shipment"
-            className="w-40 bg-transparent text-sm outline-none placeholder:text-muted-foreground xl:w-48"
+            placeholder="Search tracking ID..."
+            className="w-full bg-transparent text-[14px] text-white outline-none placeholder:text-white/60"
           />
         </form>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
           <InstallPrompt />
           <button
             type="button"
             onClick={toggle}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-            className="grid h-9 w-9 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
+            className="grid h-9 w-9 place-items-center rounded-[4px] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -87,7 +87,7 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="ml-auto grid h-11 w-11 place-items-center rounded-md lg:hidden"
+          className="ml-auto grid h-9 w-9 place-items-center rounded-[4px] text-white hover:bg-white/10 lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
         >
@@ -101,19 +101,19 @@ export function SiteHeader() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="border-t border-border/60 bg-background lg:hidden overflow-hidden"
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="border-t border-white/10 bg-secondary text-white shadow-lg lg:hidden overflow-hidden"
           >
-            <nav className="mx-auto grid max-w-7xl gap-1 px-4 py-4" aria-label="Mobile">
+            <nav className="mx-auto grid max-w-7xl gap-1 px-4 py-3" aria-label="Mobile">
               {nav.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to as any}
                   onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-md px-3 py-3 text-sm font-medium hover:bg-secondary transition-colors"
+                  className="flex items-center justify-between rounded-[4px] px-3 py-2.5 text-[14px] font-medium text-white/90 hover:bg-white/10 transition-colors"
                 >
                   {item.tKey ? t(item.tKey) : item.label}
-                  <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4 -rotate-90 text-white/60" />
                 </Link>
               ))}
             </nav>
@@ -123,3 +123,4 @@ export function SiteHeader() {
     </header>
   );
 }
+

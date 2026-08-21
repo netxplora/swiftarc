@@ -8,49 +8,59 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito Sans", "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Source Code Pro", ui-monospace, monospace;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
 
+  --shadow-level-1: 0 2px 4px rgba(0, 0, 0, 0.07);
+  --shadow-level-2: 0 4px 14px rgba(0, 0, 0, 0.1);
+  --shadow-level-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-nav: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Dynamic Brand Token Map */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --color-card-hover: var(--card-hover);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
+  --color-card-border: var(--card-border);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-border-subtle: var(--border-subtle);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-
-  --color-navy: var(--navy);
-  --color-navy-deep: var(--navy-deep);
-  --color-amber: var(--amber);
-  --color-amber-soft: var(--amber-soft);
-  --color-cream: var(--cream);
-  --color-ink: var(--ink);
+  
+  --color-muted-bg: var(--muted-bg);
+  --color-muted-text: var(--muted-text);
+  
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+  
   --color-success: var(--success);
   --color-warning: var(--warning);
-
+  --color-error: var(--error);
+  --color-info: var(--info);
+  
+  /* Fallbacks for semantic tokens referencing old vars (we map them to the new dynamic tokens) */
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary-foreground: #FFFFFF;
+  --color-accent-foreground: #FFFFFF;
+  --color-muted: var(--muted-bg);
+  --color-muted-foreground: var(--muted-text);
+  --color-destructive: var(--error);
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: var(--card-border);
+  --color-input: var(--input-border);
+  --color-ring: var(--primary);
+  
+  /* Retained chart colors */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -66,18 +76,18 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Full Semantic Design Tokens */
-  --color-surface: var(--surface);
-  --color-surface-secondary: var(--surface-secondary);
-  --color-surface-elevated: var(--surface-elevated);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  --color-brand: var(--brand);
-  --color-brand-secondary: var(--brand-secondary);
-  --color-danger: var(--destructive);
-  --color-overlay: var(--overlay);
-  --color-glass-background: var(--glass-bg);
+  /* Semantic aliases */
+  --color-surface: var(--background);
+  --color-surface-secondary: var(--muted-bg);
+  --color-surface-elevated: var(--card);
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-text);
+  --color-brand: var(--primary);
+  --color-brand-secondary: var(--secondary);
+  --color-danger: var(--error);
+
+  /* Glassmorphism tokens */
+  --color-glass-bg: var(--glass-bg);
   --color-glass-border: var(--glass-border);
   --color-glass-shadow: var(--glass-shadow);
   --color-glass-text: var(--glass-text);
@@ -87,129 +97,101 @@
 }
 
 :root {
+  /* Structural Tokens */
   --radius: 0.5rem;
+  --card-radius: 0.75rem;
+  
+  /* Default Light Mode Palette (Tightened Brand System) */
+  --primary: #EA580C;
+  --primary-hover: #C2410C;
+  --secondary: #032D60;
+  --accent: #2563EB;
+  
+  --background: #FFFFFF;
+  --foreground: #032D60;
+  
+  --card: #FFFFFF;
+  --card-border: #E2E8F0;
+  
+  --muted-bg: #F8FAFC;
+  --muted-text: #64748B;
+  
+  --input-bg: #FFFFFF;
+  --input-border: #CBD5E1;
+  
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --error: #DC2626;
+  --info: #2563EB;
 
-  /* SwiftArc palette */
-  --navy-deep: oklch(0.16 0.03 260);   /* #0B1220 */
-  --navy: oklch(0.22 0.04 260);        /* #141c30 */
-  --amber: oklch(0.82 0.16 78);        /* #FFB020 */
-  --amber-soft: oklch(0.9 0.11 82);
-  --cream: oklch(0.965 0.012 85);      /* #F5F2EC */
-  --ink: oklch(0.18 0.02 260);
-  --success: oklch(0.72 0.16 155);
-  --warning: oklch(0.78 0.16 55);
+  /* Component specifics */
+  --chart-1: var(--primary);
+  --chart-2: var(--secondary);
+  --chart-3: var(--success);
+  --chart-4: var(--warning);
+  --chart-5: var(--muted-text);
 
-  --background: var(--cream);
-  --foreground: var(--ink);
-  --card: oklch(0.99 0.005 85);
-  --card-hover: oklch(0.975 0.008 85);
-  --card-foreground: var(--ink);
-  --popover: oklch(1 0 0);
-  --popover-foreground: var(--ink);
-  --primary: var(--navy-deep);
-  --primary-foreground: var(--cream);
-  --secondary: oklch(0.94 0.008 85);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.93 0.008 85);
-  --muted-foreground: oklch(0.42 0.02 260);
-  --accent: var(--amber);
-  --accent-foreground: var(--navy-deep);
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.88 0.01 85);
-  --border-subtle: oklch(0.92 0.008 85);
-  --input: oklch(0.92 0.01 85);
-  --ring: var(--amber);
-  --overlay: rgba(15, 23, 42, 0.4);
+  --sidebar: var(--muted-bg);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(234, 88, 12, 0.1);
+  --sidebar-accent-foreground: var(--primary);
+  --sidebar-border: var(--card-border);
+  --sidebar-ring: var(--primary);
 
-  --chart-1: var(--amber);
-  --chart-2: var(--navy-deep);
-  --chart-3: oklch(0.55 0.12 220);
-  --chart-4: var(--success);
-  --chart-5: oklch(0.65 0.18 30);
-
-  --sidebar: oklch(0.96 0.01 85);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--navy-deep);
-  --sidebar-primary-foreground: var(--cream);
-  --sidebar-accent: oklch(0.92 0.01 85);
-  --sidebar-accent-foreground: var(--navy-deep);
-  --sidebar-border: oklch(0.88 0.01 85);
-  --sidebar-ring: var(--amber);
-
-  /* Semantic Design Tokens Base Values */
-  --surface: var(--card);
-  --surface-secondary: var(--secondary);
-  --surface-elevated: var(--popover);
-  --text-primary: var(--foreground);
-  --text-secondary: oklch(0.35 0.02 260);
-  --text-muted: var(--muted-foreground);
-  --brand: var(--navy-deep);
-  --brand-secondary: var(--navy);
-  --info: oklch(0.55 0.12 220);
-
-  /* Glassmorphism tokens - Light Mode */
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --glass-shadow: rgba(0, 0, 0, 0.06);
-  --glass-text: var(--ink);
-  --glass-text-secondary: oklch(0.42 0.02 260);
-  --glass-accent: var(--amber);
-  --glass-overlay: rgba(255, 255, 255, 0.5);
+  /* Glassmorphism tokens - Clean Cloud Mode */
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-border: var(--card-border);
+  --glass-shadow: rgba(3, 45, 96, 0.08);
+  --glass-text: var(--foreground);
+  --glass-text-secondary: var(--muted-text);
+  --glass-accent: var(--primary);
+  --glass-overlay: rgba(244, 246, 249, 0.7);
 }
 
 .dark {
-  --background: var(--navy-deep);
-  --foreground: var(--cream);
-  --card: var(--navy);
-  --card-hover: oklch(0.24 0.04 260);
-  --card-foreground: var(--cream);
-  --popover: var(--navy);
-  --popover-foreground: var(--cream);
-  --primary: var(--amber);
-  --primary-foreground: var(--navy-deep);
-  --secondary: oklch(0.25 0.04 260);
-  --secondary-foreground: var(--cream);
-  --muted: oklch(0.25 0.04 260);
-  --muted-foreground: oklch(0.72 0.02 260);
-  --accent: var(--amber);
-  --accent-foreground: var(--navy-deep);
-  --destructive: oklch(0.62 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(1 0 0 / 12%);
-  --border-subtle: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: var(--amber);
-  --overlay: rgba(0, 0, 0, 0.7);
+  /* Default Dark Mode Palette (Tightened Brand System) */
+  --primary: #F97316;
+  --primary-hover: #EA580C;
+  --secondary: #021836;
+  --accent: #60A5FA;
+  
+  --background: #020617;
+  --foreground: #F8FAFC;
+  
+  --card: #0F172A;
+  --card-elevated: #172033;
+  --card-border: #1E293B;
+  
+  --muted-bg: #0B1120;
+  --muted-text: #94A3B8;
+  
+  --input-bg: #0F172A;
+  --input-border: #334155;
+  
+  --success: #22C55E;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
 
-  --sidebar: var(--navy-deep);
-  --sidebar-foreground: var(--cream);
-  --sidebar-primary: var(--amber);
-  --sidebar-primary-foreground: var(--navy-deep);
-  --sidebar-accent: var(--navy);
-  --sidebar-accent-foreground: var(--cream);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: var(--amber);
-
-  /* Semantic Design Tokens Dark Values */
-  --surface: var(--card);
-  --surface-secondary: var(--secondary);
-  --surface-elevated: var(--popover);
-  --text-primary: var(--foreground);
-  --text-secondary: oklch(0.85 0.02 260);
-  --text-muted: var(--muted-foreground);
-  --brand: var(--amber);
-  --brand-secondary: var(--amber-soft);
-  --info: oklch(0.65 0.18 220);
+  --sidebar: #020617;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(249, 115, 22, 0.15);
+  --sidebar-accent-foreground: var(--primary);
+  --sidebar-border: var(--card-border);
+  --sidebar-ring: var(--primary);
 
   /* Glassmorphism tokens - Dark Mode */
-  --glass-bg: rgba(20, 28, 48, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(2, 6, 23, 0.85);
+  --glass-border: var(--card-border);
   --glass-shadow: rgba(0, 0, 0, 0.35);
-  --glass-text: var(--cream);
-  --glass-text-secondary: oklch(0.72 0.02 260);
-  --glass-accent: var(--amber);
-  --glass-overlay: rgba(11, 18, 32, 0.6);
+  --glass-text: var(--foreground);
+  --glass-text-secondary: var(--muted-text);
+  --glass-accent: var(--primary);
+  --glass-overlay: rgba(2, 6, 23, 0.6);
 }
 
 @layer base {
@@ -417,10 +399,10 @@
   .text-h2 { @apply text-2xl md:text-3xl font-display font-semibold leading-snug; }
   .text-h3 { @apply text-xl md:text-2xl font-display font-semibold leading-snug; }
   .text-h4 { @apply text-lg md:text-xl font-display font-medium leading-normal; }
-  .text-body-lg { @apply text-base md:text-lg leading-relaxed text-text-secondary; }
-  .text-body { @apply text-sm md:text-base leading-relaxed text-text-secondary; }
-  .text-body-sm { @apply text-xs md:text-sm leading-normal text-text-muted; }
-  .text-caption { @apply text-[11px] md:text-xs text-text-muted uppercase tracking-wider font-semibold; }
+  .text-body-lg { @apply text-base md:text-lg leading-relaxed text-muted-foreground; }
+  .text-body { @apply text-sm md:text-base leading-relaxed text-muted-foreground; }
+  .text-body-sm { @apply text-xs md:text-sm leading-normal text-muted-foreground; }
+  .text-caption { @apply text-[11px] md:text-xs text-muted-foreground uppercase tracking-wider font-semibold; }
 
   /* -------------------------------------
      MOBILE-FIRST RESPONSIVE SPACING

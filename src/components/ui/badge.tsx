@@ -4,19 +4,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex h-[24px] items-center rounded-[4px] border px-2 text-[11px] font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#00A1E0]",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-brand text-primary-foreground shadow hover:bg-brand/80",
-        secondary:
-          "border-transparent bg-surface-secondary text-primary-text hover:bg-surface-secondary/80",
-        destructive:
-          "border-transparent bg-danger text-destructive-foreground shadow hover:bg-danger/80",
-        outline: "text-primary-text border-border",
-        success: "border-transparent bg-success/20 text-success hover:bg-success/30",
-        warning: "border-transparent bg-warning/20 text-warning-foreground hover:bg-warning/30",
-        info: "border-transparent bg-info/20 text-info hover:bg-info/30",
+        default: "border-transparent bg-accent text-white",
+        secondary: "border-transparent bg-border text-muted-foreground dark:bg-white/20 dark:text-white",
+        destructive: "border-transparent bg-error/10 text-error dark:bg-error/25 dark:text-red-300",
+        outline: "border-border bg-transparent text-secondary dark:border-white/20 dark:text-white",
+        success: "border-transparent bg-success/10 text-success dark:bg-success/25 dark:text-green-300",
+        warning: "border-transparent bg-primary/15 text-[#D97706] dark:bg-primary/25 dark:text-primary",
+        info: "border-transparent bg-accent/10 text-accent dark:bg-accent/25 dark:text-sky-300",
       },
     },
     defaultVariants: {
@@ -33,3 +31,4 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 }
 
 export { Badge, badgeVariants };
+

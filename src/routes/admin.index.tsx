@@ -70,36 +70,36 @@ function AdminOverview() {
       label: "Gross Revenue",
       value: fmt(adminData?.revenue.gross ?? 0),
       Icon: Activity,
-      color: "text-emerald-600",
-      bg: "bg-emerald-500/10",
+      color: "text-success",
+      bg: "bg-success/10",
     },
     {
       label: "Outstanding",
       value: fmt(adminData?.revenue.outstanding ?? 0),
       Icon: CreditCard,
-      color: "text-amber",
-      bg: "bg-amber/10",
+      color: "text-primary",
+      bg: "bg-primary/10",
     },
     {
       label: "Total Users",
       value: (adminData?.counts.users ?? 0).toLocaleString(),
       Icon: Users,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
+      color: "text-accent",
+      bg: "bg-accent/10",
     },
     {
       label: "Active Shipments",
       value: (adminData?.counts.shipments ?? 0).toLocaleString(),
       Icon: Package2,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
+      color: "text-secondary",
+      bg: "bg-secondary/10 dark:bg-white/10 dark:text-white",
     },
     {
       label: "Live Chats",
       value: (adminData?.counts.openChats ?? 0).toLocaleString(),
       Icon: MessageSquare,
-      color: "text-red-500",
-      bg: "bg-red-500/10",
+      color: "text-error",
+      bg: "bg-error/10",
     },
   ];
 
@@ -110,8 +110,8 @@ function AdminOverview() {
           <h1 className="font-display text-3xl font-bold tracking-tight">Admin Control Center</h1>
           <p className="mt-1 text-sm text-muted-foreground flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
             </span>
             System-wide activity synced in real-time
           </p>
@@ -137,7 +137,7 @@ function AdminOverview() {
           </Link>
           <Link
             to="/admin/shipments"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-navy-deep px-3 text-sm font-medium text-cream hover:bg-navy transition-colors"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-accent px-3 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
           >
             <Package2 className="mr-2 h-4 w-4" /> All Shipments
           </Link>
@@ -145,19 +145,20 @@ function AdminOverview() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((s, i) => (
+        {stats.map((s) => (
           <div
             key={s.label}
-            className="rounded-2xl border border-border bg-card p-5 hover:shadow-md transition-shadow relative overflow-hidden group"
+            className="rounded-[8px] border border-border dark:border-white/10 bg-white dark:bg-secondary p-5 shadow-[0_2px_4px_rgba(0,0,0,0.07)] hover:shadow-md transition-shadow relative overflow-hidden group"
           >
-            <div
-              className={`absolute -right-6 -top-6 h-24 w-24 rounded-full ${s.bg} transition-transform group-hover:scale-150`}
-            ></div>
-            <s.Icon className={`h-5 w-5 ${s.color} relative z-10`} />
-            <p className="mt-4 font-display text-4xl font-bold text-navy-deep dark:text-cream relative z-10">
+            <div className="flex items-center justify-between">
+              <span className={`grid h-9 w-9 place-items-center rounded-[6px] ${s.bg} ${s.color}`}>
+                <s.Icon className="h-5 w-5" />
+              </span>
+            </div>
+            <p className="mt-4 font-display text-3xl font-bold text-secondary dark:text-white">
               {s.value.toLocaleString()}
             </p>
-            <p className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground relative z-10">
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground dark:text-white/70">
               {s.label}
             </p>
           </div>
