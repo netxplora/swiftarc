@@ -38,11 +38,34 @@ export function ChatWidget() {
   const [text, setText] = useState("");
   const qc = useQueryClient();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   
   const [guestId, setGuestId] = useState<string | null>(null);
   const [guestSetupComplete, setGuestSetupComplete] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
+
+  // Close widget when clicking outside
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (
+        widgetRef.current && 
+        !widgetRef.current.contains(e.target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!signedIn) {
@@ -119,14 +142,15 @@ export function ChatWidget() {
   return (
     <>
       <motion.button
+        ref={triggerRef}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1, duration: 0.4 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        transition={{ delay: 0.5, duration: 0.3 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
         onClick={() => setOpen((v) => !v)}
         aria-label="Open live chat"
-        className="fixed bottom-20 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-amber text-navy-deep shadow-2xl ring-4 ring-amber/20 lg:bottom-6"
+        className="fixed bottom-20 right-4 z-50 grid h-14 w-14 place-items-center rounded-full bg-primary text-white shadow-2xl ring-4 ring-primary/25 lg:bottom-6"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </motion.button>
@@ -134,33 +158,43 @@ export function ChatWidget() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
+            ref={widgetRef}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-36 right-4 z-40 flex h-[70vh] max-h-[560px] w-[min(360px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl lg:bottom-24"
+            className="fixed bottom-36 right-4 z-50 flex h-[70vh] max-h-[560px] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl lg:bottom-24"
             role="dialog"
             aria-label="SwiftArc Support Chat"
           >
-            <div className="flex items-center gap-3 border-b border-border bg-navy-deep px-4 py-3 text-cream">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-amber text-navy-deep">
+            <div className="flex items-center gap-3 bg-gradient-to-r from-primary via-accent to-secondary px-4 py-3.5 text-white shadow-sm">
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md">
                 <Headphones className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold">SwiftArc Support</p>
-                <p className="flex items-center gap-1.5 text-[11px] text-cream/70">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  Online • typically replies in minutes
+                <p className="text-sm font-bold tracking-tight">SwiftArc Live Support</p>
+                <p className="flex items-center gap-1.5 text-[11px] text-white/80">
+                  <span className="inline-block h-2 w-2 rounded-full bg-success animate-pulse" />
+                  Online • replies in seconds
                 </p>
               </div>
+              <button 
+                onClick={() => setOpen(false)}
+                className="rounded-full p-1 text-white/80 hover:text-white hover:bg-white/20 transition-colors"
+                aria-label="Close chat"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
             {!signedIn && !guestSetupComplete ? (
               <div className="flex flex-1 flex-col justify-center p-6 bg-background">
                 <div className="text-center mb-6">
-                  <MessageCircle className="h-12 w-12 text-amber mx-auto mb-3" />
-                  <h3 className="font-bold text-lg">Welcome to Live Chat</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Please introduce yourself to start chatting with our support team.</p>
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary mx-auto mb-3">
+                    <MessageCircle className="h-7 w-7" />
+                  </div>
+                  <h3 className="font-bold text-lg text-foreground">Welcome to Live Chat</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Introduce yourself to start chatting with our logistics team.</p>
                 </div>
                 <form 
                   onSubmit={(e) => {
@@ -186,14 +220,14 @@ export function ChatWidget() {
                     onChange={(e) => setGuestEmail(e.target.value)}
                     className="h-11 rounded-xl"
                   />
-                  <Button type="submit" className="w-full h-11 font-bold bg-amber text-navy-deep hover:bg-amber/90 rounded-xl mt-2">
-                    Start Chat
+                  <Button type="submit" className="w-full h-11 font-bold bg-primary text-white hover:bg-primary-hover rounded-xl mt-2">
+                    Start Chatting
                   </Button>
                 </form>
               </div>
             ) : (
               <>
-                <div className="flex-1 space-y-2 overflow-y-auto bg-background p-3">
+                <div className="flex-1 space-y-2.5 overflow-y-auto bg-background p-4">
                   {(msgs.data ?? []).map((m: Msg, i: number, arr: Msg[]) => {
                 const mine = m.sender_role === "user";
                 const isSystem = m.sender_role === "system";
@@ -209,22 +243,22 @@ export function ChatWidget() {
                   >
                     {showLabel && !isSystem && (
                       <span className="text-[10px] font-semibold text-muted-foreground mb-1 px-1">
-                        {mine ? "You" : "Support"}
+                        {mine ? "You" : "Support Agent"}
                       </span>
                     )}
                     <div
                       className={
                         isSystem
-                          ? "max-w-[80%] rounded-xl bg-secondary px-3 py-2 text-xs text-muted-foreground self-center mt-2 mb-2 text-center"
+                          ? "max-w-[85%] rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground self-center mt-2 mb-2 text-center"
                           : mine
-                            ? "max-w-[80%] rounded-2xl rounded-br-sm bg-navy-deep px-3 py-2 text-sm text-cream"
-                            : "max-w-[80%] rounded-2xl rounded-bl-sm bg-secondary px-3 py-2 text-sm"
+                            ? "max-w-[85%] rounded-2xl rounded-br-xs bg-primary px-3.5 py-2.5 text-sm text-white shadow-sm"
+                            : "max-w-[85%] rounded-2xl rounded-bl-xs bg-muted border border-border px-3.5 py-2.5 text-sm text-foreground shadow-sm"
                       }
                     >
                       {m.body}
                       {!isSystem && (
                         <div
-                          className={`text-[9px] mt-1 ${mine ? "text-cream/50 text-right" : "text-muted-foreground"}`}
+                          className={`text-[9px] mt-1 ${mine ? "text-white/70 text-right" : "text-muted-foreground"}`}
                         >
                           {format(new Date(m.created_at), "HH:mm")}
                         </div>
@@ -240,19 +274,19 @@ export function ChatWidget() {
                 e.preventDefault();
                 if (text.trim() && convo.data?.id) send.mutate(text.trim());
               }}
-              className="flex items-center gap-2 border-t border-border bg-card p-2"
+              className="flex items-center gap-2 border-t border-border bg-card p-3"
             >
               <input
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Type your message…"
-                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber/50"
+                className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/40"
               />
               <button
                 type="submit"
                 disabled={!text.trim() || send.isPending}
-                className="grid h-9 w-9 place-items-center rounded-lg bg-amber text-navy-deep disabled:opacity-50"
-                aria-label="Send"
+                className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white disabled:opacity-40 hover:bg-primary-hover transition-colors shadow-sm"
+                aria-label="Send message"
               >
                 <Send className="h-4 w-4" />
               </button>

@@ -61,15 +61,15 @@ export function SiteHeader() {
 
         <form
           onSubmit={onTrack}
-          className="mx-auto hidden h-[36px] max-w-xs flex-1 items-center rounded-[4px] bg-white/15 px-3 text-white shadow-inner transition-colors focus-within:bg-white/20 md:flex"
+          className="mx-auto hidden h-[36px] max-w-xs flex-1 items-center rounded-[4px] border border-border bg-muted/50 px-3 text-foreground shadow-inner transition-colors focus-within:bg-background md:flex"
         >
-          <Search className="mr-2 h-4 w-4 text-white/70" aria-hidden />
+          <Search className="mr-2 h-4 w-4 text-muted-foreground" aria-hidden />
           <input
             aria-label="Enter tracking number"
             value={track}
             onChange={(e) => setTrack(e.target.value)}
             placeholder="Search tracking ID..."
-            className="w-full bg-transparent text-[14px] text-white outline-none placeholder:text-white/60"
+            className="w-full bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground"
           />
         </form>
 
@@ -79,7 +79,7 @@ export function SiteHeader() {
             type="button"
             onClick={toggle}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-            className="grid h-9 w-9 place-items-center rounded-[4px] text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            className="grid h-9 w-9 place-items-center rounded-[4px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -87,7 +87,7 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="ml-auto grid h-9 w-9 place-items-center rounded-[4px] text-white hover:bg-white/10 lg:hidden"
+          className="ml-auto grid h-9 w-9 place-items-center rounded-[4px] text-foreground hover:bg-muted lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
         >
@@ -102,7 +102,7 @@ export function SiteHeader() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="border-t border-white/10 bg-secondary text-white shadow-lg lg:hidden overflow-hidden"
+            className="border-t border-border bg-white dark:bg-card text-foreground shadow-lg lg:hidden overflow-hidden"
           >
             <nav className="mx-auto grid max-w-7xl gap-1 px-4 py-3" aria-label="Mobile">
               {nav.map((item) => (
@@ -110,10 +110,10 @@ export function SiteHeader() {
                   key={item.to}
                   to={item.to as any}
                   onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-[4px] px-3 py-2.5 text-[14px] font-medium text-white/90 hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between rounded-[4px] px-3 py-2.5 text-[14px] font-medium text-foreground hover:bg-muted transition-colors"
                 >
                   {item.tKey ? t(item.tKey) : item.label}
-                  <ChevronDown className="h-4 w-4 -rotate-90 text-white/60" />
+                  <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground" />
                 </Link>
               ))}
             </nav>

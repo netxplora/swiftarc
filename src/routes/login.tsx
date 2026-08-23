@@ -206,7 +206,7 @@ function Login() {
 
               <div className="flex items-center justify-end">
                 <details className="group relative">
-                  <summary className="text-sm font-medium text-amber hover:text-amber-soft cursor-pointer list-none transition-colors">
+                  <summary className="text-sm font-medium text-primary hover:underline cursor-pointer list-none transition-colors">
                     Forgot your password?
                   </summary>
                   <div className="absolute right-0 top-full mt-2 w-72 rounded-lg border border-border bg-card p-4 shadow-xl z-50">
@@ -230,7 +230,7 @@ function Login() {
                 <Button
                   disabled={busy}
                   type="submit"
-                  className="w-full h-11 bg-navy-deep text-white shadow-md hover:bg-navy hover:shadow-lg transition-all font-medium text-base"
+                  className="w-full h-11 bg-primary text-white shadow-md hover:bg-primary-hover hover:shadow-lg transition-all font-semibold text-base"
                 >
                   {busy ? "Signing in…" : "Sign in"}
                 </Button>
@@ -239,7 +239,7 @@ function Login() {
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
               Not a member?{" "}
-              <Link to="/register" className="font-medium text-amber hover:text-amber-soft hover:underline transition-all">
+              <Link to="/register" className="font-medium text-primary hover:underline transition-all">
                 Open a business account
               </Link>
             </p>

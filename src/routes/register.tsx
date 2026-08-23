@@ -328,7 +328,7 @@ function Register() {
                 <Button
                   disabled={busy || score < 2}
                   type="submit"
-                  className="w-full h-11 bg-amber text-navy-deep hover:bg-amber-soft shadow-md hover:shadow-lg transition-all font-medium text-base disabled:opacity-60"
+                  className="w-full h-11 bg-primary text-white hover:bg-primary-hover shadow-md hover:shadow-lg transition-all font-semibold text-base disabled:opacity-60"
                 >
                   {busy ? "Creating account…" : "Open account"}
                 </Button>
@@ -337,7 +337,7 @@ function Register() {
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link to="/login" className="font-medium text-amber hover:text-amber-soft hover:underline transition-all">
+              <Link to="/login" className="font-medium text-primary hover:underline transition-all">
                 Log in
               </Link>
             </p>

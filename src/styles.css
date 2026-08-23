@@ -232,8 +232,8 @@
   }
 
   ::selection {
-    background-color: var(--color-amber);
-    color: var(--color-navy-deep);
+    background-color: var(--color-primary);
+    color: #FFFFFF;
   }
 
   /* Leaflet base */

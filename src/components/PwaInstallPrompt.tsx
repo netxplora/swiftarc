@@ -38,24 +38,24 @@ export function PwaInstallPrompt() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-amber/30 bg-navy-deep p-4 text-cream shadow-2xl flex flex-col gap-3">
-      <button onClick={dismiss} className="absolute right-3 top-3 text-cream/50 hover:text-cream">
+    <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-border bg-card p-4 text-foreground shadow-2xl flex flex-col gap-3">
+      <button onClick={dismiss} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground">
         <X className="h-4 w-4" />
       </button>
       <div className="flex gap-3">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-amber/10">
-          <Download className="h-5 w-5 text-amber" />
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10">
+          <Download className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h3 className="font-display font-semibold">Install SwiftArc App</h3>
-          <p className="text-xs text-cream/70 mt-0.5">
+          <h3 className="font-display font-semibold text-foreground">Install SwiftArc App</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Get faster loading and offline support for tracking & courier tools.
           </p>
         </div>
       </div>
       <Button
         onClick={install}
-        className="w-full bg-amber text-navy-deep hover:bg-amber/90 font-bold"
+        className="w-full bg-primary text-white hover:bg-primary-hover font-bold rounded-xl"
       >
         Install App
       </Button>
