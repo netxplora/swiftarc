@@ -86,6 +86,9 @@
   --color-brand-secondary: var(--secondary);
   --color-danger: var(--error);
 
+  /* Navbar token */
+  --color-navbar-bg: var(--navbar-bg);
+
   /* Glassmorphism tokens */
   --color-glass-bg: var(--glass-bg);
   --color-glass-border: var(--glass-border);
@@ -140,6 +143,9 @@
   --sidebar-border: var(--card-border);
   --sidebar-ring: var(--primary);
 
+  /* Navbar */
+  --navbar-bg: #FFFFFF;
+
   /* Glassmorphism tokens - Clean Cloud Mode */
   --glass-bg: rgba(255, 255, 255, 0.92);
   --glass-border: var(--card-border);
@@ -184,6 +190,9 @@
   --sidebar-border: var(--card-border);
   --sidebar-ring: var(--primary);
 
+  /* Navbar */
+  --navbar-bg: #0F172A;
+
   /* Glassmorphism tokens - Dark Mode */
   --glass-bg: rgba(2, 6, 23, 0.85);
   --glass-border: var(--card-border);
@@ -216,6 +225,10 @@
     font-family: var(--font-display);
     letter-spacing: -0.02em;
     font-weight: 600;
+  }
+
+  h1 {
+    color: var(--color-primary);
   }
 
   ::selection {

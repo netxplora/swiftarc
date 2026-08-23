@@ -31,9 +31,9 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-[56px] border-b border-accent/20 bg-secondary text-white shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+    <header className="sticky top-0 z-40 h-[56px] border-b border-border bg-white dark:bg-card text-foreground shadow-[0_2px_4px_rgba(0,0,0,0.07)]">
       <div className="mx-auto flex h-[56px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:gap-6 lg:px-8">
-        <Link to="/" className="shrink-0 text-white" aria-label="SwiftArc home">
+        <Link to="/" className="shrink-0 text-foreground" aria-label="SwiftArc home">
           <Logo />
         </Link>
 
@@ -47,12 +47,12 @@ export function SiteHeader() {
                 to={item.to as any}
                 className={cn(
                   "relative flex h-[56px] items-center px-3 text-[14px] font-normal transition-colors",
-                  active ? "text-white font-semibold" : "text-white/80 hover:text-white",
+                  active ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {item.tKey ? t(item.tKey) : item.label}
                 {active && (
-                  <span className="absolute inset-x-2 bottom-0 h-[3px] rounded-t-sm bg-accent" />
+                  <span className="absolute inset-x-2 bottom-0 h-[3px] rounded-t-sm bg-primary" />
                 )}
               </Link>
             );

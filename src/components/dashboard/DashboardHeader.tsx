@@ -97,7 +97,7 @@ export function DashboardHeader() {
   });
 
   return (
-    <div className="sticky top-0 z-20 flex h-[56px] w-full items-center justify-between border-b border-border bg-white px-4 shadow-[0_2px_4px_rgba(0,0,0,0.1)] dark:bg-secondary dark:border-white/10">
+    <div className="sticky top-0 z-20 flex h-[56px] w-full items-center justify-between border-b border-border bg-white dark:bg-card px-4 shadow-[0_2px_4px_rgba(0,0,0,0.07)] dark:border-border">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <div className="hidden sm:flex h-[36px] items-center gap-2 rounded-[4px] border border-border bg-muted px-3 text-[14px] text-muted-foreground w-64 focus-within:border-accent focus-within:bg-white transition-colors dark:bg-white/10 dark:border-white/20 dark:text-white">

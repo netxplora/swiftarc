@@ -785,20 +785,28 @@ function Features() {
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 pb-6 items-stretch">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
-              className={`${i === 2 ? "col-span-2 sm:col-span-2 md:col-span-1" : ""}`}
-            >
-              <Card className="border-border bg-card h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                <CardContent className="p-4 sm:p-8 space-y-3 sm:space-y-4">
-                  <div className="grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-xl bg-amber/15 text-amber">
-                    <f.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </div>
+          {features.map((f, i) => {
+            const iconColors = [
+              "bg-primary/15 text-primary",
+              "bg-success/15 text-success",
+              "bg-accent/15 text-accent",
+              "bg-warning/15 text-warning",
+            ];
+            const colorClass = iconColors[i % iconColors.length];
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+                className={`${i === 2 ? "col-span-2 sm:col-span-2 md:col-span-1" : ""}`}
+              >
+                <Card className="border-border bg-card h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                  <CardContent className="p-4 sm:p-8 space-y-3 sm:space-y-4">
+                    <div className={`grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-xl ${colorClass}`}>
+                      <f.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                    </div>
                   <h3 className="font-display text-sm sm:text-xl font-bold text-foreground leading-tight">
                     {f.title}
                   </h3>
@@ -808,7 +816,8 @@ function Features() {
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
+          );
+        })}
         </div>
       </div>
     </section>
