@@ -64,9 +64,9 @@ export default defineConfig({
           display: "standalone",
           icons: [
             {
-              src: "/favicon.ico",
+              src: "/favicon.svg",
               sizes: "64x64",
-              type: "image/x-icon",
+              type: "image/svg+xml",
             },
           ],
         },

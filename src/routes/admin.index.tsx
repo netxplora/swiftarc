@@ -119,19 +119,19 @@ function AdminOverview() {
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/admin/analytics"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
           >
             <Activity className="mr-2 h-4 w-4" /> Analytics
           </Link>
           <Link
             to="/admin/invoices"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
           >
             <Receipt className="mr-2 h-4 w-4" /> Issue Invoice
           </Link>
           <Link
             to="/admin/broadcast"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium hover:bg-secondary/80"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
           >
             <MessageSquare className="mr-2 h-4 w-4" /> Broadcast
           </Link>
