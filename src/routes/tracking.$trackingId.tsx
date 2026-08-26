@@ -530,7 +530,7 @@ function TrackingDetail() {
             })()}
 
           {/* 3. MAP HERO */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full bg-muted rounded-3xl overflow-hidden shadow-2xl border border-border/50">
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="relative h-[400px] sm:h-[500px] lg:h-[650px] w-full bg-muted rounded-3xl overflow-hidden shadow-2xl border border-border/50">
             <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
               <TrackingMap
                 origin={[shipment.origin.lat, shipment.origin.lng]}
@@ -603,7 +603,7 @@ function TrackingDetail() {
               </div>
             </div>
 
-            {/* Right: Shipment Overview (Minimal) */}
+            {/* Right: Detailed Shipment Overview */}
             <div className="lg:col-span-1 space-y-6">
               <div className="flex items-center justify-between">
                  <h3 className="font-display font-bold text-2xl">Overview</h3>
@@ -612,72 +612,191 @@ function TrackingDetail() {
                  </Button>
               </div>
               
-              <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+              <div className="w-full space-y-4">
                 
-                {/* Route */}
-                <div className="relative">
-                  <div className="absolute left-2.5 top-3 bottom-3 w-px bg-border border-dashed border-l-2"></div>
-                  <div className="flex gap-4 pb-6 relative">
-                    <div className="h-5 w-5 rounded-full border-4 border-card bg-amber shadow-sm shrink-0 z-10"></div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Origin</p>
-                      <p className="font-bold">{shipment.origin.city}</p>
-                      <p className="text-xs text-muted-foreground">{shipment.origin.country}</p>
+                <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl px-6 shadow-sm">
+                  <div className="py-6 border-b border-border/10">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-amber/10 flex items-center justify-center text-amber">
+                        <Package className="h-5 w-5" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-base">Shipment Details</p>
+                        <p className="text-xs text-muted-foreground font-normal mt-0.5">{shipment.service} · {shipment.weightKg} kg</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-4 relative">
-                    <div className="h-5 w-5 rounded-full border-4 border-card bg-amber shadow-sm shrink-0 z-10"></div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Destination</p>
-                      <p className="font-bold">{shipment.destination.city}</p>
-                      <p className="text-xs text-muted-foreground">{shipment.destination.country}</p>
+                  <div className="pb-6 pt-4">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Service Type</p>
+                          <p className="font-bold text-sm">{shipment.service}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{shipment.type}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Priority</p>
+                          <p className="font-bold text-sm">{shipment.priority}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Weight</p>
+                          <p className="font-bold text-sm">{shipment.weightKg} kg</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Dimensions</p>
+                          <p className="font-bold text-sm">{shipment.dimensions}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Pieces</p>
+                          <p className="font-bold text-sm">{shipment.pieces} pcs</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Total Distance</p>
+                          <p className="font-bold text-sm">{shipment.distanceKm}</p>
+                        </div>
+                      </div>
+                      
+                      {shipment.declaredValue > 0 && (
+                        <div className="pt-2">
+                          <p className="text-xs text-muted-foreground mb-1">Declared Value</p>
+                          <p className="font-bold text-sm">${shipment.declaredValue.toFixed(2)} {shipment.insurance && <span className="text-emerald-500 font-semibold ml-2">✓ Insured</span>}</p>
+                        </div>
+                      )}
+
+                      {shipment.packageImage && (
+                        <div className="pt-2">
+                          <p className="text-xs text-muted-foreground mb-2">Package Photo</p>
+                          <button
+                            onClick={() => setImageModalOpen(true)}
+                            className="w-full rounded-2xl overflow-hidden border border-border hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 bg-muted/50"
+                          >
+                            <img 
+                              src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl} 
+                              alt="Package Photo" 
+                              className="h-32 w-full object-contain"
+                            />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-                
-                <hr className="border-border/60" />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Service</p>
-                    <p className="font-bold text-sm">{shipment.service}</p>
+
+                {/* Sender & Receiver — combined card */}
+                <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl px-6 shadow-sm">
+                  {/* Card header */}
+                  <div className="py-5 border-b border-border/10 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <User className="h-5 w-5" />
+                    </div>
+                    <p className="font-bold text-base">Sender &amp; Receiver</p>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Weight</p>
-                    <p className="font-bold text-sm">{shipment.weightKg} kg</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Pieces</p>
-                    <p className="font-bold text-sm">{shipment.pieces}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Distance</p>
-                    <p className="font-bold text-sm">{shipment.distanceKm}</p>
+
+                  {/* Two-column body */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border/30 py-5 gap-0">
+                    {/* Sender */}
+                    <div className="space-y-3 pb-5 sm:pb-0 sm:pr-6">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-6 w-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                          <User className="h-3.5 w-3.5" />
+                        </div>
+                        <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide">Sender</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Name</p>
+                        <p className="font-bold text-sm">{shipment.origin.contact}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Address</p>
+                        {shipment.origin.line1 && <p className="text-sm">{shipment.origin.line1}</p>}
+                        <p className="text-sm">{shipment.origin.city}, {shipment.origin.country} {shipment.origin.zip}</p>
+                      </div>
+                      {shipment.origin.phone && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                          <p className="text-sm">{shipment.origin.phone}</p>
+                        </div>
+                      )}
+                      {shipment.origin.email && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                          <p className="text-sm">{shipment.origin.email}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Receiver */}
+                    <div className="space-y-3 pt-5 sm:pt-0 sm:pl-6">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-6 w-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                          <Building className="h-3.5 w-3.5" />
+                        </div>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wide">Receiver</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Name</p>
+                        <p className="font-bold text-sm">{shipment.destination.contact}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Address</p>
+                        {shipment.destination.line1 && <p className="text-sm">{shipment.destination.line1}</p>}
+                        <p className="text-sm">{shipment.destination.city}, {shipment.destination.country} {shipment.destination.zip}</p>
+                      </div>
+                      {shipment.destination.phone && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                          <p className="text-sm">{shipment.destination.phone}</p>
+                        </div>
+                      )}
+                      {shipment.destination.email && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                          <p className="text-sm">{shipment.destination.email}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {shipment.packageImage && (
-                  <>
-                    <hr className="border-border/60" />
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-2">Package Photo</p>
-                      <button
-                        onClick={() => setImageModalOpen(true)}
-                        className="w-full rounded-2xl overflow-hidden border border-border hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 bg-muted/50"
-                      >
-                        <img 
-                          src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl} 
-                          alt="Package Photo" 
-                          className="h-32 w-full object-contain"
-                        />
-                      </button>
+                
+                {hasCustomsHold && (
+                  <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl px-6 shadow-sm">
+                    <div className="py-6 border-b border-border/10">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-600">
+                          <ShieldAlert className="h-5 w-5" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-bold text-base">Clearance Details</p>
+                          <p className="text-xs text-muted-foreground font-normal mt-0.5">Status: {activeHold?.status}</p>
+                        </div>
+                      </div>
                     </div>
-                  </>
+                    <div className="pb-6 pt-4">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Reason</p>
+                          <p className="font-bold text-sm">{activeHold?.hold_reason || "Customs inspection required."}</p>
+                        </div>
+                        {activeHold?.amount_due > 0 && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-0.5">Amount Due</p>
+                            <p className="text-sm text-red-600 font-bold">${activeHold.amount_due.toFixed(2)}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Payment Status</p>
+                          <p className="text-sm capitalize">{activeHold?.payment_status || "Unpaid"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
+
               </div>
             </div>
-
-          </div>
+</div>
         </div>
       </div>
 

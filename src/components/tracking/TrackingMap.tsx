@@ -27,7 +27,7 @@ interface Props {
   destination: [number, number];
   current: [number, number];
   checkpoints: Checkpoint[];
-  height?: number;
+  height?: number | string;
   driverName?: string;
 }
 
@@ -105,7 +105,7 @@ export function TrackingMap({
   destination,
   current,
   checkpoints,
-  height = 380,
+  height = "100%",
   driverName = "Driver",
 }: Props) {
   const [mounted, setMounted] = useState(false);

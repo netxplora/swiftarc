@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff, Package } from "lucide-react";
 import { z } from "zod";
@@ -38,13 +38,13 @@ function Login() {
   const [resetEmail, setResetEmail] = useState("");
 
   // Automatically redirect once AuthContext recognizes the session
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       nav({ to: (redirect as "/" | undefined) ?? "/admin/shipments" });
     }
   }, [user, nav, redirect]);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
