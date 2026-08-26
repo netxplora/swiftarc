@@ -118,258 +118,195 @@ function Hero() {
   const [tn, setTn] = useState("");
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
   return (
     <section
       ref={heroRef}
-      className="relative min-h-[100svh] flex flex-col justify-center overflow-hidden"
-      style={{ background: "linear-gradient(145deg, #f8faff 0%, #ffffff 50%, #f0f4ff 100%)" }}
+      className="relative min-h-[100svh] flex flex-col justify-end overflow-hidden"
     >
-      {/* Parallax background image */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        style={{ y: bgY, opacity }}
-      >
+      {/* ── Full-bleed parallax background photo ── */}
+      <motion.div className="absolute inset-0 z-0" style={{ y: bgY }}>
         <img
           src={heroBg1}
           alt=""
           aria-hidden
-          className="w-full h-full object-cover object-center opacity-[0.08]"
+          className="w-full h-full object-cover object-center"
         />
       </motion.div>
 
-      {/* Animated dot grid */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
-          backgroundSize: "28px 28px",
-          opacity: 0.04,
-        }}
-        aria-hidden
-      />
+      {/* ── Gradient overlays for legibility ── */}
+      {/* Strong bottom-up scrim so copy is always readable */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#032D60] via-[#032D60]/60 to-[#032D60]/10 pointer-events-none" />
+      {/* Left-side fade on large screens to deepen copy area */}
+      <div className="absolute inset-0 z-[1] hidden lg:block bg-gradient-to-r from-[#032D60]/75 via-[#032D60]/15 to-transparent pointer-events-none" />
+      {/* Warm orange glow at the very bottom */}
+      <div className="absolute bottom-0 inset-x-0 h-40 z-[1] bg-gradient-to-t from-primary/15 to-transparent pointer-events-none" />
 
-      {/* Glowing orbs */}
-      <div className="absolute top-[-80px] right-[-80px] w-[520px] h-[520px] rounded-full bg-primary/[0.06] blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-60px] left-[-60px] w-[400px] h-[400px] rounded-full bg-sky-500/[0.06] blur-[100px] pointer-events-none z-0" />
-      <div className="absolute top-1/3 left-1/2 w-[300px] h-[300px] rounded-full bg-purple-400/[0.04] blur-[80px] pointer-events-none z-0" />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-10 lg:pt-24 lg:pb-16">
-        <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
-
-          {/* ── Left copy ── */}
-          <motion.div
-            className="lg:col-span-6 space-y-6"
-            initial="hidden"
-            animate="show"
-            variants={containerVariants}
-          >
-            <motion.div variants={itemVariants}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm backdrop-blur-sm">
-                <Globe className="h-3 w-3 animate-spin" style={{ animationDuration: "8s" }} />
-                Ship to Any Country · Deliver to Any Location
-              </span>
-            </motion.div>
-
-            <motion.h1
-              variants={itemVariants}
-              className="font-display text-[2.6rem] sm:text-5xl lg:text-[3.6rem] font-extrabold tracking-tight text-[#032D60] leading-[1.1]"
-            >
-              We Ship What Matters{" "}
-              <span className="relative inline-block">
-                <span className="text-primary">Anywhere</span>
-                <motion.span
-                  className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/50"
-                  initial={{ scaleX: 0, originX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.7, delay: 0.9, ease: "easeOut" }}
-                />
-              </span>{" "}
-              in the World.
-            </motion.h1>
-
-            <motion.p
-              variants={itemVariants}
-              className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl"
-            >
-              Fast, secure and reliable shipping to over 220 countries. Real-time tracking,
-              insured handling, and dedicated support at every step.
-            </motion.p>
-
-            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4">
-              <Link to="/shipping">
-                <Button
-                  size="lg"
-                  className="group bg-primary text-white hover:bg-primary-hover font-bold px-8 h-13 rounded-xl shadow-lg shadow-primary/25 text-base transition-all duration-300 hover:shadow-primary/40 hover:shadow-xl hover:-translate-y-0.5"
-                >
-                  Ship Now
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link to="/rates">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-[#032D60]/20 text-[#032D60] hover:border-primary hover:text-primary hover:bg-primary/5 font-bold px-7 h-13 rounded-xl text-base transition-all duration-300 bg-white/60 backdrop-blur-sm"
-                >
-                  <Calculator className="mr-2 h-4 w-4 text-primary" />
-                  Calculate Rates
-                </Button>
-              </Link>
-            </motion.div>
-
-            {/* Mini trust badges */}
-            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-5 pt-2">
-              {[
-                { icon: ShieldCheck, label: "100% Insured" },
-                { icon: Clock, label: "99.7% On-Time" },
-                { icon: Globe, label: "220+ Countries" },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                  <Icon className="h-3.5 w-3.5 text-primary" />
-                  {label}
-                </div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* ── Right visual ── */}
-          <div className="lg:col-span-6">
-            <motion.div
-              initial={{ opacity: 0, x: 40, scale: 0.96 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.25, ease: "easeOut" }}
-              className="relative"
-            >
-              {/* Main image with glass frame */}
-              <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-[#032D60]/15 border border-white/80 bg-white/20 backdrop-blur-md p-2">
-                <img
-                  src={heroBg1}
-                  alt="SwiftArc Global Freight Logistics"
-                  className="w-full h-[380px] sm:h-[460px] lg:h-[500px] rounded-2xl object-cover"
-                />
-                {/* Subtle overlay gradient on image */}
-                <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-[#032D60]/10 via-transparent to-primary/5 pointer-events-none" />
-              </div>
-
-              {/* Floating glass badge — bottom left */}
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="absolute -bottom-4 -left-4 sm:left-4 sm:bottom-4 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 p-4 shadow-xl flex items-center gap-3"
-              >
-                <div className="h-11 w-11 rounded-xl bg-primary/15 grid place-items-center text-primary">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-display text-sm font-bold text-[#032D60]">100% Insured</div>
-                  <div className="text-[11px] text-slate-500">End-to-End Chain of Custody</div>
-                </div>
-              </motion.div>
-
-              {/* Floating glass badge — top right */}
-              <motion.div
-                initial={{ opacity: 0, y: -20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
-                className="absolute -top-4 -right-3 sm:right-4 sm:top-4 rounded-2xl bg-[#032D60]/90 backdrop-blur-xl text-white p-3.5 shadow-xl flex items-center gap-3 border border-white/10"
-              >
-                <div className="h-9 w-9 rounded-xl bg-white/15 grid place-items-center">
-                  <Plane className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="font-display text-sm font-bold">220+ Countries</div>
-                  <div className="text-[11px] text-white/65">Global Air &amp; Sea Routes</div>
-                </div>
-              </motion.div>
-
-              {/* Floating glass badge — mid right */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 1.1 }}
-                className="absolute top-[42%] -right-5 sm:-right-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 p-3 shadow-xl hidden sm:flex items-center gap-2"
-              >
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/15 grid place-items-center text-emerald-600">
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="font-display text-xs font-bold text-[#032D60]">99.7% On-Time</div>
-                  <div className="text-[10px] text-slate-500">Delivery Success Rate</div>
-                </div>
-              </motion.div>
-            </motion.div>
+      {/* ── Floating stat pills — top-right, visible on ALL screen sizes ── */}
+      <motion.div
+        className="absolute top-[5.5rem] right-3 sm:right-8 lg:right-14 z-10 flex flex-col gap-2.5"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.65, delay: 1.0 }}
+      >
+        <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 px-3 py-2 shadow-xl">
+          <div className="h-7 w-7 rounded-lg bg-primary/80 grid place-items-center shrink-0">
+            <Globe className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <div className="font-display text-[13px] font-bold text-white leading-tight">220+ Countries</div>
+            <div className="text-[10px] text-white/55 leading-tight">Global Network</div>
           </div>
         </div>
+        <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 px-3 py-2 shadow-xl">
+          <div className="h-7 w-7 rounded-lg bg-emerald-500/80 grid place-items-center shrink-0">
+            <TrendingUp className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <div className="font-display text-[13px] font-bold text-white leading-tight">99.7% On-Time</div>
+            <div className="text-[10px] text-white/55 leading-tight">Delivery Rate</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 px-3 py-2 shadow-xl">
+          <div className="h-7 w-7 rounded-lg bg-sky-500/80 grid place-items-center shrink-0">
+            <ShieldCheck className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <div className="font-display text-[13px] font-bold text-white leading-tight">100% Insured</div>
+            <div className="text-[10px] text-white/55 leading-tight">Every Shipment</div>
+          </div>
+        </div>
+      </motion.div>
 
-        {/* ── Track Your Parcel widget ── */}
+      {/* ── Copy + tracking widget (bottom-anchored) ── */}
+      <motion.div
+        className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14 lg:pb-20 pt-36"
+        style={{ opacity: textOpacity }}
+      >
+        {/* Copy block */}
         <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.55 }}
-          className="mt-14 sm:mt-16"
+          className="max-w-2xl space-y-5"
+          initial="hidden"
+          animate="show"
+          variants={containerVariants}
         >
-          <div className="relative rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-5 sm:p-6 shadow-2xl shadow-[#032D60]/8 flex flex-col lg:flex-row items-center justify-between gap-5">
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/[0.03] via-transparent to-sky-500/[0.03] pointer-events-none" />
+          <motion.div variants={itemVariants}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white/85 shadow-sm">
+              <Globe className="h-3 w-3 animate-spin" style={{ animationDuration: "8s" }} />
+              Ship to Any Country · Deliver to Any Location
+            </span>
+          </motion.div>
 
-            <div className="relative flex items-center gap-3 w-full lg:w-auto">
-              <div className="h-12 w-12 rounded-xl bg-[#032D60] text-white grid place-items-center shrink-0 shadow-md">
-                <PackageSearch className="h-6 w-6" />
+          <motion.h1
+            variants={itemVariants}
+            className="font-display text-[2.5rem] sm:text-5xl lg:text-[3.75rem] font-extrabold tracking-tight text-white leading-[1.08]"
+          >
+            We Ship What Matters{" "}
+            <span className="relative inline-block">
+              <span className="text-primary">Anywhere</span>
+              <motion.span
+                className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/70"
+                initial={{ scaleX: 0, originX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.7, delay: 0.95, ease: "easeOut" }}
+              />
+            </span>{" "}
+            in the World.
+          </motion.h1>
+
+          <motion.p
+            variants={itemVariants}
+            className="text-base sm:text-lg text-white/70 leading-relaxed max-w-xl"
+          >
+            Fast, secure and reliable shipping to over 220 countries. Real-time tracking,
+            insured handling, and dedicated support at every step.
+          </motion.p>
+
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 pt-1">
+            <Link to="/shipping">
+              <Button
+                size="lg"
+                className="group bg-primary text-white hover:bg-primary-hover font-bold px-8 h-12 rounded-xl shadow-lg shadow-primary/30 text-[15px] transition-all duration-300 hover:shadow-primary/50 hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Ship Now
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+            <Link to="/rates">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white/40 font-bold px-7 h-12 rounded-xl text-[15px] transition-all duration-300"
+              >
+                <Calculator className="mr-2 h-4 w-4" />
+                Calculate Rates
+              </Button>
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        {/* ── Tracking widget ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.65 }}
+          className="mt-8 sm:mt-10"
+        >
+          <div className="relative rounded-2xl border border-white/15 bg-white/8 backdrop-blur-xl p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-sky-500/5 pointer-events-none" />
+
+            <div className="relative flex items-center gap-3 shrink-0">
+              <div className="h-11 w-11 rounded-xl bg-white/12 border border-white/20 text-white grid place-items-center shadow-md">
+                <PackageSearch className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-display text-base font-bold text-[#032D60]">Track Your Parcel</h3>
-                <p className="text-xs text-slate-500">Enter your tracking number to get live updates.</p>
+                <h3 className="font-display text-sm font-bold text-white leading-tight">Track Your Parcel</h3>
+                <p className="text-[11px] text-white/55">Enter your tracking number below.</p>
               </div>
             </div>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (tn.trim()) {
-                  navigate({ to: "/tracking/$trackingId", params: { trackingId: tn.trim() } });
-                }
+                if (tn.trim()) navigate({ to: "/tracking/$trackingId", params: { trackingId: tn.trim() } });
               }}
-              className="relative flex flex-col sm:flex-row items-center gap-3 w-full lg:max-w-xl"
+              className="relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full"
             >
-              <div className="relative w-full">
-                <input
-                  value={tn}
-                  onChange={(e) => setTn(e.target.value)}
-                  placeholder="e.g. SA-7241-9032-11"
-                  className="w-full h-12 rounded-xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all placeholder:text-slate-400"
-                />
-              </div>
+              <input
+                value={tn}
+                onChange={(e) => setTn(e.target.value)}
+                placeholder="e.g. SA-7241-9032-11"
+                className="w-full h-11 rounded-xl border border-white/20 bg-white/12 backdrop-blur-sm px-4 text-sm font-medium text-white outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all placeholder:text-white/35"
+              />
               <Button
                 type="submit"
-                className="w-full sm:w-auto h-12 shrink-0 bg-[#032D60] hover:bg-[#032D60]/90 text-white font-bold px-8 rounded-xl shadow-md transition-all text-sm hover:-translate-y-0.5 hover:shadow-lg"
+                className="h-11 shrink-0 bg-primary hover:bg-primary-hover text-white font-bold px-6 rounded-xl shadow-md transition-all text-sm hover:-translate-y-0.5"
               >
-                Track Now <ArrowRight className="ml-1.5 h-4 w-4" />
+                Track Now <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
             </form>
           </div>
         </motion.div>
 
-        {/* Scroll indicator */}
+        {/* Scroll cue */}
         <motion.div
-          className="mt-10 flex justify-center"
+          className="mt-8 flex justify-start"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.4 }}
+          transition={{ delay: 1.8 }}
         >
           <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-1 text-slate-400"
+            animate={{ y: [0, 7, 0] }}
+            transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-1 text-white/35"
           >
-            <span className="text-[10px] font-semibold uppercase tracking-widest">Explore</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em]">Scroll</span>
             <ChevronDown className="h-4 w-4" />
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
