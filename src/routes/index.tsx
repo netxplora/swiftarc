@@ -144,9 +144,9 @@ function Hero() {
       {/* Warm orange glow at the very bottom */}
       <div className="absolute bottom-0 inset-x-0 h-40 z-[1] bg-gradient-to-t from-primary/15 to-transparent pointer-events-none" />
 
-      {/* ── Floating stat pills — top-right, visible on ALL screen sizes ── */}
+      {/* ── Floating stat pills — sm+ only (hidden on mobile to avoid overlap) ── */}
       <motion.div
-        className="absolute top-[5.5rem] right-3 sm:right-8 lg:right-14 z-10 flex flex-col gap-2.5"
+        className="absolute top-[5.5rem] right-4 sm:right-8 lg:right-14 z-10 hidden sm:flex flex-col gap-2.5"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.65, delay: 1.0 }}
@@ -182,7 +182,7 @@ function Hero() {
 
       {/* ── Copy + tracking widget (bottom-anchored) ── */}
       <motion.div
-        className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14 lg:pb-20 pt-36"
+        className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14 lg:pb-20 pt-24 sm:pt-36"
         style={{ opacity: textOpacity }}
       >
         {/* Copy block */}
@@ -199,9 +199,25 @@ function Hero() {
             </span>
           </motion.div>
 
+          {/* Mobile-only horizontal trust badges (replace floating pills) */}
+          <motion.div variants={itemVariants} className="flex sm:hidden flex-wrap items-center gap-3 pb-1">
+            {[
+              { icon: Globe, label: "220+ Countries", color: "bg-primary/80" },
+              { icon: TrendingUp, label: "99.7% On-Time", color: "bg-emerald-500/80" },
+              { icon: ShieldCheck, label: "100% Insured", color: "bg-sky-500/80" },
+            ].map(({ icon: Icon, label, color }) => (
+              <div key={label} className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 backdrop-blur-sm px-2.5 py-1">
+                <div className={`h-4 w-4 rounded-full ${color} grid place-items-center shrink-0`}>
+                  <Icon className="h-2.5 w-2.5 text-white" />
+                </div>
+                <span className="text-[10px] font-bold text-white/80">{label}</span>
+              </div>
+            ))}
+          </motion.div>
+
           <motion.h1
             variants={itemVariants}
-            className="font-display text-[2.5rem] sm:text-5xl lg:text-[3.75rem] font-extrabold tracking-tight text-white leading-[1.08]"
+            className="font-display text-[2rem] sm:text-5xl lg:text-[3.75rem] font-extrabold tracking-tight text-white leading-[1.1]"
           >
             We Ship What Matters{" "}
             <span className="relative inline-block">
