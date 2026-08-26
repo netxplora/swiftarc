@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff, Package } from "lucide-react";
 import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
 import { Logo } from "@/components/brand/Logo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,11 +30,19 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const { redirect } = useSearch({ from: "/login" });
   const nav = useNavigate();
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+
+  // Automatically redirect once AuthContext recognizes the session
+  React.useEffect(() => {
+    if (user) {
+      nav({ to: (redirect as "/" | undefined) ?? "/admin/shipments" });
+    }
+  }, [user, nav, redirect]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +51,6 @@ function Login() {
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back");
-    nav({ to: (redirect as "/" | undefined) ?? "/admin/shipments" });
   };
 
   const google = async () => {

@@ -349,15 +349,15 @@ function TrackingDetail() {
   const hasCustomsHold = realtimeStatus === "customs_hold" || activeHold;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-16">
+    <div className="min-h-screen bg-background text-foreground pb-24">
       {/* ========================================================== */}
-      {/* PRINT WAYBILL — Only visible when printing                  */}
+      {/* PRINT WAYBILL (Visually hidden)                             */}
       {/* ========================================================== */}
-      <div id="print-waybill">
+      <div id="print-waybill" className="hidden print:block">
         <div className="waybill-header">
           <div className="brand-block">
             <div className="brand-name">SwiftArc</div>
-            <div className="brand-tagline">Global Logistics &amp; Freight Solutions</div>
+            <div className="brand-tagline">Global Logistics & Freight Solutions</div>
           </div>
           <div className="doc-type-block">
             <div className="doc-type">Shipment Waybill</div>
@@ -393,7 +393,7 @@ function TrackingDetail() {
           <div className="waybill-section">
             <h4>Service Type</h4>
             <p>{shipment.service}</p>
-            <p className="sub">{shipment.type} Â· {shipment.priority} Priority</p>
+            <p className="sub">{shipment.type} · {shipment.priority} Priority</p>
           </div>
           <div className="waybill-section">
             <h4>Reference No.</h4>
@@ -418,8 +418,8 @@ function TrackingDetail() {
           <div className="waybill-section">
             <h4>Package Details</h4>
             {shipment.description && <p>{shipment.description}</p>}
-            <p className="sub">{shipment.weightKg} kg Â· {shipment.dimensions} Â· {shipment.pieces} pcs</p>
-            {shipment.declaredValue > 0 && <p className="sub">Declared Value: ${shipment.declaredValue.toFixed(2)}{shipment.insurance ? " Â· Insured" : ""}</p>}
+            <p className="sub">{shipment.weightKg} kg · {shipment.dimensions} · {shipment.pieces} pcs</p>
+            {shipment.declaredValue > 0 && <p className="sub">Declared Value: ${shipment.declaredValue.toFixed(2)}{shipment.insurance ? " · Insured" : ""}</p>}
           </div>
           <div className="waybill-section">
             <h4>Shipping Charges</h4>
@@ -437,803 +437,251 @@ function TrackingDetail() {
       </div>
 
       {/* ========================================================== */}
-      {/* SCREEN VIEW                                                 */}
+      {/* SCREEN VIEW (Redesigned)                                    */}
       {/* ========================================================== */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 no-print">
-        {/* Header Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-display font-bold">Track Shipment</h1>
-            <span className="h-3 w-3 rounded-full bg-amber mt-1"></span>
+      <div className="no-print">
+        {/* Minimal Nav / Search Bar */}
+        <div className="border-b border-border/40 bg-card/50 backdrop-blur-md sticky top-16 z-30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <Link to="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4 mr-1.5" /> Home
+            </Link>
+            <form onSubmit={onSearch} className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Track another..."
+                  className="pl-9 h-9 w-full sm:w-64 bg-background border-border rounded-full text-sm shadow-sm focus-visible:ring-amber focus-visible:border-amber"
+                  value={trackInput}
+                  onChange={(e) => setTrackInput(e.target.value)}
+                />
+              </div>
+            </form>
           </div>
-          <p className="text-muted-foreground text-sm hidden lg:block mr-auto ml-2">
-            Real-time updates and live location of your shipment
-          </p>
-          <form onSubmit={onSearch} className="flex w-full md:w-[400px] gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Enter Tracking ID / Reference"
-                className="pl-9 h-11 bg-card border-border rounded-lg shadow-sm"
-                value={trackInput}
-                onChange={(e) => setTrackInput(e.target.value)}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="h-11 bg-amber text-navy-deep hover:bg-amber/90 font-bold px-6 shadow-sm rounded-lg"
-            >
-              Track
-            </Button>
-          </form>
         </div>
 
-        {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Status Card */}
-            <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border">
-              <div className="flex items-center justify-between mb-6">
-                <Link
-                  to="/"
-                  className="inline-flex items-center text-sm font-medium text-amber hover:underline"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
+          
+          {/* 1. TRACKING HERO (Tracking ID & Big Status) */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <p className="text-sm font-bold uppercase tracking-widest text-amber mb-2">Tracking ID</p>
+              <div className="flex items-center gap-3">
+                <h1 className="text-4xl sm:text-5xl font-display font-extrabold tracking-tight">
+                  {shipment.trackingNumber}
+                </h1>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(shipment.trackingNumber);
+                    toast.success("Copied");
+                  }}
+                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Copy Tracking Number"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-1" /> Home
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.print()}
-                  className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  <Printer className="h-3.5 w-3.5" /> Print Waybill
-                </Button>
+                  <Copy className="h-5 w-5" />
+                </button>
               </div>
-
-              <div className="mb-6">
-                <p className="text-xs text-muted-foreground mb-1">Tracking ID</p>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold font-mono">{shipment.trackingNumber}</h2>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(shipment.trackingNumber);
-                      toast.success("Copied");
-                    }}
-                    className="text-muted-foreground hover:text-navy-deep"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="mt-3 inline-block bg-amber/20 text-navy-deep font-bold text-xs px-3 py-1 rounded-full border border-amber/30">
-                  {statusLabels[realtimeStatus] || "In Transit"}
-                </div>
+            </motion.div>
+            
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-left md:text-right">
+              <p className="text-sm text-muted-foreground mb-1">Estimated Delivery</p>
+              <h2 className="text-2xl sm:text-3xl font-bold">
+                {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
+                  weekday: 'short', month: "short", day: "numeric"
+                })}
+              </h2>
+              <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber/10 border border-amber/20 text-amber font-bold text-sm shadow-inner shadow-amber/5">
+                <div className="h-2 w-2 rounded-full bg-amber animate-pulse" />
+                {statusLabels[realtimeStatus] || "In Transit"}
               </div>
+            </motion.div>
+          </div>
 
-              <div className="mb-6 pb-6 border-b border-border">
-                <p className="text-xs text-muted-foreground mb-1">Estimated Delivery</p>
-                <p className="text-lg font-bold text-amber mb-2">
-                  {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}{" "}
-                  Â·{" "}
-                  {new Date(shipment.estimatedDelivery).toLocaleTimeString(undefined, {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <div className={`inline-flex items-center gap-1.5 text-xs font-semibold ${hasCustomsHold ? activeHold?.status === 'released' || activeHold?.payment_status === 'paid' ? 'text-emerald-600' : 'text-red-600' : 'text-emerald-600'}`}>
-                  {hasCustomsHold && activeHold?.status !== 'released' && activeHold?.payment_status !== 'paid' ? <AlertCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-                  {hasCustomsHold ? activeHold?.status === 'released' || activeHold?.payment_status === 'paid' ? 'Released' : 'Exception' : 'On Time'}
-                </div>
-              </div>
-
-              <div className="relative mb-6">
-                <div className="absolute left-2.5 top-2 bottom-2 w-px bg-border border-dashed border-l-2"></div>
-
-                <div className="relative flex gap-4 pb-6">
-                  <div className="h-5 w-5 rounded-full border-4 border-card bg-amber shadow-sm shrink-0 z-10"></div>
-                  <div>
-                    <p className="font-bold text-sm">
-                      {shipment.origin.city}, {shipment.origin.country}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(shipment.shipDate).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative flex gap-4">
-                  <div className="h-5 w-5 rounded-full border-4 border-card bg-amber shadow-sm shrink-0 z-10"></div>
-                  <div>
-                    <p className="font-bold text-sm">
-                      {shipment.destination.city}, {shipment.destination.country}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Button className="w-full bg-amber text-navy-deep hover:bg-amber/90 font-bold rounded-xl h-11">
-                <Bell className="h-4 w-4 mr-2" /> Get Updates
-              </Button>
-            </div>
-
-            {/* Customs Hold Alert */}
-            {hasCustomsHold &&
-              (() => {
-                const isResolved =
-                  activeHold?.status === "released" || activeHold?.payment_status === "paid";
-                const alertStyle = isResolved
-                  ? "bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-                  : "bg-red-50 text-red-900 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20";
-                const iconBg = isResolved ? "bg-emerald-100 dark:bg-emerald-500/20" : "bg-red-100 dark:bg-red-500/20";
-                const iconColor = isResolved ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400";
-                const subText = isResolved ? "text-emerald-700/80 dark:text-emerald-400/80" : "text-red-700/80 dark:text-red-400/80";
-                const innerBox = isResolved ? "border-emerald-100 dark:border-emerald-500/10 bg-white/60 dark:bg-black/20" : "border-red-100 dark:border-red-500/10 bg-white/60 dark:bg-black/20";
-
-                return (
-                  <div className={`${alertStyle} rounded-2xl p-6 shadow-sm border`}>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className={`h-10 w-10 ${iconBg} rounded-full flex items-center justify-center shrink-0`}
-                      >
-                        {isResolved ? (
-                          <CheckCircle2 className={`h-5 w-5 ${iconColor}`} />
-                        ) : (
-                          <ShieldAlert className={`h-5 w-5 ${iconColor}`} />
-                        )}
+          {/* 2. CUSTOMS HOLD ALERT (If any) */}
+          {hasCustomsHold &&
+            (() => {
+              const isResolved = activeHold?.status === "released" || activeHold?.payment_status === "paid";
+              return (
+                <div className={`${isResolved ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"} dark:bg-card dark:border-border rounded-3xl p-6 shadow-sm border`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`h-12 w-12 rounded-full flex items-center justify-center shrink-0 ${isResolved ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20" : "bg-red-100 text-red-600 dark:bg-red-500/20"}`}>
+                        {isResolved ? <CheckCircle2 className="h-6 w-6" /> : <ShieldAlert className="h-6 w-6" />}
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg leading-tight">
-                          {isResolved ? "Clearance Complete" : "Clearance Hold"}
+                        <h3 className="font-bold text-xl leading-tight">
+                          {isResolved ? "Clearance Complete" : "Customs Hold Requires Action"}
                         </h3>
-                        <p className={`text-sm ${subText}`}>
-                          {isResolved ? "Shipment released" : "Action required"}
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {isResolved ? "Shipment has been released for delivery." : activeHold?.hold_reason || "Customs inspection required."}
                         </p>
                       </div>
                     </div>
-
-                    {!isResolved && (
-                      <div className="space-y-3 mb-5 text-sm">
-                        <div className={`rounded-lg p-3 border ${innerBox}`}>
-                          <p className={`text-xs ${subText} mb-0.5`}>Reason</p>
-                          <p className="font-medium">
-                            {activeHold?.hold_reason || "Customs Inspection Required"}
-                          </p>
-                        </div>
-                        {activeHold?.required_action && (
-                          <div className={`rounded-lg p-3 border ${innerBox}`}>
-                            <p className={`text-xs ${subText} mb-0.5`}>Required Document</p>
-                            <p className="font-medium">{activeHold.required_action}</p>
-                          </div>
-                        )}
-                        {(activeHold?.amount_due > 0 ||
-                          activeHold?.status === "payment_required" ||
-                          activeHold?.payment_status === "verification_required") && (
-                          <div
-                            className={`rounded-lg p-3 border ${innerBox} flex items-center justify-between`}
-                          >
-                            <div>
-                              <p className={`text-xs ${subText} mb-0.5`}>Clearance Charges</p>
-                              <p className="font-bold">
-                                {activeHold?.currency || "USD"}{" "}
-                                {Number(activeHold?.amount_due || 0).toFixed(2)}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-xs ${subText} mb-0.5`}>Status</p>
-                              <p className="font-bold capitalize">
-                                {activeHold?.payment_status?.replace(/_/g, " ") || "Pending"}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {activeHold && ["payment_required", "open"].includes(activeHold.status) && (
-                      <Button
-                        asChild
-                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-11"
-                      >
+                    {!isResolved && activeHold && ["payment_required", "open"].includes(activeHold.status) && (
+                      <Button asChild className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-12 px-6">
                         <Link to="/pay/$caseId" params={{ caseId: activeHold.id }}>
-                          Resolve &amp; Proceed to Payment
+                          Resolve & Pay Fees
                         </Link>
                       </Button>
                     )}
-
-                    {activeHold?.payment_status === "verification_required" && (
-                      <div className="text-center text-sm font-semibold text-amber-700 dark:text-amber-400 bg-amber-100/50 dark:bg-amber-500/10 rounded-xl py-3 border border-amber-200 dark:border-amber-500/20 mt-5">
-                        <Clock className="h-4 w-4 inline mr-1.5" />
-                        Payment Verification Pending
-                      </div>
-                    )}
                   </div>
-                );
-              })()}
+                </div>
+              );
+            })()}
 
-            {/* Shipment Timeline */}
-            <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border">
-              <h3 className="font-bold text-lg mb-6">Shipment Timeline</h3>
-              <div className="relative space-y-6">
-                <div className="absolute left-3.5 top-2 bottom-2 w-px bg-border"></div>
+          {/* 3. MAP HERO */}
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full bg-muted rounded-3xl overflow-hidden shadow-2xl border border-border/50">
+            <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
+              <TrackingMap
+                origin={[shipment.origin.lat, shipment.origin.lng]}
+                destination={[shipment.destination.lat, shipment.destination.lng]}
+                current={livePos}
+                checkpoints={realtimeCheckpoints}
+              />
+            </Suspense>
 
-                {[...realtimeCheckpoints].slice().reverse().map((c: any, i) => {
-                  const isLatest = i === 0;
+            {/* Live Tracking overlay */}
+            <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-lg border border-white/10">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                </span>
+                <span className="font-bold text-sm sm:text-base">Live Position</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {livePos[0].toFixed(4)}°, {livePos[1].toFixed(4)}°
+              </p>
+            </div>
+            
+            <button className="absolute top-4 right-4 bg-background/80 text-foreground backdrop-blur-md rounded-full px-4 py-2.5 shadow-lg border border-white/10 font-bold text-xs flex items-center gap-2 hover:bg-background transition-colors">
+              <Maximize className="h-4 w-4" /> <span className="hidden sm:inline">Fullscreen</span>
+            </button>
+          </motion.div>
 
-                  let Icon = isLatest ? Navigation : MapPin;
-                  let bgClass = isLatest
-                    ? "bg-emerald-500 text-white"
-                    : "bg-border text-muted-foreground";
-                  let textClass = isLatest ? "text-foreground" : "text-muted-foreground";
+          {/* 4. DETAILS ROW (Timeline + Package Info) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Left: Checkpoint Timeline (Occupies 2 columns on lg) */}
+            <div className="lg:col-span-2 space-y-6">
+              <h3 className="font-display font-bold text-2xl">Tracking History</h3>
+              <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <div className="relative space-y-8">
+                  <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border rounded-full"></div>
 
-                  if (c.type === "hold_placed") {
-                    Icon = ShieldAlert;
-                    bgClass = "bg-red-500 text-white";
-                    textClass = "text-red-700 font-bold";
-                  } else if (c.type === "hold_released") {
-                    Icon = CheckCircle2;
-                    bgClass = "bg-green-500 text-white";
-                    textClass = "text-green-700 font-bold";
-                  }
+                  {[...realtimeCheckpoints].slice().reverse().map((c: any, i) => {
+                    const isLatest = i === 0;
 
-                  return (
-                    <div key={c.id} className="relative flex gap-4">
-                      <div
-                        className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 z-10 border-4 border-card ${bgClass}`}
-                      >
-                        <Icon className="h-3 w-3" />
+                    let Icon = isLatest ? Navigation : MapPin;
+                    let bgClass = isLatest ? "bg-amber text-navy-deep border-amber/20" : "bg-card text-muted-foreground border-border";
+                    let textClass = isLatest ? "text-foreground font-bold" : "text-muted-foreground font-medium";
+
+                    if (c.type === "hold_placed") {
+                      Icon = ShieldAlert; bgClass = "bg-red-500 text-white border-red-500/20"; textClass = "text-red-600 font-bold dark:text-red-400";
+                    } else if (c.type === "hold_released") {
+                      Icon = CheckCircle2; bgClass = "bg-emerald-500 text-white border-emerald-500/20"; textClass = "text-emerald-600 font-bold dark:text-emerald-400";
+                    }
+
+                    return (
+                      <div key={c.id} className="relative flex gap-5">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 z-10 border-[3px] shadow-sm ${bgClass}`}>
+                          <Icon className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="pt-0.5 pb-2">
+                          <p className={`text-base ${textClass}`}>{c.status}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{c.facility}</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1.5 font-mono">
+                            {new Date(c.timestamp).toLocaleString(undefined, {
+                              month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className={`font-bold text-sm ${textClass}`}>{c.status}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{c.facility}</p>
-                        <p className="text-xs text-muted-foreground/70 mt-1">
-                          {new Date(c.timestamp).toLocaleString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Shipment Overview (Minimal) */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="flex items-center justify-between">
+                 <h3 className="font-display font-bold text-2xl">Overview</h3>
+                 <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground no-print" onClick={() => window.print()}>
+                   <Printer className="h-4 w-4" /> Print
+                 </Button>
+              </div>
+              
+              <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+                
+                {/* Route */}
+                <div className="relative">
+                  <div className="absolute left-2.5 top-3 bottom-3 w-px bg-border border-dashed border-l-2"></div>
+                  <div className="flex gap-4 pb-6 relative">
+                    <div className="h-5 w-5 rounded-full border-4 border-card bg-amber shadow-sm shrink-0 z-10"></div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">Origin</p>
+                      <p className="font-bold">{shipment.origin.city}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.origin.country}</p>
                     </div>
-                  );
-                })}
-              </div>
-              <Button variant="link" className="w-full mt-4 text-amber font-semibold">
-                View Full History
-              </Button>
-            </div>
-
-            {/* Need Help Card */}
-            <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border relative overflow-hidden">
-              <div className="relative z-10 w-2/3">
-                <h3 className="font-bold text-lg mb-2">Need Help?</h3>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Our support team is here to help you
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs font-semibold rounded-full bg-card h-9 px-4 shadow-sm border-border"
-                >
-                  <Headphones className="h-3.5 w-3.5 mr-2" /> Contact Support
-                </Button>
-              </div>
-              <div className="absolute -right-4 -bottom-4 h-32 w-32 bg-amber/10 rounded-full blur-2xl"></div>
-              <Headphones className="absolute right-4 bottom-4 h-16 w-16 text-amber drop-shadow-xl" />
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="lg:col-span-9 space-y-6 flex flex-col">
-
-            {/* â”€â”€ SHIPMENT DETAILS â€” Moved to top â”€â”€ */}
-            <div className="bg-card text-card-foreground rounded-2xl p-6 lg:p-8 shadow-sm border border-border">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg">Shipment Details</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  data-print-trigger
-                  onClick={() => window.print()}
-                  className="text-xs font-semibold rounded-lg h-9 px-4 gap-2 no-print"
-                >
-                  <Printer className="h-3.5 w-3.5" /> Print Waybill
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                {/* Sender */}
-                <div className="flex gap-3">
-                  <User className="h-5 w-5 text-muted-foreground shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Sender</p>
-                    <p className="font-bold text-sm">{shipment.origin.contact}</p>
-                    {shipment.origin.line1 && (
-                      <p className="text-xs text-muted-foreground">{shipment.origin.line1}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {shipment.origin.city}
-                      {shipment.origin.country ? `, ${shipment.origin.country}` : ""}
-                      {shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
-                    </p>
-                    {shipment.origin.phone && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <Phone className="h-3 w-3" /> {shipment.origin.phone}
-                      </p>
-                    )}
-                    {shipment.origin.email && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> {shipment.origin.email}
-                      </p>
-                    )}
                   </div>
-                </div>
-
-                {/* Receiver */}
-                <div className="flex gap-3">
-                  <User className="h-5 w-5 text-muted-foreground shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Receiver</p>
-                    <p className="font-bold text-sm">{shipment.destination.contact}</p>
-                    {shipment.destination.line1 && (
-                      <p className="text-xs text-muted-foreground">
-                        {shipment.destination.line1}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {shipment.destination.city}
-                      {shipment.destination.country ? `, ${shipment.destination.country}` : ""}
-                      {shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
-                    </p>
-                    {shipment.destination.phone && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <Phone className="h-3 w-3" /> {shipment.destination.phone}
-                      </p>
-                    )}
-                    {shipment.destination.email && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> {shipment.destination.email}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Service Type */}
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Service Type</p>
-                  <p className="font-bold text-sm">{shipment.service}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {shipment.type} Â· {shipment.priority} Priority
-                  </p>
-                </div>
-
-                {/* Package Info */}
-                <div className="flex gap-3">
-                  <ClipboardCheck className="h-5 w-5 text-muted-foreground shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Package Details</p>
-                    {shipment.description && (
-                      <p className="font-bold text-sm">{shipment.description}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {shipment.weightKg} kg Â· {shipment.dimensions} Â· {shipment.pieces} pcs
-                    </p>
-                    {shipment.declaredValue > 0 && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Declared Value: ${shipment.declaredValue.toFixed(2)}
-                        {shipment.insurance && " Â· Insured"}
-                      </p>
-                    )}
+                  <div className="flex gap-4 relative">
+                    <div className="h-5 w-5 rounded-full border-4 border-card bg-amber shadow-sm shrink-0 z-10"></div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">Destination</p>
+                      <p className="font-bold">{shipment.destination.city}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.destination.country}</p>
+                    </div>
                   </div>
                 </div>
                 
-                {/* Package Photo */}
+                <hr className="border-border/60" />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Service</p>
+                    <p className="font-bold text-sm">{shipment.service}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Weight</p>
+                    <p className="font-bold text-sm">{shipment.weightKg} kg</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Pieces</p>
+                    <p className="font-bold text-sm">{shipment.pieces}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Distance</p>
+                    <p className="font-bold text-sm">{shipment.distanceKm}</p>
+                  </div>
+                </div>
+
                 {shipment.packageImage && (
-                  <div className="flex gap-3 sm:col-span-2">
-                    <Camera className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <>
+                    <hr className="border-border/60" />
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">Package Photo</p>
                       <button
                         onClick={() => setImageModalOpen(true)}
-                        className="block rounded-xl overflow-hidden border border-border hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        className="w-full rounded-2xl overflow-hidden border border-border hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 bg-muted/50"
                       >
                         <img 
                           src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl} 
                           alt="Package Photo" 
-                          className="h-24 w-auto object-cover"
+                          className="h-32 w-full object-contain"
                         />
                       </button>
                     </div>
-                  </div>
+                  </>
                 )}
-
-                {/* Booking Date, Reference, & Estimated Delivery */}
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Reference No.</p>
-                  <p className="font-bold text-sm">{shipment.referenceNumber}</p>
-
-                  <p className="text-xs text-muted-foreground mt-4 mb-1">Booking Date</p>
-                  <p className="font-bold text-sm">
-                    {new Date(shipment.shipDate).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-
-                  <p className="text-xs text-muted-foreground mt-4 mb-1">Estimated Delivery</p>
-                  <p className="font-bold text-sm">
-                    {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-
-                {/* Route Info */}
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Route Distance</p>
-                  <p className="font-bold text-sm">{shipment.distanceKm}</p>
-                  <p className="text-xs text-muted-foreground mt-4 mb-1">Shipping Fee</p>
-                  <p className="font-bold text-sm">{shipment.shippingFee}</p>
-                </div>
               </div>
             </div>
 
-            {/* Map Area */}
-            <div className="relative h-[300px] sm:h-[380px] lg:h-[420px] w-full bg-muted rounded-3xl overflow-hidden shadow-sm border border-border">
-              <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
-                <TrackingMap
-                  origin={[shipment.origin.lat, shipment.origin.lng]}
-                  destination={[shipment.destination.lat, shipment.destination.lng]}
-                  current={livePos}
-                  checkpoints={realtimeCheckpoints}
-                />
-              </Suspense>
-
-              {/* Live Tracking Chip */}
-              <div className="absolute top-4 left-4 bg-background/90 backdrop-blur rounded-xl p-3 shadow-sm border border-border">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <span className="font-bold text-sm">Live Tracking</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Updated 1 min ago</p>
-              </div>
-
-              {/* View in Fullscreen Button */}
-              <button className="absolute top-4 right-4 bg-background/90 text-foreground backdrop-blur rounded-full px-4 py-2 shadow-sm border border-border font-semibold text-xs flex items-center gap-2 hover:bg-card">
-                <Maximize className="h-3.5 w-3.5" /> View in Fullscreen
-              </button>
-            </div>
-
-            {/* Location & Delivery Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Current Location Card */}
-              <div className="bg-card text-card-foreground rounded-2xl p-5 shadow-sm border border-border">
-                <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-3">
-                  <Navigation className="h-3.5 w-3.5 text-blue-500" /> Current Location
-                </p>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="h-10 w-10 bg-amber/10 rounded-xl flex items-center justify-center text-amber shrink-0">
-                    <Ship className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm">
-                      {shipment.currentLocation.label ||
-                        `${shipment.origin.city} â†’ ${shipment.destination.city}`}
-                    </h4>
-                    <p className="text-xs text-muted-foreground font-mono mt-0.5">
-                      {livePos[0].toFixed(4)}Â° {livePos[0] >= 0 ? "N" : "S"},{" "}
-                      {Math.abs(livePos[1]).toFixed(4)}Â° {livePos[1] >= 0 ? "E" : "W"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-6 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">Origin:</span>{" "}
-                    <span className="font-semibold">
-                      {shipment.origin.city}, {shipment.origin.country}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Destination:</span>{" "}
-                    <span className="font-semibold">
-                      {shipment.destination.city}, {shipment.destination.country}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Estimated Delivery Card */}
-              <div className="bg-card text-card-foreground rounded-2xl p-5 shadow-sm border border-border">
-                <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-3">
-                  <Calendar className="h-3.5 w-3.5 text-emerald-500" /> Estimated Delivery
-                </p>
-                <div className="flex items-end justify-between mb-4">
-                  <div>
-                    <h3 className="font-display font-bold text-2xl mb-1">
-                      {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </h3>
-                    <p className="text-sm font-semibold">
-                      {new Date(shipment.estimatedDelivery).toLocaleTimeString(undefined, {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
-                      <span className="text-muted-foreground font-normal">
-                        ({Intl.DateTimeFormat().resolvedOptions().timeZone})
-                      </span>
-                    </p>
-                  </div>
-                  <span
-                    className={`font-bold text-[10px] px-2 py-1 rounded-md ${
-                      hasCustomsHold
-                        ? activeHold?.status === "released" || activeHold?.payment_status === "paid"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-red-100 text-red-700"
-                        : "bg-amber/20 text-navy-deep"
-                    }`}
-                  >
-                    {hasCustomsHold 
-                      ? activeHold?.status === "released" || activeHold?.payment_status === "paid"
-                        ? "Released"
-                        : "On Hold"
-                      : "On Time"}
-                  </span>
-                </div>
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-amber rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${realtimeProgress}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-bold">{realtimeProgress}%</span>
-                </div>
-                <div className="flex justify-between text-xs font-medium text-muted-foreground">
-                  <span>{statusLabels[realtimeStatus] || "In Progress"}</span>
-                  {shipment.estimatedTravelTime && shipment.estimatedTravelTime !== "N/A" && (
-                    <span>Est. {shipment.estimatedTravelTime}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Stats Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatBox icon={Truck} label="Service" value={shipment.service} />
-              <StatBox icon={Navigation} label="Distance" value={shipment.distanceKm} />
-              <StatBox icon={Clock} label="Travel Time" value={shipment.estimatedTravelTime} />
-              <StatBox
-                icon={Package}
-                label="Package"
-                value={`${shipment.weightKg} kg Â· ${shipment.pieces} pcs`}
-              />
-            </div>
-
-            {/* Notifications */}
-            <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex flex-col">
-              <h3 className="font-bold text-lg mb-6">Notifications</h3>
-              <div className="space-y-4 flex-1">
-                <div className="flex gap-3">
-                  <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                    <div className="h-3 w-3 rounded-full border-2 border-emerald-500"></div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <p className="font-semibold text-sm">In Transit Update</p>
-                      <span className="text-[10px] text-muted-foreground">1 min ago</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Your shipment is on the way
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="h-8 w-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-                    <MapPin className="h-4 w-4 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <p className="font-semibold text-sm">Location Update</p>
-                      <span className="text-[10px] text-muted-foreground">1 min ago</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">New location available</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="h-8 w-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0">
-                    <Bell className="h-4 w-4 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <p className="font-semibold text-sm">ETA Update</p>
-                      <span className="text-[10px] text-muted-foreground">2 hours ago</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Estimated delivery updated
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <Button onClick={() => setNotifOpen(true)} variant="link" className="w-full mt-4 text-amber font-semibold">
-                View All Notifications
-              </Button>
-            </div>
-
-            {/* Shipment Progress Horizontal Stepper */}
-            <div className="bg-card text-card-foreground rounded-2xl p-6 sm:p-8 shadow-sm border border-border">
-              <h3 className="font-bold text-lg mb-8">Shipment Progress</h3>
-              <div className="relative overflow-x-auto hide-scrollbar pb-4 -mb-4">
-                <div className="min-w-[700px] relative mt-2 px-2">
-                  {/* Track background */}
-                  <div className="absolute left-[5%] right-[5%] top-6 h-0.5 bg-muted"></div>
-                  {/* Amber fill — width is % of the 90% track span */}
-                  <div
-                    className="absolute left-[5%] top-6 h-0.5 bg-amber transition-all duration-1000"
-                    style={{ width: `calc(${realtimeProgress / 100} * 90%)` }}
-                  ></div>
-
-                  <div className="flex justify-between relative z-10">
-                  <ProgressStep
-                    icon={ClipboardCheck}
-                    label="Booked"
-                    date="May 18"
-                    active={realtimeProgress >= 10}
-                  />
-                  <ProgressStep
-                    icon={Package}
-                    label="Picked Up"
-                    date="May 19"
-                    active={realtimeProgress >= 30}
-                  />
-                  <ProgressStep
-                    icon={Anchor}
-                    label="Arrived at Port"
-                    date="May 20"
-                    active={realtimeProgress >= 50}
-                  />
-                  <ProgressStep
-                    icon={Ship}
-                    label="Departed"
-                    date="May 20"
-                    active={realtimeProgress >= 60}
-                  />
-                  <ProgressStep
-                    icon={Navigation}
-                    label="In Transit"
-                    date="May 21"
-                    active={realtimeProgress >= 75}
-                    current={realtimeProgress < 90 && realtimeProgress >= 75}
-                  />
-                  <ProgressStep
-                    icon={MapPin}
-                    label="Arriving at Destination"
-                    date=""
-                    active={realtimeProgress >= 90}
-                  />
-                  <ProgressStep
-                    icon={CheckCircle2}
-                    label="Delivered"
-                    date=""
-                    active={realtimeProgress === 100}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-            {/* Bottom Banners */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex items-center justify-between overflow-hidden relative">
-                <div className="z-10 w-2/3">
-                  <h3 className="font-bold text-lg mb-1">
-                    Track on the go with SwiftArc Mobile App
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Stay updated wherever you are. Track your shipments, receive delivery
-                    notifications and follow your package in real time from your phone.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <div className="h-10 px-4 bg-foreground rounded-lg flex items-center justify-center text-background text-xs font-bold gap-2 cursor-not-allowed opacity-80">
-                      <Search className="h-4 w-4" /> App Store
-                    </div>
-                    <div className="h-10 px-4 bg-foreground rounded-lg flex items-center justify-center text-background text-xs font-bold gap-2 cursor-not-allowed opacity-80">
-                      <Search className="h-4 w-4" /> Google Play
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground/70 mt-2">Coming Soon</p>
-                </div>
-                <div className="absolute right-0 top-6 bottom-0 w-1/3 bg-muted rounded-tl-2xl border-t-4 border-l-4 border-border"></div>
-              </div>
-
-              <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-sm border border-border flex items-center justify-between overflow-hidden relative">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 w-24 h-24 bg-amber/20 rounded-xl flex items-center justify-center">
-                  <Box className="h-10 w-10 text-amber" />
-                </div>
-                <div className="z-10 ml-36">
-                  <h3 className="font-bold text-lg mb-1">Need to ship something?</h3>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Get a quote and book your shipment in minutes.
-                  </p>
-                  <Button className="bg-amber text-navy-deep hover:bg-amber/90 font-bold rounded-lg px-6 h-10">
-                    Book a Shipment
-                  </Button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <Dialog open={notifOpen} onOpenChange={setNotifOpen}>
-        <DialogContent className="max-w-md bg-card text-foreground">
-          <DialogHeader>
-            <DialogTitle>All Notifications</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2 space-y-4">
-            {realtimeCheckpoints.map((event: any, i: number) => (
-              <div key={event.id || i} className="flex gap-4 p-3 rounded-lg border border-border bg-background shadow-sm">
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
-                  event.type === 'hold_placed' ? 'bg-red-100 text-red-600' :
-                  event.type === 'hold_released' ? 'bg-emerald-100 text-emerald-600' :
-                  'bg-amber/10 text-amber'
-                }`}>
-                  {event.type === 'hold_placed' ? <ShieldAlert className="h-5 w-5" /> :
-                   event.type === 'hold_released' ? <CheckCircle2 className="h-5 w-5" /> :
-                   <MapPin className="h-5 w-5" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-2">
-                    <p className="font-semibold text-sm leading-tight text-foreground">{event.status}</p>
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap pt-0.5">
-                      {new Date(event.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 truncate">
-                    {event.facility}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                    {new Date(event.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {realtimeCheckpoints.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <Bell className="h-8 w-8 mx-auto mb-3 opacity-20" />
-                <p>No notifications yet</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      {/* Dialogs */}
       <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
         <DialogContent className="max-w-3xl bg-background text-foreground border-none shadow-2xl p-0 overflow-hidden">
           <div className="relative w-full h-[80vh] flex items-center justify-center bg-black/5">
@@ -1247,59 +695,6 @@ function TrackingDetail() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-
-function StatBox({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <div className="bg-card text-card-foreground rounded-2xl p-4 flex items-center gap-4 shadow-sm border border-border">
-      <div className="h-10 w-10 bg-amber/10 rounded-xl flex items-center justify-center text-amber shrink-0">
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
-          {label}
-        </p>
-        <p className="font-bold text-sm truncate">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function ProgressStep({
-  icon: Icon,
-  label,
-  date,
-  active,
-  current,
-}: {
-  icon: any;
-  label: string;
-  date: string;
-  active: boolean;
-  current?: boolean;
-}) {
-  return (
-    <div className="flex flex-col items-center w-16 text-center">
-      <div
-        className={`h-12 w-12 rounded-2xl flex items-center justify-center mb-3 transition-colors ${current ? "bg-amber text-white shadow-lg shadow-amber/30 scale-110" : active ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-muted text-muted-foreground/50"}`}
-      >
-        <Icon className="h-5 w-5" />
-      </div>
-      <p
-        className={`text-[11px] font-bold leading-tight ${active ? "text-foreground" : "text-muted-foreground/50"}`}
-      >
-        {label}
-      </p>
-      {date && (
-        <p
-          className={`text-[10px] mt-1 ${active ? "text-muted-foreground" : "text-muted-foreground/30"}`}
-        >
-          {date}
-        </p>
-      )}
     </div>
   );
 }
