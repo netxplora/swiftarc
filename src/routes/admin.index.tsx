@@ -137,7 +137,7 @@ function AdminOverview() {
           </Link>
           <Link
             to="/admin/shipments"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-accent px-3 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
+            className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-white hover:bg-primary-hover transition-colors"
           >
             <Package2 className="mr-2 h-4 w-4" /> All Shipments
           </Link>
@@ -209,13 +209,13 @@ function AdminOverview() {
           <div className="flex items-center justify-between border-b border-border p-5">
             <div>
               <h2 className="font-display text-lg font-bold flex items-center gap-2">
-                <Activity className="h-5 w-5 text-amber" />
+                <Activity className="h-5 w-5 text-primary" />
                 Live Network Feed
               </h2>
             </div>
             <Link
               to="/admin/shipments"
-              className="inline-flex items-center gap-1 text-sm font-medium text-amber hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
             >
               View all <ArrowUpRight className="h-3 w-3" />
             </Link>
@@ -247,7 +247,7 @@ function AdminOverview() {
                         <td className="px-5 py-3 text-muted-foreground">{r.service}</td>
                         <td className="px-5 py-3">
                           <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.status === "delivered" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber/10 text-amber"}`}
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.status === "delivered" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-primary/10 text-primary"}`}
                           >
                             {statusLabels[r.status] || r.status}
                           </span>

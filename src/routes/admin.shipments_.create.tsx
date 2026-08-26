@@ -586,7 +586,7 @@ function AdminCreateShipmentPage() {
         {step === 5 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-500" /> Review Shipment
+              <ShieldCheck className="w-5 h-5 text-primary" /> Review Shipment Details
             </h2>
 
             <div className="grid sm:grid-cols-2 gap-6 bg-secondary/20 p-6 rounded-xl border">
@@ -656,7 +656,7 @@ function AdminCreateShipmentPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={createMut.isPending}
-                className="bg-navy-deep text-cream hover:bg-navy gap-2"
+                className="bg-primary text-white hover:bg-primary-hover font-semibold gap-2 shadow-md"
               >
                 {createMut.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 Create Shipment

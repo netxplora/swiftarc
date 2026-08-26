@@ -65,6 +65,8 @@ import {
   Download,
   CheckSquare,
   ShieldCheck,
+  ShieldAlert,
+  Info,
   Unlock,
 } from "lucide-react";
 import { statusLabels } from "@/lib/types";
@@ -93,23 +95,70 @@ const SERVICES = [
 
 const getStatusVariant = (status: string) => {
   switch (status) {
+    case "created":
+    case "booking_created":
+      return "info";
+    case "confirmed":
+    case "awaiting_confirmation":
+      return "indigo";
+    case "assigned":
+      return "cyan";
+    case "picked_up":
+    case "package_picked_up":
+      return "amber";
+    case "in_transit":
+    case "out_for_delivery":
+      return "info";
+    case "near_destination":
+      return "purple";
     case "delivered":
     case "completed":
       return "success";
     case "exception":
+    case "cancelled":
       return "destructive";
-    case "in_transit":
-    case "near_destination":
-    case "out_for_delivery":
-      return "info";
-    case "created":
-    case "booking_created":
-    case "confirmed":
-    case "awaiting_confirmation":
-      return "secondary";
     default:
-      return "default";
+      return "secondary";
   }
+};
+
+const STATUS_BUTTON_STYLES: Record<string, { active: string; inactive: string }> = {
+  all: {
+    active: "bg-primary text-white shadow-md font-semibold ring-2 ring-primary/30",
+    inactive: "bg-muted text-foreground border border-border hover:bg-muted/80 font-medium",
+  },
+  created: {
+    active: "bg-blue-600 text-white shadow-md font-semibold ring-2 ring-blue-600/30",
+    inactive: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 font-medium",
+  },
+  confirmed: {
+    active: "bg-indigo-600 text-white shadow-md font-semibold ring-2 ring-indigo-600/30",
+    inactive: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/20 font-medium",
+  },
+  assigned: {
+    active: "bg-cyan-600 text-white shadow-md font-semibold ring-2 ring-cyan-600/30",
+    inactive: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 font-medium",
+  },
+  picked_up: {
+    active: "bg-amber-600 text-white shadow-md font-semibold ring-2 ring-amber-600/30",
+    inactive: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 font-medium",
+  },
+  in_transit: {
+    active: "bg-sky-600 text-white shadow-md font-semibold ring-2 ring-sky-600/30",
+    inactive: "bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/20 font-medium",
+  },
+  near_destination: {
+    active: "bg-purple-600 text-white shadow-md font-semibold ring-2 ring-purple-600/30",
+    inactive: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 font-medium",
+  },
+  delivered: {
+    active: "bg-emerald-600 text-white shadow-md font-semibold ring-2 ring-emerald-600/30",
+    inactive: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 font-medium",
+  },
+  exception: {
+    active: "bg-red-600 text-white shadow-md font-semibold ring-2 ring-red-600/30",
+    inactive: "bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/30 hover:bg-red-500/20 font-medium",
+  },
 };
 
 export const Route = createFileRoute("/admin/shipments")({
@@ -244,17 +293,17 @@ function AdminShipments() {
             variant="outline"
             onClick={() => aiMut.mutate()}
             disabled={aiMut.isPending}
-            className="border-amber/50 text-amber hover:bg-amber/10"
+            className="border-primary/40 text-primary hover:bg-primary/10"
           >
             {aiMut.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <BrainCircuit className="mr-2 h-4 w-4" />
+              <ShieldAlert className="mr-2 h-4 w-4" />
             )}
-            Run AI Analysis
+            Check Delay Risks
           </Button>
           <Link to="/admin/shipments/create">
-            <Button className="bg-navy text-cream hover:bg-navy-deep">New Shipment</Button>
+            <Button className="bg-primary text-white hover:bg-primary-hover font-semibold">New Shipment</Button>
           </Link>
         </div>
       </div>
@@ -272,19 +321,27 @@ function AdminShipments() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilter("all")}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filter === "all" ? "bg-navy-deep text-cream shadow-sm" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+            className={`rounded-full px-3.5 py-1.5 text-xs transition-all ${filter === "all"
+              ? STATUS_BUTTON_STYLES.all.active
+              : STATUS_BUTTON_STYLES.all.inactive
+              }`}
           >
             All
           </button>
-          {STATUSES.map((s) => (
-            <button
-              key={s}
-              onClick={() => setFilter(s)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filter === s ? "bg-navy-deep text-cream shadow-sm" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
-            >
-              {statusLabels[s] || s}
-            </button>
-          ))}
+          {STATUSES.map((s) => {
+            const style = STATUS_BUTTON_STYLES[s] || STATUS_BUTTON_STYLES.all;
+            const isSelected = filter === s;
+            return (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`rounded-full px-3.5 py-1.5 text-xs transition-all ${isSelected ? style.active : style.inactive
+                  }`}
+              >
+                {statusLabels[s] || s}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -312,7 +369,7 @@ function AdminShipments() {
                 variant="secondary"
                 disabled={!bulkStatus || isBulkUpdating}
                 onClick={handleBulkUpdate}
-                className="h-8 text-xs bg-navy-deep text-white hover:bg-navy"
+                className="h-8 text-xs bg-primary text-white hover:bg-primary-hover font-semibold"
               >
                 {isBulkUpdating ? (
                   <Loader2 className="h-3 w-3 animate-spin mr-1" />
@@ -358,7 +415,7 @@ function AdminShipments() {
                       type="checkbox"
                       checked={rows.length > 0 && selectedIds.size === rows.length}
                       onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="rounded border-input h-4 w-4 text-navy-deep focus:ring-navy-deep accent-amber"
+                      className="rounded border-input h-4 w-4 text-primary focus:ring-primary accent-primary"
                     />
                   </TableHead>
                   <TableHead>Tracking</TableHead>
@@ -375,7 +432,7 @@ function AdminShipments() {
                   const origin = r.origin as any;
                   const dest = r.destination as any;
                   return (
-                    <TableRow key={r.id} className={selectedIds.has(r.id) ? "bg-amber/5" : ""}>
+                    <TableRow key={r.id} className={selectedIds.has(r.id) ? "bg-primary/5" : ""}>
                       <TableCell className="pl-4">
                         <input
                           type="checkbox"
@@ -386,19 +443,19 @@ function AdminShipments() {
                             else newSet.delete(r.id);
                             setSelectedIds(newSet);
                           }}
-                          className="rounded border-input h-4 w-4 text-navy-deep focus:ring-navy-deep accent-amber"
+                          className="rounded border-input h-4 w-4 text-primary focus:ring-primary accent-primary"
                         />
                       </TableCell>
-                      <TableCell className="font-mono font-medium text-navy-deep">
+                      <TableCell className="font-mono font-medium text-foreground">
                         <div className="flex items-center gap-2">
                           {r.tracking_number}
                           {(r.ai_delay_risk ?? 0) > 0.5 && (
                             <div
-                              className="flex items-center gap-1 text-[10px] bg-amber/10 text-amber px-1.5 py-0.5 rounded-full font-bold"
-                              title={r.ai_delay_reason || "AI Delay Risk"}
+                              className="flex items-center gap-1 text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold"
+                              title={r.ai_delay_reason || "Delay Risk Warning"}
                             >
-                              <BrainCircuit className="h-3 w-3" />
-                              Risk
+                              <ShieldAlert className="h-3 w-3" />
+                              Delay Risk
                             </div>
                           )}
                         </div>
@@ -1294,7 +1351,7 @@ function LocationsTab({
     <div className="space-y-6 pt-4">
       <div>
         <h3 className="font-display font-bold text-base flex items-center gap-2 mb-3">
-          <Navigation className="h-4 w-4 text-amber" /> Origin
+          <Navigation className="h-4 w-4 text-primary" /> Origin
         </h3>
         <div className="grid grid-cols-2 gap-3">
           <FormField label="Contact Name" value={oContact} onChange={setOContact} />
@@ -1316,7 +1373,7 @@ function LocationsTab({
 
       <div>
         <h3 className="font-display font-bold text-base flex items-center gap-2 mb-3">
-          <MapPin className="h-4 w-4 text-amber" /> Destination
+          <MapPin className="h-4 w-4 text-primary" /> Destination
         </h3>
         <div className="grid grid-cols-2 gap-3">
           <FormField label="Contact Name" value={dContact} onChange={setDContact} />
@@ -1420,7 +1477,7 @@ function PackageTab({
           {Math.max(
             parseFloat(weight) || 0,
             ((parseFloat(length) || 0) * (parseFloat(width) || 0) * (parseFloat(height) || 0)) /
-              5000,
+            5000,
           ).toFixed(2)}{" "}
           kg
         </p>
@@ -1684,7 +1741,7 @@ function TelemetryTab({ ship, onRefresh }: { ship: any; onRefresh: () => void })
 
       <div className="mt-6 rounded-md bg-muted p-4 border border-border">
         <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-          <BrainCircuit className="h-4 w-4 text-amber" /> What does this do?
+          <Info className="h-4 w-4 text-primary" /> How does live location work?
         </h4>
         <p className="text-xs text-muted-foreground leading-relaxed">
           Updating these coordinates will move the live tracking marker for customers viewing this

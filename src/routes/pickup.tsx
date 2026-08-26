@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { PageHero } from "@/components/site/PageHero";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, MapPin, Package, CheckCircle2, Truck, Loader2 } from "lucide-react";
+import { CalendarClock, MapPin, Package, CheckCircle2, Truck, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,21 +11,26 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getPickupSlots, createPickup } from "@/lib/api.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { FadeInSection } from "@/components/animated/FadeIn";
+import heroImg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/pickup")({
   head: () => ({
     meta: [
-      { title: "Schedule a pickup — SwiftArc" },
+      { title: "Schedule a Courier Pickup — SwiftArc Logistics" },
       {
         name: "description",
-        content: "Request a same-day or next-day courier pickup from your address in seconds.",
+        content:
+          "Request a scheduled courier package collection from your residential or commercial address. Choose available time slots and track pickup status.",
       },
-      { property: "og:title", content: "Schedule a SwiftArc pickup" },
+      { property: "og:title", content: "Schedule a Courier Pickup — SwiftArc" },
       {
         property: "og:description",
-        content: "Same-day and next-day pickup slots across 60+ metros.",
+        content: "Book a same-day or next-day courier collection directly from your doorstep.",
       },
+      { name: "keywords", content: "schedule courier pickup, package collection, doorstep pickup, parcel dispatch" },
     ],
+    links: [{ rel: "canonical", href: "/pickup" }],
   }),
   component: PickupPage,
 });
@@ -68,7 +72,7 @@ function PickupPage() {
     mutationFn: () => create({ data: { ...form, pickup_date: date, slot, package_count: count } }),
     onSuccess: (row) => {
       setConfirmed(row);
-      toast.success("Pickup scheduled", { description: row.reference });
+      toast.success("Pickup scheduled successfully", { description: `Reference: ${row.reference}` });
       qc.invalidateQueries({ queryKey: ["pickup-slots", date] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -82,266 +86,326 @@ function PickupPage() {
       return;
     }
     if (!slot) {
-      toast.error("Choose a pickup window");
+      toast.error("Please select an available pickup time window");
       return;
     }
     createMut.mutate();
   };
 
   return (
-    <div>
-      <PageHero
-        eyebrow="Courier pickup"
-        title="Schedule a pickup in 30 seconds."
-        subtitle="Live slot availability. Same-day slots close 90 minutes before the pickup window."
-        imageSrc="/images/hero_pickup_1784191942933.png"
-      />
+    <div className="bg-background text-foreground overflow-x-hidden">
+      {/* ── Premium Glassmorphic Hero ── */}
+      <section
+        className="relative min-h-[58vh] flex items-center overflow-hidden pt-12 pb-16 border-b border-slate-100"
+        style={{ background: "linear-gradient(145deg, #f0f6ff 0%, #ffffff 55%, #f5f0ff 100%)" }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          aria-hidden
+        />
+        <div className="absolute -top-20 right-0 w-[480px] h-[480px] rounded-full bg-primary/[0.06] blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-0 -left-16 w-[380px] h-[380px] rounded-full bg-sky-400/[0.06] blur-[110px] pointer-events-none" />
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
-        <motion.form
-          onSubmit={submit}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-8 rounded-2xl border border-border bg-card p-6 shadow-sm"
-        >
-          <fieldset className="space-y-4">
-            <legend className="flex items-center gap-2 font-display text-lg">
-              <MapPin className="h-5 w-5 text-amber" /> Pickup location
-            </legend>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-1.5">
-                <Label>Contact name</Label>
-                <Input
-                  required
-                  value={form.contact_name}
-                  onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Company</Label>
-                <Input
-                  value={form.company}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
-                />
-              </div>
-              <div className="sm:col-span-2 grid gap-1.5">
-                <Label>Street address</Label>
-                <Input
-                  required
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>City</Label>
-                <Input
-                  required
-                  value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Postal code</Label>
-                <Input
-                  required
-                  value={form.postal_code}
-                  onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
-                />
-              </div>
-              <div className="sm:col-span-2 grid gap-1.5">
-                <Label>Instructions for courier</Label>
-                <Textarea
-                  placeholder="Ring bell twice, reception on ground floor."
-                  value={form.instructions}
-                  onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-                />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="space-y-4">
-            <legend className="flex items-center gap-2 font-display text-lg">
-              <CalendarClock className="h-5 w-5 text-amber" /> When
-            </legend>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-1.5">
-                <Label>Date</Label>
-                <Input
-                  type="date"
-                  min={today}
-                  value={date}
-                  onChange={(e) => {
-                    setDate(e.target.value);
-                    setSlot("");
-                  }}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Available windows</Label>
-                {slots.isLoading ? (
-                  <div className="grid h-20 place-items-center rounded-md border border-border">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {(slots.data ?? []).map((w) => (
-                      <button
-                        type="button"
-                        key={w.slot}
-                        disabled={!w.available}
-                        onClick={() => setSlot(w.slot)}
-                        className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
-                          slot === w.slot
-                            ? "border-navy-deep bg-navy-deep text-cream"
-                            : w.available
-                              ? "border-border hover:bg-secondary"
-                              : "border-border/50 bg-secondary/40 text-muted-foreground line-through"
-                        }`}
-                        title={w.reason ?? `${w.remaining} of ${w.capacity} slots left`}
-                      >
-                        <div>{w.slot}</div>
-                        <div className="text-[10px] opacity-70">
-                          {w.available ? `${w.remaining} left` : w.reason}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="space-y-4">
-            <legend className="flex items-center gap-2 font-display text-lg">
-              <Package className="h-5 w-5 text-amber" /> Packages
-            </legend>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="grid gap-1.5">
-                <Label>Number of packages</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={99}
-                  value={count}
-                  onChange={(e) => setCount(Math.max(1, +e.target.value))}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Total weight (kg)</Label>
-                <Input type="number" min={0.1} step={0.1} defaultValue={2.4} />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Service</Label>
-                <select className="h-10 rounded-md border border-input bg-background px-3 text-sm">
-                  <option>SwiftArc Priority</option>
-                  <option>SwiftArc Express</option>
-                  <option>SwiftArc Ground</option>
-                </select>
-              </div>
-            </div>
-          </fieldset>
-
-          <Button
-            type="submit"
-            size="lg"
-            disabled={createMut.isPending || !signedIn}
-            className="w-full bg-navy-deep text-cream hover:bg-navy"
-          >
-            {createMut.isPending
-              ? "Scheduling…"
-              : signedIn
-                ? "Confirm pickup"
-                : "Sign in to schedule"}
-          </Button>
-        </motion.form>
-
-        <motion.aside
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="space-y-4"
-        >
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Summary
-            </h2>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Date</span>
-                <span className="font-medium">
-                  {new Date(date).toLocaleDateString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7 space-y-6">
+              <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm">
+                  <Truck className="h-3 w-3" />
+                  On-Demand Logistics Collection
                 </span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Window</span>
-                <span className="font-medium">{slot || "—"}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Packages</span>
-                <span className="font-medium">{count}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Est. fee</span>
-                <span className="font-medium">Included</span>
-              </li>
-            </ul>
-          </div>
+              </motion.div>
 
-          {confirmed && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="rounded-2xl border border-success/40 bg-success/10 p-5"
-            >
-              <div className="flex items-center gap-2 text-success">
-                <CheckCircle2 className="h-5 w-5" />
-                <span className="font-semibold">Pickup confirmed</span>
-              </div>
-              <p className="mt-2 text-sm text-foreground/80">Confirmation reference:</p>
-              <p className="font-mono text-lg font-bold">{confirmed.reference}</p>
-              <dl className="mt-3 space-y-1 text-xs text-muted-foreground">
-                <div className="flex justify-between">
-                  <dt>When</dt>
-                  <dd>
-                    {confirmed.pickup_date} · {confirmed.slot}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>Packages</dt>
-                  <dd>{confirmed.package_count}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>Address</dt>
-                  <dd className="text-right">
-                    {confirmed.address}, {confirmed.city} {confirmed.postal_code}
-                  </dd>
-                </div>
-              </dl>
-              <p className="mt-3 text-xs text-muted-foreground">
-                A courier will arrive during your chosen window. You'll receive an SMS 30 minutes
-                before.
-              </p>
-            </motion.div>
-          )}
+              <motion.h1
+                initial={{ opacity: 0, y: 22 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.08 }}
+                className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#032D60] leading-[1.1]"
+              >
+                Schedule a Courier{" "}
+                <span className="relative">
+                  <span className="text-primary">Doorstep Pickup</span>
+                  <motion.span className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8 }} />
+                </span>
+              </motion.h1>
 
-          <div className="rounded-2xl border border-border bg-navy-deep p-5 text-cream">
-            <div className="flex items-center gap-2 text-amber">
-              <Truck className="h-5 w-5" />
-              <span className="text-xs font-semibold uppercase tracking-widest">Live capacity</span>
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
+              >
+                Book a local driver to collect parcels, pallets, or commercial packages directly from your warehouse, office, or residence.
+              </motion.p>
             </div>
-            <p className="mt-3 text-sm text-cream/80">
-              {slots.data
-                ? `${slots.data.reduce((s, w) => s + w.remaining, 0)} slots remaining today`
-                : "Checking capacity…"}
-            </p>
+
+            <div className="hidden lg:col-span-5 lg:block">
+              <motion.div
+                initial={{ opacity: 0, x: 30, scale: 0.96 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.75, delay: 0.2 }}
+                className="relative"
+              >
+                <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/25 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/12">
+                  <img src={heroImg} alt="SwiftArc Courier Pickup Service" className="w-full h-72 sm:h-80 rounded-2xl object-cover" />
+                  <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </motion.div>
+            </div>
           </div>
-        </motion.aside>
-      </div>
+        </div>
+      </section>
+
+      {/* ── Main Form & Sidebar ── */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-12">
+          
+          {/* Form */}
+          <div className="lg:col-span-8">
+            <FadeInSection direction="left" className="rounded-3xl border border-slate-100 bg-white p-6 sm:p-10 shadow-xl shadow-[#032D60]/5">
+              <form onSubmit={submit} className="space-y-10">
+                {/* Address Section */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <MapPin className="h-5 w-5" />
+                    </div>
+                    <h2 className="font-display font-bold text-[#032D60] text-xl">Collection Location</h2>
+                  </div>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Contact Name *</Label>
+                      <Input
+                        required
+                        value={form.contact_name}
+                        onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                        placeholder="Full name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Company (Optional)</Label>
+                      <Input
+                        value={form.company}
+                        onChange={(e) => setForm({ ...form, company: e.target.value })}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                        placeholder="Company name"
+                      />
+                    </div>
+                    <div className="sm:col-span-2 space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Street Address *</Label>
+                      <Input
+                        required
+                        value={form.address}
+                        onChange={(e) => setForm({ ...form, address: e.target.value })}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                        placeholder="Building, street name, apartment or suite"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">City *</Label>
+                      <Input
+                        required
+                        value={form.city}
+                        onChange={(e) => setForm({ ...form, city: e.target.value })}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                        placeholder="City"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Postal Code *</Label>
+                      <Input
+                        required
+                        value={form.postal_code}
+                        onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                        placeholder="Postal code"
+                      />
+                    </div>
+                    <div className="sm:col-span-2 space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Driver Instructions (Optional)</Label>
+                      <Textarea
+                        placeholder="e.g. Ring reception bell on arrival, ground floor dispatch bay..."
+                        value={form.instructions}
+                        onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+                        className="bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 focus:ring-primary/20 shadow-sm text-sm"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timing & Windows */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <CalendarClock className="h-5 w-5" />
+                    </div>
+                    <h2 className="font-display font-bold text-[#032D60] text-xl">Pickup Window</h2>
+                  </div>
+
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Collection Date</Label>
+                      <Input
+                        type="date"
+                        min={today}
+                        value={date}
+                        onChange={(e) => {
+                          setDate(e.target.value);
+                          setSlot("");
+                        }}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 shadow-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Available Time Slots</Label>
+                      {slots.isLoading ? (
+                        <div className="grid h-24 place-items-center rounded-xl border border-slate-100 bg-slate-50/50">
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          {(slots.data ?? []).map((w) => (
+                            <button
+                              type="button"
+                              key={w.slot}
+                              disabled={!w.available}
+                              onClick={() => setSlot(w.slot)}
+                              className={`rounded-xl border p-3 text-xs font-bold transition-all duration-300 ${
+                                slot === w.slot
+                                  ? "border-primary bg-primary text-white shadow-md shadow-primary/20"
+                                  : w.available
+                                    ? "border-slate-200 bg-slate-50 hover:bg-primary/5 hover:border-primary/30 text-slate-600"
+                                    : "border-slate-100 bg-slate-50 text-slate-400 opacity-50 cursor-not-allowed"
+                              }`}
+                            >
+                              <div className="mb-0.5">{w.slot}</div>
+                              <div className="text-[10px] font-semibold opacity-80 uppercase tracking-widest">
+                                {w.available ? `${w.remaining} slots open` : "Full"}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Package Count */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <Package className="h-5 w-5" />
+                    </div>
+                    <h2 className="font-display font-bold text-[#032D60] text-xl">Package Information</h2>
+                  </div>
+
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Number of Packages</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={99}
+                        value={count}
+                        onChange={(e) => setCount(Math.max(1, +e.target.value))}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 shadow-sm font-mono text-lg"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Estimated Total Weight (kg)</Label>
+                      <Input type="number" min={0.1} step={0.1} defaultValue={3.5} className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 shadow-sm font-mono text-lg" />
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={createMut.isPending || !signedIn}
+                  className="w-full bg-primary hover:bg-primary-hover text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all text-[15px]"
+                >
+                  {createMut.isPending
+                    ? "Booking Collection Slot…"
+                    : signedIn
+                      ? "Confirm Pickup Request"
+                      : "Sign In to Book Pickup"}
+                </Button>
+              </form>
+            </FadeInSection>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            <FadeInSection direction="right">
+              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xl shadow-[#032D60]/5">
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-5">
+                  Booking Overview
+                </h3>
+                <dl className="space-y-3.5 text-[13px]">
+                  <div className="flex justify-between border-b border-slate-100 pb-3">
+                    <dt className="text-slate-500 font-medium">Pickup Date</dt>
+                    <dd className="font-bold text-[#032D60]">
+                      {new Date(date).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-3">
+                    <dt className="text-slate-500 font-medium">Selected Window</dt>
+                    <dd className="font-bold text-[#032D60]">{slot || "Not selected"}</dd>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-3">
+                    <dt className="text-slate-500 font-medium">Total Parcels</dt>
+                    <dd className="font-bold text-[#032D60]">{count}</dd>
+                  </div>
+                  <div className="flex justify-between pt-1">
+                    <dt className="text-slate-500 font-medium">Collection Fee</dt>
+                    <dd className="font-bold text-emerald-600">Standard Service</dd>
+                  </div>
+                </dl>
+              </div>
+            </FadeInSection>
+
+            {confirmed && (
+              <FadeInSection direction="up">
+                <div className="rounded-2xl border-2 border-emerald-500/20 bg-emerald-50/50 p-6 space-y-3 shadow-md">
+                  <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm">
+                    <CheckCircle2 className="h-5 w-5" />
+                    Pickup Booking Confirmed
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-600/70">Booking Reference:</p>
+                    <p className="font-mono text-2xl font-extrabold text-emerald-800">{confirmed.reference}</p>
+                  </div>
+                  <p className="text-xs text-emerald-700/80 leading-relaxed pt-3 border-t border-emerald-500/10">
+                    Our dispatch driver will arrive during your designated time window. Please ensure packages are securely packaged.
+                  </p>
+                </div>
+              </FadeInSection>
+            )}
+
+            <FadeInSection direction="up" delay={0.2}>
+              <div className="rounded-2xl p-7 text-white shadow-xl shadow-[#032D60]/20" style={{ backgroundColor: "#032D60" }}>
+                <div className="flex items-center gap-2.5 text-primary font-bold text-xs uppercase tracking-widest mb-3">
+                  <Truck className="h-4 w-4" />
+                  Fleet Availability
+                </div>
+                <p className="text-sm text-white/80 leading-relaxed font-medium">
+                  {slots.data
+                    ? `${slots.data.reduce((s, w) => s + w.remaining, 0)} collection windows available in your area today.`
+                    : "Retrieving route capacity…"}
+                </p>
+              </div>
+            </FadeInSection>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

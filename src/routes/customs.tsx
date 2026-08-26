@@ -1,42 +1,60 @@
 import { useMemo, useState } from "react";
-import { PageHero } from "@/components/site/PageHero";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Calculator, Info, Globe2, FileText, Download, Loader2, Plus, Trash2 } from "lucide-react";
+import { Calculator, Info, Globe2, FileText, Download, Loader2, Plus, Trash2, ShieldCheck, ArrowRight, FileCheck2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { estimateCustoms } from "@/lib/api.functions";
+import { FadeInSection, StaggerGrid, StaggerItem } from "@/components/animated/FadeIn";
+import heroImg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/customs")({
   head: () => ({
     meta: [
-      { title: "Customs & duties estimator — SwiftArc" },
+      { title: "Customs & Duties Calculator — SwiftArc Logistics" },
       {
         name: "description",
         content:
-          "Estimate import duties, VAT, and clearance fees for cross-border shipments in seconds.",
+          "Calculate estimated import duties, value-added tax (VAT), clearance fees, and necessary customs documents for international parcel shipments.",
       },
-      { property: "og:title", content: "SwiftArc Customs & Duties Estimator" },
-      { property: "og:description", content: "Landed cost calculator across 220+ destinations." },
+      { property: "og:title", content: "Customs & Duties Calculator — SwiftArc" },
+      {
+        property: "og:description",
+        content: "Clear landed cost estimates and documentation requirements across 220+ destinations.",
+      },
+      { name: "keywords", content: "customs duty calculator, landed cost, VAT estimator, import tariff, clearance documents" },
     ],
+    links: [{ rel: "canonical", href: "/customs" }],
   }),
   component: CustomsPage,
 });
 
 const categories = [
   "Electronics",
-  "Apparel",
-  "Home goods",
-  "Cosmetics",
-  "Books",
-  "Machinery",
-  "Toys",
-  "Jewelry",
+  "Apparel & Textiles",
+  "Home & Furniture",
+  "Cosmetics & Care",
+  "Books & Printed",
+  "Machinery & Parts",
+  "Toys & Games",
+  "Jewelry & Valuables",
 ];
-const countries = ["UK", "DE", "FR", "ES", "US", "JP", "CA", "AU", "AE", "IN"];
+
+const countries = [
+  { code: "UK", name: "United Kingdom" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "ES", name: "Spain" },
+  { code: "US", name: "United States" },
+  { code: "JP", name: "Japan" },
+  { code: "CA", name: "Canada" },
+  { code: "AU", name: "Australia" },
+  { code: "AE", name: "United Arab Emirates" },
+  { code: "IN", name: "India" },
+];
 
 interface Item {
   id: string;
@@ -47,37 +65,42 @@ interface Item {
 }
 
 function CustomsPage() {
-  const fetchRates = useServerFn(estimateCustoms);
-  const [country, setCountry] = useState("DE");
+  const [country, setCountry] = useState("US");
   const [freight, setFreight] = useState(45);
-  const [insurance, setInsurance] = useState(6);
+  const [insurance, setInsurance] = useState(15);
   const [hsCode, setHsCode] = useState("");
   const [items, setItems] = useState<Item[]>([
-    { id: "1", name: "Wireless earbuds", category: "Electronics", qty: 2, unitValue: 180 },
-    { id: "2", name: "Cotton hoodie", category: "Apparel", qty: 1, unitValue: 140 },
+    {
+      id: "init",
+      name: "Wireless Headphones",
+      category: "Electronics",
+      qty: 2,
+      unitValue: 150,
+    },
   ]);
 
-  const totalValue = useMemo(() => items.reduce((s, i) => s + i.qty * i.unitValue, 0), [items]);
-  const dominant = useMemo(() => {
-    const byCat = new Map<string, number>();
-    items.forEach((i) => byCat.set(i.category, (byCat.get(i.category) ?? 0) + i.qty * i.unitValue));
-    let top = items[0]?.category ?? "Electronics",
-      max = 0;
-    byCat.forEach((v, k) => {
-      if (v > max) {
-        max = v;
-        top = k;
-      }
-    });
-    return top;
-  }, [items]);
+  const totalValue = items.reduce((a, b) => a + b.qty * b.unitValue, 0);
 
+  const counts: Record<string, number> = {};
+  items.forEach((i) => {
+    counts[i.category] = (counts[i.category] || 0) + 1;
+  });
+  let dominant = "General Merchandise";
+  let max = 0;
+  for (const [c, n] of Object.entries(counts)) {
+    if (n > max) {
+      max = n;
+      dominant = c;
+    }
+  }
+
+  const fetchEst = useServerFn(estimateCustoms);
   const est = useQuery({
     queryKey: ["customs", country, dominant, totalValue, freight, insurance, hsCode],
     queryFn: () =>
-      fetchRates({
+      fetchEst({
         data: {
-          country,
+          destination: country,
           category: dominant,
           value: totalValue,
           freight,
@@ -93,7 +116,7 @@ function CustomsPage() {
       ...prev,
       {
         id: crypto.randomUUID(),
-        name: "New item",
+        name: "New Parcel Item",
         category: "Electronics",
         qty: 1,
         unitValue: 100,
@@ -106,14 +129,14 @@ function CustomsPage() {
   const exportSummary = () => {
     if (!est.data) return;
     const rows = [
-      ["SwiftArc Customs Estimate"],
+      ["SwiftArc Customs Estimate Summary"],
       [`Generated ${est.data.generatedAt}`],
-      [`Destination`, country],
-      [`Dominant category`, dominant],
-      [`HS code`, hsCode || "—"],
+      [`Destination Country`, country],
+      [`Dominant Cargo Category`, dominant],
+      [`HS Tariff Code`, hsCode || "—"],
       [],
-      ["Items"],
-      ["Name", "Category", "Qty", "Unit value", "Line total"],
+      ["Declared Items"],
+      ["Item Description", "Category", "Quantity", "Unit Value (USD)", "Line Total (USD)"],
       ...items.map((i) => [
         i.name,
         i.category,
@@ -122,11 +145,11 @@ function CustomsPage() {
         (i.qty * i.unitValue).toFixed(2),
       ]),
       [],
-      ["Cost breakdown"],
-      ["Label", "Amount (USD)"],
+      ["Estimated Cost Breakdown"],
+      ["Fee Label", "Amount (USD)"],
       ...est.data.breakdown.map((b) => [b.label, b.amount.toFixed(2)]),
       [],
-      ["Required documents"],
+      ["Required Customs Documents"],
       ...est.data.documents.map((d) => [d]),
     ];
     const csv = rows
@@ -141,226 +164,304 @@ function CustomsPage() {
   };
 
   return (
-    <div>
-      <PageHero
-        eyebrow="Landed cost"
-        title="Customs & duties estimator"
-        subtitle="Item-level duties, VAT, clearance and handling — plus required documents per category."
-        imageSrc="/images/hero_customs_1784191922424.png"
-      />
+    <div className="bg-background text-foreground overflow-x-hidden">
+      {/* ── Premium Glassmorphic Hero ── */}
+      <section
+        className="relative min-h-[58vh] flex items-center overflow-hidden pt-12 pb-16 border-b border-slate-100"
+        style={{ background: "linear-gradient(145deg, #f0f6ff 0%, #ffffff 55%, #f5f0ff 100%)" }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          aria-hidden
+        />
+        <div className="absolute -top-20 right-0 w-[480px] h-[480px] rounded-full bg-primary/[0.06] blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-0 -left-16 w-[380px] h-[380px] rounded-full bg-sky-400/[0.06] blur-[110px] pointer-events-none" />
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:px-8">
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm"
-          >
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="grid gap-1.5">
-                <Label>Destination country</Label>
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                >
-                  {countries.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Freight (USD)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={freight}
-                  onChange={(e) => setFreight(+e.target.value || 0)}
-                  className="transition-shadow focus-visible:ring-amber"
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label>Insurance (USD)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={insurance}
-                  onChange={(e) => setInsurance(+e.target.value || 0)}
-                  className="transition-shadow focus-visible:ring-amber"
-                />
-              </div>
-              <div className="sm:col-span-3 grid gap-1.5">
-                <Label>HS code (optional)</Label>
-                <Input
-                  placeholder="e.g., 8517.13.00"
-                  value={hsCode}
-                  onChange={(e) => setHsCode(e.target.value)}
-                  className="transition-shadow focus-visible:ring-amber"
-                />
-              </div>
-            </div>
-          </motion.div>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7 space-y-6">
+              <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm">
+                  <FileCheck2 className="h-3 w-3" />
+                  International Compliance
+                </span>
+              </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg">Items</h2>
-              <button
-                onClick={addItem}
-                className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary transition-colors"
+              <motion.h1
+                initial={{ opacity: 0, y: 22 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.08 }}
+                className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#032D60] leading-[1.1]"
               >
-                <Plus className="h-3 w-3" /> Add item
-              </button>
-            </div>
-            <div className="mt-4 space-y-3">
-              {items.map((i) => (
-                <div
-                  key={i.id}
-                  className="grid gap-2 rounded-lg border border-border p-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)_80px_120px_36px] transition-all hover:border-amber/50"
-                >
-                  <Input
-                    value={i.name}
-                    onChange={(e) => patch(i.id, { name: e.target.value })}
-                    placeholder="Item name"
-                    className="focus-visible:ring-amber"
-                  />
-                  <select
-                    value={i.category}
-                    onChange={(e) => patch(i.id, { category: e.target.value })}
-                    className="h-10 rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-amber"
-                  >
-                    {categories.map((c) => (
-                      <option key={c}>{c}</option>
-                    ))}
-                  </select>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={i.qty}
-                    onChange={(e) => patch(i.id, { qty: +e.target.value || 1 })}
-                    className="focus-visible:ring-amber"
-                  />
-                  <Input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={i.unitValue}
-                    onChange={(e) => patch(i.id, { unitValue: +e.target.value || 0 })}
-                    className="focus-visible:ring-amber"
-                  />
-                  <button
-                    onClick={() => rmItem(i.id)}
-                    aria-label="Remove item"
-                    className="grid h-10 w-10 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
-              <span className="text-muted-foreground">Declared value</span>
-              <span className="font-mono font-semibold">
-                ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-              </span>
-            </div>
-          </motion.div>
+                Customs Duties &{" "}
+                <span className="relative">
+                  <span className="text-primary">Tax Calculator</span>
+                  <motion.span className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8 }} />
+                </span>
+              </motion.h1>
 
-          <div className="flex items-start gap-2 rounded-lg border border-border bg-secondary/60 p-3 text-xs text-muted-foreground">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber" />
-            <p>
-              SwiftArc's DDP option lets you pre-pay duties at checkout so recipients aren't billed
-              on delivery. Talk to sales for enterprise HS-code automation.
-            </p>
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
+              >
+                Estimate landed costs before shipping internationally. Calculate duties, VAT, and required documentation instantly based on current trade tariffs.
+              </motion.p>
+            </div>
+
+            <div className="hidden lg:col-span-5 lg:block">
+              <motion.div
+                initial={{ opacity: 0, x: 30, scale: 0.96 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{ duration: 0.75, delay: 0.2 }}
+                className="relative"
+              >
+                <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/25 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/12">
+                  <img src={heroImg} alt="SwiftArc Customs Service" className="w-full h-72 sm:h-80 rounded-2xl object-cover" />
+                  <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <motion.aside
-          key={est.dataUpdatedAt}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="h-fit space-y-4"
-        >
-          <div className="rounded-2xl border border-border bg-navy-deep p-6 text-cream">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-amber">
-                <Calculator className="h-5 w-5" />
-                <span className="text-xs font-semibold uppercase tracking-widest">
-                  Estimated landed cost
-                </span>
-              </div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-amber">
-                <Globe2 className="h-3 w-3" /> {country}
-              </span>
-            </div>
-
-            {est.isLoading || !est.data ? (
-              <div className="mt-6 grid h-24 place-items-center">
-                <Loader2 className="h-5 w-5 animate-spin text-cream/60" />
-              </div>
-            ) : (
-              <>
-                <div className="mt-4 font-display text-5xl font-bold">
-                  ${est.data.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+      {/* ── Calculator Main Section ── */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-12">
+          
+          {/* Controls Column */}
+          <div className="lg:col-span-7">
+            <FadeInSection direction="left" className="space-y-6">
+              <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-[#032D60]/5">
+                <div className="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold text-[#032D60]">Declared Items</h2>
+                  </div>
+                  <Button onClick={addItem} variant="outline" size="sm" className="font-bold border-2 rounded-xl text-primary border-primary/20 hover:bg-primary/5 hover:border-primary">
+                    <Plus className="h-4 w-4 mr-1.5" /> Add Item
+                  </Button>
                 </div>
-                <p className="mt-1 text-xs text-cream/60">
-                  Rates based on dominant category: <span className="text-cream">{dominant}</span>
-                </p>
-                <dl className="mt-6 space-y-2 border-t border-white/10 pt-4 text-sm">
-                  {est.data.breakdown.map((b) => (
-                    <div
-                      key={b.label}
-                      className={`flex justify-between ${b.emphasis ? "font-semibold" : ""}`}
-                    >
-                      <dt className="text-cream/70">{b.label}</dt>
-                      <dd className="font-mono">
-                        ${b.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                      </dd>
+
+                <div className="space-y-4">
+                  {items.map((it, idx) => (
+                    <div key={it.id} className="group relative grid gap-4 rounded-xl border border-slate-100 bg-slate-50 p-5 pr-12 transition-all hover:border-primary/30 hover:shadow-sm sm:grid-cols-12">
+                      <div className="sm:col-span-5 space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Item Description</Label>
+                        <Input
+                          value={it.name}
+                          onChange={(e) => patch(it.id, { name: e.target.value })}
+                          className="h-10 bg-white border-slate-200 rounded-lg shadow-sm"
+                        />
+                      </div>
+                      <div className="sm:col-span-3 space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Category</Label>
+                        <select
+                          value={it.category}
+                          onChange={(e) => patch(it.id, { category: e.target.value })}
+                          className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                        >
+                          {categories.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-2 space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Qty</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={it.qty}
+                          onChange={(e) => patch(it.id, { qty: Math.max(1, +e.target.value) })}
+                          className="h-10 bg-white border-slate-200 rounded-lg font-mono shadow-sm"
+                        />
+                      </div>
+                      <div className="sm:col-span-2 space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Val ($)</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={it.unitValue}
+                          onChange={(e) => patch(it.id, { unitValue: Math.max(1, +e.target.value) })}
+                          className="h-10 bg-white border-slate-200 rounded-lg font-mono shadow-sm"
+                        />
+                      </div>
+
+                      <button
+                        onClick={() => rmItem(it.id)}
+                        disabled={items.length === 1}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-red-500 disabled:opacity-30 disabled:hover:text-slate-300 transition-colors"
+                        title="Remove item"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
-                </dl>
-              </>
-            )}
+                </div>
 
-            <div className="mt-6 grid gap-2">
-              <button
-                onClick={exportSummary}
-                disabled={!est.data}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-amber py-3 text-sm font-semibold text-navy-deep transition-colors hover:bg-amber-soft disabled:opacity-60"
-              >
-                <Download className="h-4 w-4" /> Export summary
-              </button>
-              <button className="w-full rounded-md border border-cream/20 py-2.5 text-sm text-cream/90 hover:bg-secondary">
-                Ship with DDP →
-              </button>
-            </div>
+                <div className="mt-6 flex justify-between items-center rounded-xl bg-slate-100/50 p-4 border border-slate-100">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Total Goods Value</span>
+                  <span className="font-mono text-xl font-bold text-[#032D60]">${totalValue.toFixed(2)} USD</span>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-[#032D60]/5">
+                <div className="flex items-center gap-3 pb-6 border-b border-slate-100 mb-6">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <Globe2 className="h-5 w-5" />
+                  </div>
+                  <h2 className="font-display text-2xl font-bold text-[#032D60]">Shipping Logistics</h2>
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Destination Country</Label>
+                    <select
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 font-medium shadow-sm outline-none focus:border-primary/50 focus:bg-white transition-colors"
+                    >
+                      {countries.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                      HS Tariff Code (Optional)
+                      <span className="group relative">
+                        <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded-md bg-slate-800 p-2 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 z-10 font-normal normal-case">
+                          Harmonized System Code for exact duty percentage. We estimate based on category if blank.
+                        </span>
+                      </span>
+                    </Label>
+                    <Input
+                      value={hsCode}
+                      onChange={(e) => setHsCode(e.target.value)}
+                      placeholder="e.g. 8518.30"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl shadow-sm focus:border-primary/40 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Freight Cost (USD)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={freight}
+                      onChange={(e) => setFreight(+e.target.value)}
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl shadow-sm focus:border-primary/40 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Cargo Insurance (USD)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={insurance}
+                      onChange={(e) => setInsurance(+e.target.value)}
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl shadow-sm focus:border-primary/40 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 rounded-2xl bg-sky-50/50 p-5 border border-sky-100 text-xs text-sky-800/80 leading-relaxed">
+                  <p className="font-bold text-sky-900 flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-sky-600" /> Estimation Notice
+                  </p>
+                  <p className="pl-6 mt-1.5">
+                    Calculations use CIF (Cost, Insurance, and Freight) value. Final duties are assessed by local customs officials upon import.
+                  </p>
+                </div>
+              </div>
+            </FadeInSection>
           </div>
 
-          {est.data && (
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-amber" />
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Documents needed
+          {/* Results Column */}
+          <div className="lg:col-span-5">
+            <FadeInSection direction="right" className="sticky top-28">
+              <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-[#032D60]/5">
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-6">
+                  Estimated Breakdown
                 </h3>
+
+                {est.isLoading ? (
+                  <div className="flex h-40 flex-col items-center justify-center space-y-3 text-slate-400">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-xs font-semibold">Calculating tariffs...</p>
+                  </div>
+                ) : est.isError ? (
+                  <div className="flex h-40 flex-col items-center justify-center space-y-2 text-red-500">
+                    <p className="text-sm font-semibold">Failed to fetch estimate.</p>
+                  </div>
+                ) : est.data ? (
+                  <div className="space-y-8">
+                    <div>
+                      <div className="mb-4 flex items-end justify-between">
+                        <span className="text-slate-500 font-medium text-sm">Estimated Total Duties & Taxes</span>
+                        <span className="font-display text-4xl font-extrabold text-[#032D60]">
+                          ${est.data.total.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                         <span className="text-xs font-bold text-slate-600">Total Landed Cost</span>
+                         <span className="font-mono font-bold text-emerald-600">
+                           ${(est.data.total + totalValue + freight + insurance).toFixed(2)}
+                         </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 pb-2 border-b border-slate-100">
+                        Itemized Cost
+                      </h4>
+                      <dl className="space-y-3 text-sm">
+                        {est.data.breakdown.map((b) => (
+                          <div key={b.label} className="flex justify-between items-center group">
+                            <dt className="text-slate-500 group-hover:text-[#032D60] transition-colors">{b.label}</dt>
+                            <dd className="font-mono font-semibold text-slate-700">
+                              ${b.amount.toFixed(2)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 pb-2 border-b border-slate-100">
+                        Required Documents
+                      </h4>
+                      <ul className="space-y-2">
+                        {est.data.documents.map((d) => (
+                          <li key={d} className="flex items-start gap-2.5 text-xs text-slate-600 font-medium">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                            {d}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100">
+                       <Button onClick={exportSummary} className="w-full bg-[#032D60] hover:bg-[#032D60]/90 text-white font-bold h-12 rounded-xl shadow-md transition-all">
+                         <Download className="mr-2 h-4 w-4" /> Export CSV Summary
+                       </Button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-              <ul className="mt-3 space-y-1.5 text-sm">
-                {est.data.documents.map((d) => (
-                  <li key={d} className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </motion.aside>
-      </div>
+            </FadeInSection>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

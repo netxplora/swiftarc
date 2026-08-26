@@ -251,7 +251,7 @@ function AdminCMSPage() {
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-widest">Drafts</span>
-            <PenLine className="h-5 w-5 text-amber" />
+            <PenLine className="h-5 w-5 text-primary" />
           </div>
           <p className="mt-3 font-display text-3xl font-bold text-navy-deep dark:text-cream">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : drafts}
@@ -373,7 +373,7 @@ function AdminCMSPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-8 px-2.5 text-amber hover:text-amber"
+                              className="h-8 px-2.5 text-primary hover:text-primary"
                               onClick={() => {
                                 const mut = adminUpsertCmsPage({
                                   data: { ...p, status: "Draft" },

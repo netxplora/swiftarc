@@ -2,27 +2,28 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { PackageSearch, Bell, ShieldCheck, Zap, ArrowRight, XCircle, Search } from "lucide-react";
+import { PackageSearch, Bell, ShieldCheck, Clock, ArrowRight, XCircle, Search } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { statusLabels } from "@/lib/types";
 import { resolveTracking } from "@/lib/api.functions";
 import { useServerFn } from "@tanstack/react-start";
+import heroImg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/tracking/")({
   head: () => ({
     meta: [
-      { title: "Track a Shipment — SwiftArc" },
+      { title: "Track a Shipment — SwiftArc Logistics" },
       {
         name: "description",
         content:
-          "Enter one or many SwiftArc tracking numbers for real-time status, AI ETA, and delivery details.",
+          "Track single or multiple SwiftArc shipments in real time. Get instant status updates, milestone scans, and estimated delivery dates.",
       },
-      { property: "og:title", content: "Track a Shipment — SwiftArc" },
+      { property: "og:title", content: "Track a Shipment — SwiftArc Logistics" },
       {
         property: "og:description",
-        content: "Real-time visibility, AI ETA, and proof of delivery.",
+        content: "Real-time visibility, checkpoint timelines, and proof of delivery across 220+ countries.",
       },
       { property: "og:url", content: "/tracking" },
     ],
@@ -74,7 +75,7 @@ function TrackingLanding() {
             };
           }
         } catch {
-          // lookup failed – return partial result below
+          // lookup failed
         }
         return { id } as TrackingResult;
       }),
@@ -83,60 +84,57 @@ function TrackingLanding() {
   };
 
   return (
-    <div className="bg-card min-h-screen">
+    <div className="bg-background min-h-screen">
       <PageHero
-        eyebrow="Tracking"
-        title="Every parcel, in real time."
-        subtitle="Track one shipment or paste up to 30 numbers at once. Live status, animated timeline, live map, AI delivery predictions, and digital proof of delivery."
-        imageSrc="/images/hero_tracking_1784191931246.png"
+        eyebrow="Real-Time Tracking"
+        title="Track Your Shipment"
+        subtitle="Track one shipment or enter multiple tracking codes at once to see checkpoint scans, route progress, and estimated delivery dates."
+        imageSrc={heroImg}
       >
         <form
           onSubmit={(e) => {
             e.preventDefault();
             runLookup(ids);
           }}
-          className="mt-8 rounded-2xl border border-cream/10 bg-cream/5 p-3 backdrop-blur max-w-3xl"
+          className="mt-6 rounded-2xl border border-border bg-white dark:bg-card p-2 shadow-lg max-w-3xl"
         >
-          <div className="rounded-xl bg-cream p-3 text-navy-deep">
+          <div className="rounded-xl bg-slate-50 dark:bg-muted/40 p-3 text-foreground">
             <div className="flex items-start gap-3">
-              <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy-deep/5">
-                <Search className="h-5 w-5 text-navy" />
+              <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <Search className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
                 <textarea
                   value={ids}
                   onChange={(e) => setIds(e.target.value)}
-                  placeholder="Enter tracking number(s)..."
+                  placeholder="Enter tracking number(s), e.g. SA-7241-9032-11..."
                   rows={2}
-                  className="w-full resize-none border-none bg-transparent p-0 text-base outline-none focus:ring-0 placeholder:text-muted-foreground"
+                  className="w-full resize-none border-none bg-transparent p-0 text-base outline-none focus:ring-0 placeholder:text-muted-foreground text-foreground"
                 />
               </div>
               <Button
                 type="submit"
                 disabled={!ids.trim()}
                 size="lg"
-                className="h-12 shrink-0 self-end bg-amber text-navy-deep hover:bg-amber/90"
+                className="h-12 shrink-0 self-end bg-primary text-white hover:bg-primary-hover font-semibold px-6 shadow-md"
               >
-                Track
+                Track Shipment
               </Button>
             </div>
           </div>
         </form>
 
-        <p className="mt-4 text-xs text-cream/60">
-          Enter a SwiftArc tracking number (e.g. SA followed by 10 digits) to get started.
+        <p className="mt-3 text-xs text-muted-foreground">
+          Tip: You can paste multiple tracking numbers separated by commas or spaces.
         </p>
       </PageHero>
-      <div className="bg-background min-h-screen -mt-px pt-4 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-amber/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="bg-background min-h-[50vh] pt-4 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {results.length > 0 && (
             <div className="mt-10 mb-16">
-              <h2 className="font-display text-2xl font-bold mb-6">
-                Results — {results.length} shipments
+              <h2 className="font-display text-2xl font-bold mb-6 text-foreground">
+                Results — {results.length} shipments found
               </h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {results.map((r, i) => (
@@ -150,18 +148,17 @@ function TrackingLanding() {
                       <Link
                         to="/tracking/$trackingId"
                         params={{ trackingId: r.trackingNumber }}
-                        className="group flex flex-col h-full rounded-[1.5rem] border border-border/60 bg-card/50 backdrop-blur-md p-5 transition-all hover:bg-card hover:shadow-xl hover:border-amber/40 overflow-hidden relative"
+                        className="group flex flex-col h-full rounded-2xl border border-border bg-card p-5 transition-all hover:shadow-lg hover:border-primary/40 overflow-hidden relative"
                       >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-amber/0 group-hover:bg-amber transition-colors" />
                         <div className="flex items-start justify-between mb-4">
-                          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-amber/10 text-amber group-hover:bg-amber group-hover:text-navy-deep transition-colors">
-                            <PackageSearch className="h-5 w-5" />
+                          <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition-colors">
+                            <PackageSearch className="h-6 w-6" />
                           </span>
                           <div
                             className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${
                               r.status === "customs_hold"
                                 ? "bg-red-500/10 text-red-500"
-                                : "bg-success/10 text-success"
+                                : "bg-emerald-500/10 text-emerald-600"
                             }`}
                           >
                             {statusLabels[r.status ?? ""] ?? r.status}
@@ -169,28 +166,30 @@ function TrackingLanding() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-mono text-xs text-muted-foreground mb-1">
-                            Tracking ID
+                            Tracking Code
                           </p>
-                          <p className="font-bold text-lg mb-3 tracking-tight">
+                          <p className="font-bold text-lg mb-3 tracking-tight font-mono text-foreground">
                             {r.trackingNumber}
                           </p>
-                          <div className="flex items-center gap-2 text-sm font-medium">
+                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span className="truncate">{r.originCity}</span>
-                            <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <ArrowRight className="h-3 w-3 shrink-0 text-primary" />
                             <span className="truncate">{r.destCity}</span>
                           </div>
                         </div>
-                        <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between">
+                        <div className="mt-5 pt-4 border-t border-border/60 flex items-center justify-between">
                           <span className="text-xs text-muted-foreground font-semibold">
                             {r.service}
                           </span>
-                          <ArrowRight className="h-4 w-4 text-foreground/40 group-hover:text-amber transition-colors group-hover:translate-x-1" />
+                          <span className="inline-flex items-center text-xs font-semibold text-primary group-hover:underline">
+                            View Full Timeline <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                          </span>
                         </div>
                       </Link>
                     ) : (
-                      <div className="flex flex-col h-full rounded-[1.5rem] border border-destructive/20 bg-destructive/5 backdrop-blur-md p-5">
+                      <div className="flex flex-col h-full rounded-2xl border border-destructive/20 bg-destructive/5 p-5">
                         <div className="flex items-start gap-4 mb-4">
-                          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-destructive/10 text-destructive">
+                          <span className="grid h-12 w-12 place-items-center rounded-xl bg-destructive/10 text-destructive">
                             <XCircle className="h-5 w-5" />
                           </span>
                         </div>
@@ -202,7 +201,7 @@ function TrackingLanding() {
                             {r.id}
                           </p>
                           <p className="text-sm text-destructive font-medium">
-                            Not found on network
+                            Shipment record not found
                           </p>
                         </div>
                       </div>
@@ -213,38 +212,38 @@ function TrackingLanding() {
             </div>
           )}
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-3 pb-24">
+          <div className="mt-12 grid gap-6 sm:grid-cols-3 pb-24">
             {[
               {
-                Icon: Bell,
-                t: "Instant alerts",
-                d: "Push, email, and SMS the moment status changes.",
+                icon: Bell,
+                title: "Live Milestone Updates",
+                desc: "Receive real-time notifications when your package is scanned at sorting hubs and border facilities.",
               },
               {
-                Icon: Zap,
-                t: "ETA Estimates",
-                d: "Calculated delivery windows with delay reason details.",
+                icon: Clock,
+                title: "Accurate Delivery Schedules",
+                desc: "Clear delivery timeframes based on route conditions, transit mode, and customs clearance pace.",
               },
               {
-                Icon: ShieldCheck,
-                t: "Digital proof",
-                d: "Signature, photo, and chain-of-custody attached.",
+                icon: ShieldCheck,
+                title: "Proof of Delivery",
+                desc: "Verified recipient signature and delivery timestamp recorded upon final handover.",
               },
             ].map((f, i) => (
               <motion.div
-                key={f.t}
-                initial={{ opacity: 0, y: 20 }}
+                key={f.title}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
               >
-                <Card className="h-full rounded-[1.5rem] border-border/60 bg-card/40 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-card">
-                  <CardContent className="p-8">
-                    <div className="h-12 w-12 rounded-2xl bg-amber/10 flex items-center justify-center mb-6">
-                      <f.Icon className="h-6 w-6 text-amber" />
+                <Card className="h-full border-border bg-card transition-all duration-300 hover:shadow-md">
+                  <CardContent className="p-6 sm:p-8">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
+                      <f.icon className="h-6 w-6" />
                     </div>
-                    <h3 className="font-display font-bold text-lg mb-2">{f.t}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.d}</p>
+                    <h3 className="font-display font-bold text-lg text-foreground mb-2">{f.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
                   </CardContent>
                 </Card>
               </motion.div>

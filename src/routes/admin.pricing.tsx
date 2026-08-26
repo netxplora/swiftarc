@@ -156,7 +156,7 @@ function AdminPricingPage() {
         {/* Base Tariff Rules */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h2 className="font-display text-lg font-bold flex items-center gap-2 border-b border-border pb-4">
-            <Sliders className="h-5 w-5 text-amber" /> Base Tariff Rules
+            <Sliders className="h-5 w-5 text-primary" /> Base Tariff Rules
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mt-5">
             <div>
@@ -273,7 +273,7 @@ function AdminPricingPage() {
         {/* Vehicle Category Rate Table */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h2 className="font-display text-lg font-bold flex items-center gap-2 border-b border-border pb-4">
-            <Truck className="h-5 w-5 text-amber" /> Vehicle Category Rates
+            <Truck className="h-5 w-5 text-primary" /> Vehicle Category Rates
           </h2>
           <div className="overflow-x-auto mt-4">
             <div className="overflow-x-auto w-full pb-4">
@@ -350,7 +350,7 @@ function AdminPricingPage() {
         {/* Zone Multipliers */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h2 className="font-display text-lg font-bold flex items-center gap-2 border-b border-border pb-4">
-            <Globe className="h-5 w-5 text-amber" /> Zone Multipliers
+            <Globe className="h-5 w-5 text-primary" /> Zone Multipliers
           </h2>
           <div className="overflow-x-auto mt-4">
             <div className="overflow-x-auto w-full pb-4">

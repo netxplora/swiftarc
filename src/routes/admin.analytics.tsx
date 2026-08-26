@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   MapPin,
   ArrowUpRight,
+  ShieldAlert,
 } from "lucide-react";
 import {
   AreaChart,
@@ -329,7 +330,7 @@ function AdminAnalytics() {
         {/* Top Destinations */}
         <div className="rounded-2xl border border-border bg-card p-5">
           <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-amber" />
+            <MapPin className="h-5 w-5 text-primary" />
             Top Destinations
           </h2>
           <div className="space-y-3">
@@ -425,12 +426,12 @@ function AdminAnalytics() {
           </div>
         </div>
 
-        {/* AI Predictions */}
+        {/* Delay Risk Forecast */}
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-lg font-bold flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-deep" />
-              AI Delay Predictions
+              <ShieldAlert className="h-5 w-5 text-primary" />
+              Route Delay Risk Forecast
             </h2>
           </div>
           <div className="space-y-3 overflow-y-auto max-h-[200px] pr-2">
@@ -462,13 +463,13 @@ function AdminAnalytics() {
               return atRisk.map((item: any) => (
                 <div
                   key={item.shipment.id}
-                  className="flex flex-col gap-1 p-3 rounded-lg border border-amber/20 bg-amber/5"
+                  className="flex flex-col gap-1 p-3 rounded-lg border border-primary/20 bg-primary/5"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs font-semibold">
                       {item.shipment.tracking_number}
                     </span>
-                    <span className="text-[10px] font-bold text-amber-deep bg-amber/20 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                       {Math.round(item.risk.confidence * 100)}% RISK
                     </span>
                   </div>

@@ -218,7 +218,7 @@ function AdminDriversPage() {
         <div className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-widest">Total Drivers</span>
-            <Users className="h-5 w-5 text-amber" />
+            <Users className="h-5 w-5 text-primary" />
           </div>
           <p className="mt-3 font-display text-3xl font-bold text-navy-deep dark:text-cream">
             {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : totalDrivers}

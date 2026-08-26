@@ -1,245 +1,260 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { PageHero } from "@/components/site/PageHero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Code2, BookOpen, ArrowRight, Clock, Tag } from "lucide-react";
 import { posts } from "@/lib/data/news";
+import heroImg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/resources")({
   head: () => ({
     meta: [
-      { title: "Newsroom & Resources — SwiftArc" },
+      { title: "Logistics Guides, News & Resources — SwiftArc" },
       {
         name: "description",
         content:
-          "Explore the latest news, product updates, sustainability reports, and logistics guides from the SwiftArc team.",
+          "Read logistics guides, international shipping updates, customs documentation tips, and operational news from the SwiftArc team.",
       },
-      { property: "og:title", content: "Newsroom — SwiftArc" },
+      { property: "og:title", content: "Resources & News — SwiftArc Logistics" },
+      {
+        property: "og:description",
+        content: "Practical guides and operational insights for international shipping and freight logistics.",
+      },
+      { name: "keywords", content: "logistics guides, customs tips, freight news, supply chain articles, shipping resources" },
     ],
+    links: [{ rel: "canonical", href: "/resources" }],
   }),
-  component: Resources,
+  component: ResourcesPage,
 });
 
-const resources = [
+const resourceCategories = [
   {
-    title: "Developer API",
-    desc: "Integrate SwiftArc's rating, booking, label generation, tracking, and webhook capabilities directly into your WMS, OMS, or storefront. Full REST and GraphQL documentation with SDKs for Node.js, Python, Go, and Java.",
-    icon: Code2,
-    links: [
-      "REST API Reference",
-      "GraphQL API",
-      "Webhook Events",
-      "Authentication & Rate Limits",
-      "Postman Collection",
-    ],
-  },
-  {
-    title: "Knowledge Base",
-    desc: "Detailed operational guides on international shipping compliance, customs clearance procedures, dangerous goods handling, cold-chain packaging standards, and claims resolution.",
+    title: "Shipping Documentation",
+    desc: "Guides on commercial invoices, packing lists, airway bills, customs declarations, and export compliance protocols.",
     icon: BookOpen,
     links: [
-      "Customs & Duties Guide",
-      "Packaging Standards",
-      "Dangerous Goods (IATA DG)",
-      "Claims & Insurance Process",
-      "Country-Specific Restrictions",
+      "Commercial Invoice Preparation",
+      "Customs Clearance Checklist",
+      "Dangerous Goods Guidelines",
+      "Cargo Insurance Coverage Terms",
+      "Country Tariff Regulations",
     ],
   },
   {
-    title: "Case Studies",
-    desc: "See how global businesses use the SwiftArc network to reduce transit times, cut logistics costs, and improve customer delivery experience.",
+    title: "Packaging & Cargo Standards",
+    desc: "Best practices for protecting goods in transit, dimensional weight calculations, pallet wrapping, and fragile cargo packaging.",
     icon: FileText,
     links: [
-      "Automotive Just-in-Time",
-      "Healthcare Cold Chain",
-      "DTC E-commerce Scale",
-      "High-value Asset Transport",
-      "Cross-border B2B Freight",
+      "Pallet Securing Standards",
+      "Dimensional Weight Guide",
+      "Temperature-Controlled Packaging",
+      "Labeling & Barcoding Best Practices",
+      "Fragile Goods Protection",
+    ],
+  },
+  {
+    title: "Developer & Integration Docs",
+    desc: "Technical documentation for tracking webhooks, status APIs, and integrating freight event notifications.",
+    icon: Code2,
+    links: [
+      "Tracking Event Webhooks",
+      "Shipment Status API Reference",
+      "Authentication & Access Keys",
+      "Postman API Collection",
+      "Error Handling & Rate Limits",
     ],
   },
 ];
 
-function Resources() {
+function ResourcesPage() {
   return (
     <>
-      <PageHero
-        eyebrow="Newsroom & Resources"
-        title="News, guides, and insights from SwiftArc."
-        subtitle="Product updates, network expansion announcements, sustainability reports, and practical guides for logistics professionals."
-        imageSrc="/images/hero_business_1784188675121.png"
-      />
+      {/* Hero Header */}
+      <section className="relative overflow-hidden text-white" style={{ minHeight: "48vh" }}>
+        <img src={heroImg} alt="SwiftArc logistics resources" className="absolute inset-0 h-full w-full object-cover" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, rgba(3,45,96,0.94) 0%, rgba(3,45,96,0.82) 60%, rgba(3,45,96,0.68) 100%)",
+          }}
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to top, rgba(3,45,96,0.95) 0%, transparent 50%)" }}
+          aria-hidden
+        />
 
-      {/* --- Featured Article --- */}
-      <section className="mx-auto max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-amber mb-8">
-          Latest Stories
-        </p>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="group grid gap-0 overflow-hidden rounded-3xl border border-border bg-card shadow-lg cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 lg:grid-cols-[1.4fr_1fr]"
-        >
-          <div className="aspect-[16/10] overflow-hidden lg:aspect-auto">
-            <img
-              src={posts[0].img}
-              alt={posts[0].title}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          </div>
-          <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-12">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber">
-                <Tag className="h-3 w-3" /> {posts[0].tag}
-              </span>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" /> {posts[0].readTime}
-              </span>
-            </div>
-            <h2 className="mt-4 font-display text-2xl font-bold leading-snug text-foreground sm:text-3xl">
-              {posts[0].title}
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{posts[0].excerpt}</p>
-            <p className="mt-6 text-xs text-muted-foreground">
-              {posts[0].date} · {posts[0].author}
-            </p>
-            <Link to="/resources/$slug" params={{ slug: posts[0].slug }}>
-              <Button className="mt-6 w-fit bg-amber text-navy-deep hover:bg-amber-soft font-bold">
-                Read full story <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* --- Article Grid --- */}
-      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="grid gap-6 sm:grid-cols-2">
-          {posts.slice(1).map((post, i) => (
-            <motion.article
-              key={post.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group overflow-hidden rounded-2xl border border-border bg-card cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            >
-              <div className="aspect-[16/9] overflow-hidden">
-                <img
-                  src={post.img}
-                  alt={post.title}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-6 sm:p-8">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber">
-                    <Tag className="h-2.5 w-2.5" /> {post.tag}
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" /> {post.readTime}
-                  </span>
-                </div>
-                <h3 className="mt-4 font-display text-xl font-bold leading-snug text-foreground">
-                  {post.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                  {post.excerpt}
-                </p>
-                <div className="mt-6 flex items-center justify-between text-sm">
-                  <span className="text-xs text-muted-foreground">
-                    {post.date} · {post.author}
-                  </span>
-                  <Link
-                    to="/resources/$slug"
-                    params={{ slug: post.slug }}
-                    className="inline-flex items-center gap-1 font-semibold text-amber text-sm group-hover:text-amber-soft"
-                  >
-                    Read more{" "}
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
-            </motion.article>
-          ))}
+        <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-20 sm:px-6 lg:px-8 flex flex-col justify-center" style={{ minHeight: "48vh" }}>
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-xs font-semibold uppercase tracking-widest text-primary mb-3"
+          >
+            Guides & Knowledge
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl"
+          >
+            Logistics Resources & Articles
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-4 max-w-2xl text-base text-white/80 leading-relaxed"
+          >
+            Browse operational guides, customs tips, packaging standards, and technical documentation to streamline your shipments.
+          </motion.p>
         </div>
       </section>
 
-      {/* --- Resource Centers --- */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      {/* Featured Story */}
+      {posts && posts.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pt-16 pb-8 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-6">
+            Featured Update
+          </p>
+          <div className="group grid gap-0 overflow-hidden rounded-3xl border border-border bg-card shadow-md transition-all duration-300 hover:shadow-xl lg:grid-cols-12">
+            <div className="lg:col-span-7 aspect-[16/10] overflow-hidden lg:aspect-auto">
+              <img
+                src={posts[0].img}
+                alt={posts[0].title}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div className="lg:col-span-5 flex flex-col justify-center p-8 sm:p-10">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  {posts[0].tag}
+                </span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" /> {posts[0].readTime}
+                </span>
+              </div>
+              <h2 className="mt-4 font-display text-2xl font-bold leading-snug text-foreground sm:text-3xl">
+                {posts[0].title}
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{posts[0].excerpt}</p>
+              <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-4">
+                <span>{posts[0].date}</span>
+                <span>By {posts[0].author}</span>
+              </div>
+              <div className="mt-6">
+                <Link to="/resources/$slug" params={{ slug: posts[0].slug }}>
+                  <Button className="bg-primary text-white hover:bg-primary-hover font-semibold">
+                    Read Full Article <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Article Grid */}
+      {posts && posts.length > 1 && (
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {posts.slice(1).map((post) => (
+              <Card key={post.title} className="group overflow-hidden border-border bg-card hover:shadow-md transition-shadow">
+                <div className="aspect-[16/9] overflow-hidden">
+                  <img
+                    src={post.img}
+                    alt={post.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <CardContent className="p-6 sm:p-8">
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-md bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                      {post.tag}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" /> {post.readTime}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 font-display text-xl font-bold text-foreground">{post.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                  <div className="mt-6 flex items-center justify-between border-t border-border/60 pt-4">
+                    <span className="text-xs text-muted-foreground">{post.date}</span>
+                    <Link
+                      to="/resources/$slug"
+                      params={{ slug: post.slug }}
+                      className="inline-flex items-center text-sm font-semibold text-primary hover:underline"
+                    >
+                      Read Article <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Resource Sections */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 border-t border-border">
         <div className="mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Resources</p>
-          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Documentation & Guides
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Guides & Reference</p>
+          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Operational Documentation
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Everything you need to integrate SwiftArc into your tech stack, understand international
-            shipping requirements, and learn from how other businesses use the network.
+            Clear, practical guides to assist with cargo preparation, customs documents, and technical integrations.
           </p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {resources.map((cat) => (
-            <Card
-              key={cat.title}
-              className="flex flex-col border-border transition-colors hover:border-amber/50 hover:shadow-md"
-            >
-              <CardContent className="p-8 flex-1">
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-navy-deep text-amber">
+          {resourceCategories.map((cat) => (
+            <Card key={cat.title} className="border-border bg-card hover:border-primary/40 transition-all flex flex-col justify-between">
+              <CardContent className="p-8">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary mb-5">
                   <cat.icon className="h-6 w-6" />
                 </div>
-                <h3 className="mt-6 font-display text-2xl font-bold">{cat.title}</h3>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
-                <ul className="mt-8 space-y-3">
+                <h3 className="font-display text-2xl font-bold text-foreground mb-3">{cat.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">{cat.desc}</p>
+                <ul className="space-y-2.5 border-t border-border/60 pt-5">
                   {cat.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="group flex items-center gap-2 text-sm font-medium text-foreground hover:text-amber"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-border group-hover:bg-amber transition-colors shrink-0" />
-                        {link}
-                      </a>
+                    <li key={link} className="flex items-center gap-2 text-xs font-medium text-foreground/80">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                      <span>{link}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              <div className="border-t border-border p-4 bg-secondary/30">
-                <a
-                  href="#"
-                  className="flex items-center justify-center gap-2 text-sm font-semibold text-foreground hover:text-amber"
-                >
-                  Explore {cat.title} <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* --- Newsletter CTA --- */}
-      <section className="bg-navy-deep text-cream">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber">
-                Stay informed
-              </p>
-              <h2 className="mt-2 font-display text-3xl font-bold">
-                Get SwiftArc updates in your inbox.
-              </h2>
-              <p className="mt-3 max-w-lg text-cream/70 text-sm">
-                Network announcements, product releases, and logistics industry insights. No
-                marketing noise — just the updates that matter to shippers.
-              </p>
-            </div>
-            <Link
-              to="/contact"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-amber px-6 text-sm font-bold text-navy-deep hover:bg-amber-soft transition-colors shrink-0"
-            >
-              Subscribe to newsletter
+      {/* CTA Box */}
+      <section className="relative overflow-hidden py-16" style={{ backgroundColor: "#032D60" }}>
+        <div className="relative mx-auto max-w-3xl px-4 text-center text-white">
+          <h2 className="font-display text-3xl font-bold sm:text-4xl">
+            Need specialized advice on your shipment?
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-white/80 leading-relaxed">
+            Our logistics support team is ready to guide you through dangerous goods regulations, temperature control, or international customs paperwork.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link to="/contact">
+              <Button size="lg" className="bg-primary text-white hover:bg-primary-hover font-bold shadow-lg px-8">
+                Contact Our Support Team <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/support">
+              <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/10 hover:bg-white/20 font-semibold px-8">
+                Visit Help Center
+              </Button>
             </Link>
           </div>
         </div>

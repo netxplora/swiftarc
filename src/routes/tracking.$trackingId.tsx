@@ -64,13 +64,13 @@ export const Route = createFileRoute("/tracking/$trackingId")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.shipment.trackingNumber} â€” SwiftArc Tracking`
-          : "Not found â€” SwiftArc",
+          ? `${loaderData.shipment.trackingNumber} — SwiftArc Tracking`
+          : "Not found — SwiftArc",
       },
       {
         name: "description",
         content: loaderData
-          ? `Live status for shipment ${loaderData.shipment.trackingNumber}: ${statusLabels[loaderData.shipment.status as keyof typeof statusLabels]} Â· ${(loaderData.shipment.origin as any)?.city ?? ""} â†’ ${(loaderData.shipment.destination as any)?.city ?? ""}.`
+          ? `Live status for shipment ${loaderData.shipment.trackingNumber}: ${statusLabels[loaderData.shipment.status as keyof typeof statusLabels] || loaderData.shipment.status} · ${(loaderData.shipment.origin as any)?.city ?? ""} → ${(loaderData.shipment.destination as any)?.city ?? ""}.`
           : "Tracking number not found.",
       },
       { name: "robots", content: "noindex" },
@@ -351,7 +351,7 @@ function TrackingDetail() {
   return (
     <div className="min-h-screen bg-background text-foreground pb-16">
       {/* ========================================================== */}
-      {/* PRINT WAYBILL â€” Only visible when printing                  */}
+      {/* PRINT WAYBILL — Only visible when printing                  */}
       {/* ========================================================== */}
       <div id="print-waybill">
         <div className="waybill-header">

@@ -1,448 +1,414 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, lazy, Suspense } from "react";
-import { useLocale } from "@/hooks/use-locale";
-import { motion } from "motion/react";
+import { useState, lazy, Suspense, useRef } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
 import {
   ArrowRight,
   PackageSearch,
-  Calculator,
   Truck,
   Plane,
   Package,
+  Ship,
   ShieldCheck,
-  Clock,
-  Sparkles,
   MapPin,
-  Building2,
-  Users,
   Star,
   Smartphone,
-  ChevronRight,
+  Warehouse,
+  CheckCircle2,
+  Phone,
+  Mail,
+  Globe,
+  Clock,
+  Headphones,
+  Calculator,
+  Shield,
+  FileCheck2,
+  Tag,
+  Building2,
   Zap,
+  TrendingUp,
+  Award,
+  BarChart3,
+  ChevronDown,
 } from "lucide-react";
-import { Logo } from "@/components/brand/Logo";
-import { SectionHead } from "@/components/site/SectionHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Counter } from "@/components/animated/Counter";
-import { Magnetic } from "@/components/animated/Magnetic";
-import { UpdatesTicker } from "@/components/home/UpdatesTicker";
 import { PartnerMarquee } from "@/components/home/PartnerMarquee";
 
 const CoverageMap = lazy(() =>
   import("@/components/home/CoverageMap").then((m) => ({ default: m.CoverageMap })),
 );
+
+import heroBg1 from "@/assets/hero-bg1.jpg";
 import heroArc from "@/assets/hero-bg.jpg";
 import warehouse from "@/assets/warehouse.jpg";
-import delivery from "@/assets/delivery.jpg";
 import aircraft from "@/assets/aircraft.jpg";
-import appMockup from "@/assets/app-mockup-new.png";
+import delivery from "@/assets/delivery.jpg";
 import svcIntl from "@/assets/svc-intl.jpg";
-import svcColdchain from "@/assets/svc-coldchain.jpg";
-import svcSameday from "@/assets/svc-sameday.jpg";
-import svcWhiteglove from "@/assets/svc-whiteglove.jpg";
 import svcEcommerce from "@/assets/svc-ecommerce.jpg";
+import svcWhiteglove from "@/assets/svc-whiteglove.jpg";
+import appMockup from "@/assets/app-mockup-new.png";
 import avatarMichael from "@/assets/customer-michael.jpg";
 import avatarSarah from "@/assets/customer-sarah.jpg";
 import avatarJames from "@/assets/customer-james.jpg";
-import newsFrankfurt from "@/assets/news-frankfurt.jpg";
-import newsRouting from "@/assets/news-routing.jpg";
-import newsElectric from "@/assets/news-electric.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SwiftArc — Global Logistics & Shipment Tracking" },
+      { title: "SwiftArc — Global Logistics & Courier Delivery" },
       {
         name: "description",
         content:
-          "Ship, track, and manage freight across 220+ countries with SwiftArc's global logistics network and reliable delivery tracking.",
+          "Fast, secure and reliable shipping to over 220 countries. Track your parcel in real time from pickup to delivery.",
       },
-      { property: "og:title", content: "SwiftArc — Global Logistics" },
+      { property: "og:title", content: "SwiftArc — Global Logistics Solutions" },
       {
         property: "og:description",
-        content: "Priority parcels, freight, and reliable tracking.",
+        content: "International shipping, freight forwarding, and real-time tracking.",
       },
     ],
   }),
   component: Home,
 });
 
+/* ─── Stagger variants ─────────────────────────────────────────── */
+const containerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+// Using cubic-bezier tuple so TypeScript Easing type is satisfied
+const itemVariants = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } },
+};
+
+/* ─── Home ─────────────────────────────────────────────────────── */
 function Home() {
   return (
-    <>
+    <div className="bg-background text-foreground overflow-x-hidden">
       <Hero />
-      <UpdatesTicker />
-      <FeaturedServices />
-      <BusinessSolutions />
+      <TrustStrip />
+      <ServicesOverview />
+      <WhyChooseUs />
+      <ImpactSection />
+      <HowItWorks />
       <CoverageSection />
       <Testimonials />
-      <LatestNews />
-      <Features />
-      <HowItWorks />
-      <Pricing />
-      <FAQ />
+      <CtaBanner />
       <PartnerMarquee />
+      <FAQ />
       <AppPromo />
-    </>
+    </div>
   );
 }
 
+/* ─── Hero ──────────────────────────────────────────────────────── */
 function Hero() {
   const navigate = useNavigate();
   const [tn, setTn] = useState("");
-  const { t } = useLocale();
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
-    <section className="relative overflow-hidden bg-navy-deep text-cream py-10 sm:py-16 lg:py-20">
-      {/* Background Image with High Visibility & Brand Navy Overlay */}
-      <img
-        src={heroArc}
-        alt="Logistics Operations"
-        className="absolute inset-0 h-full w-full object-cover opacity-80 scale-105 transition-transform duration-[10000ms] ease-out hover:scale-100"
-      />
-      {/* Premium Navy Brand Overlays - Reduced Intensity for Higher Image Visibility */}
+    <section
+      ref={heroRef}
+      className="relative min-h-[100svh] flex flex-col justify-center overflow-hidden"
+      style={{ background: "linear-gradient(145deg, #f8faff 0%, #ffffff 50%, #f0f4ff 100%)" }}
+    >
+      {/* Parallax background image */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{ y: bgY, opacity }}
+      >
+        <img
+          src={heroBg1}
+          alt=""
+          aria-hidden
+          className="w-full h-full object-cover object-center opacity-[0.08]"
+        />
+      </motion.div>
+
+      {/* Animated dot grid */}
       <div
-        className="absolute inset-0 bg-gradient-to-tr from-navy-deep/70 via-navy-deep/45 to-navy/10"
-        aria-hidden
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-navy-deep/80 via-transparent to-transparent opacity-80"
-        aria-hidden
-      />
-      <div className="absolute inset-0 arc-grid opacity-25" aria-hidden />
-      <div
-        className="absolute inset-x-0 -top-40 h-[500px] bg-[radial-gradient(closest-side,_var(--color-amber)_0%,_transparent_70%)] opacity-20"
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+          backgroundSize: "28px 28px",
+          opacity: 0.04,
+        }}
         aria-hidden
       />
 
-      <div className="relative mx-auto grid max-w-7xl gap-16 px-4 sm:px-6 lg:grid-cols-[1.25fr_1fr] lg:gap-20 lg:px-8">
-        <div>
+      {/* Glowing orbs */}
+      <div className="absolute top-[-80px] right-[-80px] w-[520px] h-[520px] rounded-full bg-primary/[0.06] blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-60px] left-[-60px] w-[400px] h-[400px] rounded-full bg-sky-500/[0.06] blur-[100px] pointer-events-none z-0" />
+      <div className="absolute top-1/3 left-1/2 w-[300px] h-[300px] rounded-full bg-purple-400/[0.04] blur-[80px] pointer-events-none z-0" />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-10 lg:pt-24 lg:pb-16">
+        <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
+
+          {/* ── Left copy ── */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          />
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-            className="mt-5 font-display text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl text-cream"
+            className="lg:col-span-6 space-y-6"
+            initial="hidden"
+            animate="show"
+            variants={containerVariants}
           >
-            {t("hero.title")}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="mt-6 max-w-xl text-lg text-cream/80"
-          >
-            {t("hero.subtitle")}
-          </motion.p>
+            <motion.div variants={itemVariants}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm backdrop-blur-sm">
+                <Globe className="h-3 w-3 animate-spin" style={{ animationDuration: "8s" }} />
+                Ship to Any Country · Deliver to Any Location
+              </span>
+            </motion.div>
 
-          <motion.form
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25 }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (tn.trim())
-                navigate({ to: "/tracking/$trackingId", params: { trackingId: tn.trim() } });
-            }}
-            className="mt-8 flex flex-col gap-3 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl shadow-2xl sm:flex-row"
-          >
-            <div className="flex flex-1 items-center gap-3 rounded-xl bg-white px-4 py-3 text-navy-deep">
-              <PackageSearch className="h-5 w-5 shrink-0 text-navy-deep/60" aria-hidden />
-              <input
-                value={tn}
-                onChange={(e) => setTn(e.target.value)}
-                placeholder="Enter tracking number, e.g. SA-7241-9032-11"
-                aria-label="Tracking number"
-                className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-navy-deep/40 font-medium"
-              />
-            </div>
-            <Magnetic intensity={0.1}>
-              <Button
-                type="submit"
-                size="lg"
-                className="h-14 bg-amber px-6 text-navy-deep font-semibold hover:bg-amber-soft transition-all shadow-md"
-              >
-                Track shipment <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Magnetic>
-          </motion.form>
+            <motion.h1
+              variants={itemVariants}
+              className="font-display text-[2.6rem] sm:text-5xl lg:text-[3.6rem] font-extrabold tracking-tight text-[#032D60] leading-[1.1]"
+            >
+              We Ship What Matters{" "}
+              <span className="relative inline-block">
+                <span className="text-primary">Anywhere</span>
+                <motion.span
+                  className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/50"
+                  initial={{ scaleX: 0, originX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.7, delay: 0.9, ease: "easeOut" }}
+                />
+              </span>{" "}
+              in the World.
+            </motion.h1>
 
-          <div className="mt-10 grid max-w-lg grid-cols-2 gap-6 sm:grid-cols-3">
-            {[
-              { v: 220, s: "+", l: "Countries" },
-              { v: 15, s: "M", l: "Daily parcels" },
-              { v: 99.4, s: "%", l: "On-time" },
-            ].map((s) => (
-              <div key={s.l}>
-                <Tooltip>
-                  <TooltipTrigger className="font-display text-3xl font-bold text-amber cursor-help">
-                    <Counter to={s.v} />
-                    {s.s}
-                  </TooltipTrigger>
-                  <TooltipContent>Verified live data metric</TooltipContent>
-                </Tooltip>
-                <div className="mt-1 text-xs font-semibold uppercase tracking-widest text-cream/70">
-                  {s.l}
+            <motion.p
+              variants={itemVariants}
+              className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl"
+            >
+              Fast, secure and reliable shipping to over 220 countries. Real-time tracking,
+              insured handling, and dedicated support at every step.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4">
+              <Link to="/shipping">
+                <Button
+                  size="lg"
+                  className="group bg-primary text-white hover:bg-primary-hover font-bold px-8 h-13 rounded-xl shadow-lg shadow-primary/25 text-base transition-all duration-300 hover:shadow-primary/40 hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  Ship Now
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Link to="/rates">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-[#032D60]/20 text-[#032D60] hover:border-primary hover:text-primary hover:bg-primary/5 font-bold px-7 h-13 rounded-xl text-base transition-all duration-300 bg-white/60 backdrop-blur-sm"
+                >
+                  <Calculator className="mr-2 h-4 w-4 text-primary" />
+                  Calculate Rates
+                </Button>
+              </Link>
+            </motion.div>
+
+            {/* Mini trust badges */}
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-5 pt-2">
+              {[
+                { icon: ShieldCheck, label: "100% Insured" },
+                { icon: Clock, label: "99.7% On-Time" },
+                { icon: Globe, label: "220+ Countries" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                  <Icon className="h-3.5 w-3.5 text-primary" />
+                  {label}
                 </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/* ── Right visual ── */}
+          <div className="lg:col-span-6">
+            <motion.div
+              initial={{ opacity: 0, x: 40, scale: 0.96 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.25, ease: "easeOut" }}
+              className="relative"
+            >
+              {/* Main image with glass frame */}
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-[#032D60]/15 border border-white/80 bg-white/20 backdrop-blur-md p-2">
+                <img
+                  src={heroBg1}
+                  alt="SwiftArc Global Freight Logistics"
+                  className="w-full h-[380px] sm:h-[460px] lg:h-[500px] rounded-2xl object-cover"
+                />
+                {/* Subtle overlay gradient on image */}
+                <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-[#032D60]/10 via-transparent to-primary/5 pointer-events-none" />
               </div>
-            ))}
+
+              {/* Floating glass badge — bottom left */}
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                className="absolute -bottom-4 -left-4 sm:left-4 sm:bottom-4 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 p-4 shadow-xl flex items-center gap-3"
+              >
+                <div className="h-11 w-11 rounded-xl bg-primary/15 grid place-items-center text-primary">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="font-display text-sm font-bold text-[#032D60]">100% Insured</div>
+                  <div className="text-[11px] text-slate-500">End-to-End Chain of Custody</div>
+                </div>
+              </motion.div>
+
+              {/* Floating glass badge — top right */}
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+                className="absolute -top-4 -right-3 sm:right-4 sm:top-4 rounded-2xl bg-[#032D60]/90 backdrop-blur-xl text-white p-3.5 shadow-xl flex items-center gap-3 border border-white/10"
+              >
+                <div className="h-9 w-9 rounded-xl bg-white/15 grid place-items-center">
+                  <Plane className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="font-display text-sm font-bold">220+ Countries</div>
+                  <div className="text-[11px] text-white/65">Global Air &amp; Sea Routes</div>
+                </div>
+              </motion.div>
+
+              {/* Floating glass badge — mid right */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 1.1 }}
+                className="absolute top-[42%] -right-5 sm:-right-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 p-3 shadow-xl hidden sm:flex items-center gap-2"
+              >
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/15 grid place-items-center text-emerald-600">
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="font-display text-xs font-bold text-[#032D60]">99.7% On-Time</div>
+                  <div className="text-[10px] text-slate-500">Delivery Success Rate</div>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Dynamic Premium Glassmorphism Live Card */}
+        {/* ── Track Your Parcel widget ── */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative mt-8 lg:mt-0"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.55 }}
+          className="mt-14 sm:mt-16"
         >
-          <div className="rounded-3xl border border-white/30 bg-white/15 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-5 shadow-inner">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-amber-soft font-semibold">
-                    Live Telemetry
-                  </p>
-                  <p className="mt-1 font-mono text-sm font-bold text-amber">SA-7241-9032-11</p>
-                </div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-amber/20 px-3.5 py-1 text-xs font-semibold text-amber border border-amber/30">
-                  <span className="relative inline-block h-2 w-2 rounded-full bg-amber pulse-dot" />
-                  Out for delivery
-                </span>
+          <div className="relative rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-5 sm:p-6 shadow-2xl shadow-[#032D60]/8 flex flex-col lg:flex-row items-center justify-between gap-5">
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/[0.03] via-transparent to-sky-500/[0.03] pointer-events-none" />
+
+            <div className="relative flex items-center gap-3 w-full lg:w-auto">
+              <div className="h-12 w-12 rounded-xl bg-[#032D60] text-white grid place-items-center shrink-0 shadow-md">
+                <PackageSearch className="h-6 w-6" />
               </div>
-
-              <div className="mt-6 flex items-end justify-between text-cream">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-cream/60 font-medium">
-                    Origin
-                  </p>
-                  <p className="font-display text-lg font-bold text-cream">Rotterdam Hub</p>
-                </div>
-
-                <div className="flex-1 px-5">
-                  <div className="h-1.5 rounded-full bg-white/10 relative overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "78%" }}
-                      transition={{ duration: 1.6, delay: 0.6, ease: "easeOut" }}
-                      className="h-full rounded-full bg-gradient-to-r from-amber to-amber-soft"
-                    />
-                  </div>
-                  <p className="mt-2 text-center text-[10px] uppercase font-semibold tracking-wider text-amber-soft">
-                    ETA: 4 hours
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-wider text-cream/60 font-medium">
-                    Destination
-                  </p>
-                  <p className="font-display text-lg font-bold text-cream">Milan Center</p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-3 gap-3 text-xs">
-                <MiniStat
-                  icon={<ShieldCheck className="h-4 w-4 text-amber" />}
-                  label="Security"
-                  value="Active"
-                />
-                <MiniStat
-                  icon={<Clock className="h-4 w-4 text-amber" />}
-                  label="On-Time"
-                  value="99.4%"
-                />
-                <MiniStat
-                  icon={<Zap className="h-4 w-4 text-amber" />}
-                  label="Priority"
-                  value="Express"
-                />
+              <div>
+                <h3 className="font-display text-base font-bold text-[#032D60]">Track Your Parcel</h3>
+                <p className="text-xs text-slate-500">Enter your tracking number to get live updates.</p>
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-3 text-xs text-cream/80 font-medium">
-              <Sparkles className="h-4 w-4 text-amber shrink-0" />
-              Delay Risk Analysis: High-confidence tracking active.
-            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (tn.trim()) {
+                  navigate({ to: "/tracking/$trackingId", params: { trackingId: tn.trim() } });
+                }
+              }}
+              className="relative flex flex-col sm:flex-row items-center gap-3 w-full lg:max-w-xl"
+            >
+              <div className="relative w-full">
+                <input
+                  value={tn}
+                  onChange={(e) => setTn(e.target.value)}
+                  placeholder="e.g. SA-7241-9032-11"
+                  className="w-full h-12 rounded-xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all placeholder:text-slate-400"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full sm:w-auto h-12 shrink-0 bg-[#032D60] hover:bg-[#032D60]/90 text-white font-bold px-8 rounded-xl shadow-md transition-all text-sm hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                Track Now <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Button>
+            </form>
           </div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="mt-10 flex justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4 }}
+        >
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-1 text-slate-400"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-widest">Explore</span>
+            <ChevronDown className="h-4 w-4" />
+          </motion.div>
         </motion.div>
       </div>
     </section>
   );
 }
 
-function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3.5">
-      <div className="flex items-center gap-1.5 text-cream/60">
-        {icon}
-        <span className="text-[9px] font-semibold uppercase tracking-wider">{label}</span>
-      </div>
-      <div className="mt-1 font-display text-base font-bold text-cream">{value}</div>
-    </div>
-  );
-}
-
-function FeaturedServices() {
-  const services = [
-    {
-      icon: Plane,
-      title: "Priority Overnight",
-      desc: "Time-critical air freight to 190+ countries with morning delivery.",
-      img: aircraft,
-    },
-    {
-      icon: Truck,
-      title: "Standard Ground",
-      desc: "Cost-efficient ground network with reliable 1–5 day transit windows.",
-      img: delivery,
-    },
-    {
-      icon: Package,
-      title: "Freight & Palletized",
-      desc: "LTL and FTL freight for oversized shipments, temperature-managed if needed.",
-      img: warehouse,
-    },
-    {
-      icon: Plane,
-      title: "International Priority",
-      desc: "Customs-cleared, duty-managed air freight across borders.",
-      img: svcIntl,
-    },
-    {
-      icon: ShieldCheck,
-      title: "Cold Chain",
-      desc: "Temperature-controlled shipments with 24/7 sensor monitoring.",
-      img: svcColdchain,
-    },
-    {
-      icon: Zap,
-      title: "Same-Day Courier",
-      desc: "City-wide same-day delivery on electric fleet, hours not days.",
-      img: svcSameday,
-    },
-    {
-      icon: Users,
-      title: "White-Glove",
-      desc: "Handled by trained specialists — art, luxury, and high-value assets.",
-      img: svcWhiteglove,
-    },
-    {
-      icon: Package,
-      title: "E-commerce Fulfillment",
-      desc: "Storage, pick-pack, and last-mile for online sellers.",
-      img: svcEcommerce,
-    },
+/* ─── Trust Strip ───────────────────────────────────────────────── */
+function TrustStrip() {
+  const stats = [
+    { value: 220, suffix: "+", label: "Countries Served", icon: Globe, color: "text-primary" },
+    { value: 50000, suffix: "+", label: "Monthly Parcels", icon: Package, color: "text-sky-600" },
+    { value: 99.7, suffix: "%", label: "On-Time Delivery", icon: Clock, color: "text-emerald-600" },
+    { value: 15000000, suffix: "+", label: "Total Deliveries", icon: TrendingUp, color: "text-amber-600" },
   ];
+
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:px-8">
-      <SectionHead
-        eyebrow="Featured services"
-        title="Move anything, anywhere on the arc."
-        link={{ to: "/shipping", label: "All services" }}
+    <section className="relative z-10 -mt-px bg-[#032D60] text-white overflow-hidden">
+      {/* Dot grid overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.07] pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+        aria-hidden
       />
-      <div className="mt-10 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
-        {services.map((s, i) => (
-          <motion.div
-            key={s.title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
-            className="flex"
-          >
-            <Card className="group relative w-full overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-              <div className="aspect-[16/10] overflow-hidden">
-                <img
-                  src={s.img}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <CardContent className="p-3 sm:p-6">
-                <div className="grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-full bg-amber text-navy-deep shadow-sm">
-                  <s.icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                </div>
-                <h3 className="mt-2 sm:mt-4 font-display text-sm sm:text-xl font-bold text-foreground leading-tight">
-                  {s.title}
-                </h3>
-                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2 sm:line-clamp-none">
-                  {s.desc}
-                </p>
-                <div className="mt-1 sm:mt-4 inline-flex items-center gap-1 text-[10px] sm:text-sm font-semibold text-amber">
-                  Learn more{" "}
-                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function BusinessSolutions() {
-  const items = [
-    {
-      icon: Building2,
-      title: "Enterprise",
-      desc: "Dedicated account teams, SLAs, and network priority.",
-    },
-    {
-      icon: Zap,
-      title: "E-commerce",
-      desc: "Bulk label creation, returns automation, marketplace connectors.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Healthcare & Life Sciences",
-      desc: "Temperature-monitored, chain-of-custody critical shipments.",
-    },
-    { icon: Users, title: "SMB", desc: "Flat pricing, one-click booking, no monthly minimums." },
-  ];
-  return (
-    <section className="relative overflow-hidden bg-background text-foreground py-8 sm:py-10 transition-colors duration-300 border-t border-border/60">
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHead
-          eyebrow="Business solutions"
-          title="Built for the way your business ships."
-          link={{ to: "/business", label: "Explore solutions" }}
-        />
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
-          {items.map((it, i) => (
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {stats.map(({ value, suffix, label, icon: Icon, color }, i) => (
             <motion.div
-              key={it.title}
-              initial={{ opacity: 0, y: 20 }}
+              key={label}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group rounded-2xl border border-border bg-card p-4 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl flex flex-col w-full"
+              className="text-center"
             >
-              <div className="grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-xl bg-amber/15 text-amber">
-                <it.icon className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 group-hover:scale-110" />
+              <div className="flex justify-center mb-1">
+                <Icon className={`h-5 w-5 ${color}`} />
               </div>
-              <h3 className="mt-3 sm:mt-6 font-display text-sm sm:text-xl font-bold text-foreground leading-tight">
-                {it.title}
-              </h3>
-              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">{it.desc}</p>
+              <div className={`font-display text-2xl sm:text-3xl font-extrabold ${color}`}>
+                <Counter to={value} duration={2} />{suffix}
+              </div>
+              <div className="text-xs text-white/60 font-semibold uppercase tracking-wider mt-1">{label}</div>
             </motion.div>
           ))}
         </div>
@@ -451,62 +417,226 @@ function BusinessSolutions() {
   );
 }
 
-function CoverageSection() {
+/* ─── Services Overview ─────────────────────────────────────────── */
+function ServicesOverview() {
+  const services = [
+    { title: "Air Freight", desc: "Fast, time-sensitive air cargo to 190+ destinations worldwide.", image: aircraft, icon: Plane, iconBg: "bg-sky-500/20 text-sky-600", href: "/shipping", accent: "from-sky-500/20" },
+    { title: "Sea Freight", desc: "Cost-effective FCL & LCL ocean freight across all major global routes.", image: svcIntl, icon: Ship, iconBg: "bg-blue-500/20 text-blue-600", href: "/shipping", accent: "from-blue-500/20" },
+    { title: "Door to Door", desc: "Complete pickup-to-delivery service with full GPS tracking and care.", image: delivery, icon: Truck, iconBg: "bg-primary/20 text-primary", href: "/shipping", accent: "from-orange-500/20" },
+    { title: "Parcel Services", desc: "Secure parcel shipping for documents, packages, and retail goods.", image: svcEcommerce, icon: Package, iconBg: "bg-purple-500/20 text-purple-600", href: "/shipping", accent: "from-purple-500/20" },
+    { title: "Customs Clearance", desc: "Expert customs handling to keep shipments moving without delays.", image: svcWhiteglove, icon: FileCheck2, iconBg: "bg-amber-500/20 text-amber-600", href: "/customs", accent: "from-amber-500/20" },
+    { title: "Warehousing", desc: "Secure climate-controlled storage with pick-and-pack fulfillment.", image: warehouse, icon: Warehouse, iconBg: "bg-emerald-500/20 text-emerald-600", href: "/shipping", accent: "from-emerald-500/20" },
+  ];
+
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:px-8">
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-center">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Coverage</p>
-          <h2 className="mt-3 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            220+ countries. One integrated network.
-          </h2>
-          <p className="mt-4 max-w-lg text-muted-foreground">
-            An interconnected web of ground fleets, regional air gateways, and last-mile partners —
-            engineered for a single arc from pickup to proof of delivery.
-          </p>
-          <div className="mt-6 grid max-w-md grid-cols-2 gap-4 text-sm">
-            <FactCard label="Air gateways" value="72" />
-            <FactCard label="Ground hubs" value="1,240" />
-            <FactCard label="Last-mile partners" value="3,800" />
-            <FactCard label="Sensor packages" value="Real-time" />
-          </div>
-          <Magnetic intensity={0.1}>
-            <Button
-              asChild
-              className="mt-8 h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
-            >
-              <Link to="/locations">
-                Find a location <MapPin className="ml-1 h-4 w-4" />
+    <section className="py-24 sm:py-28 bg-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.03] blur-[140px] pointer-events-none" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-center mb-16">
+          <motion.div
+            className="lg:col-span-5"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-4">
+                <Package className="h-3 w-3" /> OUR SERVICES
+              </span>
+            </motion.div>
+            <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#032D60] leading-tight">
+              Shipping Solutions{" "}
+              <span className="text-primary">Built Around You</span>
+            </motion.h2>
+            <motion.div variants={itemVariants} className="w-14 h-1 bg-primary rounded-full mt-4 mb-5" />
+            <motion.p variants={itemVariants} className="text-base text-slate-600 leading-relaxed">
+              From air and sea freight to door-to-door delivery, we provide end-to-end shipping
+              solutions tailored to your business and personal needs.
+            </motion.p>
+            <motion.div variants={itemVariants} className="mt-6">
+              <Link to="/shipping">
+                <Button className="group bg-[#032D60] hover:bg-[#032D60]/90 text-white font-bold px-6 h-12 rounded-xl shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                  Explore All Services
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
               </Link>
-            </Button>
-          </Magnetic>
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="overflow-hidden rounded-2xl border border-border shadow-lg bg-card">
-            <Suspense
-              fallback={<div className="h-[400px] w-full animate-pulse rounded-2xl bg-secondary" />}
+            </motion.div>
+          </motion.div>
+
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative rounded-3xl overflow-hidden border border-border shadow-2xl"
             >
-              <CoverageMap />
-            </Suspense>
+              <img src={heroArc} alt="SwiftArc Global Logistics" className="w-full h-64 sm:h-72 object-cover" />
+              {/* Glassmorphism stats overlay */}
+              <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 shadow-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                {[
+                  { v: "220+", l: "Countries" },
+                  { v: "50K+", l: "Delivered" },
+                  { v: "99.7%", l: "On-Time" },
+                  { v: "100%", l: "Secure" },
+                ].map(({ v, l }) => (
+                  <div key={l}>
+                    <div className="text-primary font-display text-2xl font-bold">{v}</div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{l}</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Service cards grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((s, i) => (
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.55, delay: i * 0.09 }}
+            >
+              <Link to={s.href} className="group block h-full">
+                <div className="h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md transition-all duration-400 hover:shadow-xl hover:-translate-y-2 hover:border-primary/20 flex flex-col">
+                  {/* Image */}
+                  <div className={`relative h-48 w-full overflow-hidden bg-gradient-to-br ${s.accent} to-slate-50`}>
+                    <img
+                      src={s.image}
+                      alt={s.title}
+                      className="h-full w-full object-cover transition-transform duration-600 group-hover:scale-108"
+                    />
+                    {/* Glass label badge */}
+                    <div className="absolute top-3 left-3">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${s.iconBg} bg-white/80 backdrop-blur-md shadow-sm border border-white/60`}>
+                        <s.icon className="h-3.5 w-3.5" />
+                        {s.title}
+                      </span>
+                    </div>
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-[#032D60]/0 group-hover:bg-[#032D60]/10 transition-colors duration-400" />
+                  </div>
+
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="font-display text-xl font-bold text-[#032D60] leading-snug mb-2 group-hover:text-primary transition-colors duration-200">
+                      {s.title}
+                    </h3>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-6 flex-1">{s.desc}</p>
+                    <div className="inline-flex items-center gap-1.5 text-sm font-bold text-primary">
+                      Learn more{" "}
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1.5" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Why Choose Us ────────────────────────────────────────────── */
+function WhyChooseUs() {
+  const benefits = [
+    { title: "Reliable & Secure", desc: "Verified security protocols and careful physical handling at every checkpoint.", icon: Shield, gradient: "from-blue-50 to-blue-100/50", iconBg: "bg-blue-500/15 text-blue-600" },
+    { title: "On-Time Delivery", desc: "We prioritize punctuality across every route, ensuring timely arrival.", icon: Clock, gradient: "from-amber-50 to-amber-100/50", iconBg: "bg-amber-500/15 text-amber-600" },
+    { title: "Global Network", desc: "Deliver to over 220 countries with our extensive international logistics hub network.", icon: Globe, gradient: "from-emerald-50 to-emerald-100/50", iconBg: "bg-emerald-500/15 text-emerald-600" },
+    { title: "Real-time Tracking", desc: "Follow every milestone with live GPS status updates and instant notifications.", icon: MapPin, gradient: "from-purple-50 to-purple-100/50", iconBg: "bg-purple-500/15 text-purple-600" },
+    { title: "24/7 Support", desc: "Our dedicated operations team is always available to assist you anytime.", icon: Headphones, gradient: "from-orange-50 to-orange-100/50", iconBg: "bg-primary/15 text-primary" },
+    { title: "Competitive Pricing", desc: "Transparent rates, no hidden fees, and clear volume discounts.", icon: Tag, gradient: "from-cyan-50 to-cyan-100/50", iconBg: "bg-cyan-500/15 text-cyan-600" },
+  ];
+
+  return (
+    <section className="py-24 sm:py-28 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-sky-400/[0.04] blur-[120px] pointer-events-none" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
+
+          {/* Left */}
+          <div className="lg:col-span-6">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-80px" }}
+              variants={containerVariants}
+              className="space-y-4"
+            >
+              <motion.div variants={itemVariants}>
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+                  <Star className="h-3 w-3" /> WHY CHOOSE US
+                </span>
+              </motion.div>
+              <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#032D60] leading-tight">
+                Your Trusted Shipping Partner{" "}
+                <span className="text-primary">Worldwide</span>
+              </motion.h2>
+              <motion.div variants={itemVariants} className="w-14 h-1 bg-primary rounded-full" />
+              <motion.p variants={itemVariants} className="text-base text-slate-600 leading-relaxed max-w-xl">
+                At SwiftArc, we combine technology, reliability, and physical branch networks to
+                deliver a shipping experience that is fast, secure, and hassle-free.
+              </motion.p>
+            </motion.div>
+
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {benefits.map((b, i) => (
+                <motion.div
+                  key={b.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.08 }}
+                  whileHover={{ y: -3, scale: 1.01 }}
+                  className={`rounded-2xl border border-slate-100 bg-gradient-to-br ${b.gradient} p-5 shadow-sm hover:shadow-md transition-all duration-300 cursor-default`}
+                >
+                  <div className={`h-10 w-10 rounded-xl grid place-items-center mb-3 ${b.iconBg}`}>
+                    <b.icon className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-display text-sm font-bold text-[#032D60] mb-1">{b.title}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">{b.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {[
-              { l: "Active Flights", v: "142", c: "text-blue-500" },
-              { l: "Ground Units", v: "8.5k", c: "text-emerald-500" },
-              { l: "Customs Cleared", v: "12k/hr", c: "text-amber" },
-              { l: "Network Load", v: "74%", c: "text-purple-500" },
-            ].map((stat) => (
-              <div
-                key={stat.l}
-                className="rounded-xl border border-border bg-card p-4 shadow-sm flex flex-col items-center text-center"
-              >
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {stat.l}
-                </span>
-                <span className={`mt-2 font-mono text-xl font-bold ${stat.c}`}>{stat.v}</span>
+          {/* Right — delivery photo with glass stats */}
+          <div className="lg:col-span-6">
+            <motion.div
+              initial={{ opacity: 0, x: 32 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="relative overflow-hidden rounded-3xl border border-slate-100 shadow-2xl"
+            >
+              <img
+                src={delivery}
+                alt="SwiftArc Courier Delivery"
+                className="w-full h-[520px] object-cover"
+              />
+              {/* Bottom glassmorphism stats bar */}
+              <div className="absolute bottom-0 inset-x-0 bg-white/20 backdrop-blur-xl border-t border-white/30 p-4 sm:p-5 grid grid-cols-4 gap-3 text-center">
+                {[
+                  { v: "220+", l: "Countries", c: "text-primary" },
+                  { v: "50K+", l: "Monthly", c: "text-white" },
+                  { v: "99.7%", l: "On-Time", c: "text-white" },
+                  { v: "100%", l: "Safe", c: "text-primary" },
+                ].map(({ v, l, c }) => (
+                  <div key={l}>
+                    <div className={`font-display text-lg font-bold ${c}`}>{v}</div>
+                    <div className="text-[10px] text-white/80 font-semibold">{l}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </motion.div>
           </div>
         </div>
       </div>
@@ -514,76 +644,329 @@ function CoverageSection() {
   );
 }
 
-function FactCard({ label, value }: { label: string; value: string }) {
+/* ─── Impact Section ───────────────────────────────────────────── */
+function ImpactSection() {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="font-display text-2xl font-bold text-foreground">{value}</div>
-      <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-        {label}
+    <section className="py-20 bg-white relative overflow-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7 }}
+          className="relative rounded-3xl bg-[#032D60] text-white overflow-hidden shadow-2xl"
+        >
+          {/* Animated dot grid */}
+          <div
+            className="absolute inset-0 opacity-[0.08] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+            aria-hidden
+          />
+          {/* Glowing orbs inside card */}
+          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary/20 blur-[80px] pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-sky-500/15 blur-[80px] pointer-events-none" />
+
+          <div className="relative grid gap-10 lg:grid-cols-12 lg:items-center p-8 sm:p-12 lg:p-16">
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                <Award className="h-3.5 w-3.5" /> OUR IMPACT &amp; ACHIEVEMENTS
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+                Delivering Impact.{" "}
+                <span className="text-primary">Building Connections.</span>
+              </h2>
+              <p className="text-base sm:text-lg text-white/75 leading-relaxed max-w-xl">
+                At SwiftArc, every shipment represents trust, responsibility, and real-world impact.
+                We measure our success by the connections we build across the globe.
+              </p>
+
+              <div className="grid grid-cols-3 gap-5 pt-5 border-t border-white/15">
+                {[
+                  { v: 15, suffix: "M+", l: "Parcels Delivered" },
+                  { v: 99.4, suffix: "%", l: "Success Rating" },
+                  { v: 220, suffix: "+", l: "Global Countries" },
+                ].map(({ v, suffix, l }) => (
+                  <div key={l}>
+                    <div className="font-display text-3xl font-bold text-primary">
+                      <Counter to={v} duration={2.2} />{suffix}
+                    </div>
+                    <div className="text-xs text-white/60 mt-1 font-medium">{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-2xl">
+                <img
+                  src={heroBg1}
+                  alt="SwiftArc Global Freight Impact"
+                  className="w-full h-72 sm:h-80 object-cover"
+                />
+                {/* Glass overlay on image */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#032D60]/30 via-transparent to-primary/10" />
+
+                {/* Floating glass card on image */}
+                <div className="absolute bottom-4 left-4 right-4 rounded-xl bg-white/15 backdrop-blur-xl border border-white/20 p-3 flex items-center gap-3 shadow-lg">
+                  <div className="h-9 w-9 rounded-lg bg-primary/80 grid place-items-center shrink-0">
+                    <BarChart3 className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white">15M+ packages delivered in 2025</div>
+                    <div className="text-[10px] text-white/65">across 220 countries and territories</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 }
 
+/* ─── How It Works ──────────────────────────────────────────────── */
+function HowItWorks() {
+  const steps = [
+    { step: "01", title: "Visit Nearest Branch", desc: "Bring your package to any local branch or schedule a collection. Our agents assist with destination routing.", icon: MapPin, color: "bg-sky-500" },
+    { step: "02", title: "Inspection & Safe Packing", desc: "Your shipment is securely weighed and packed per international carrier safety standards.", icon: ShieldCheck, color: "bg-primary" },
+    { step: "03", title: "Live Real-Time Transit", desc: "Follow your shipment milestone by milestone with live GPS checkpoints and instant notifications.", icon: Zap, color: "bg-purple-500" },
+    { step: "04", title: "Doorstep Delivery", desc: "Our verified local courier delivers directly to your recipient with digital proof-of-delivery.", icon: CheckCircle2, color: "bg-emerald-500" },
+  ];
+
+  return (
+    <section className="py-24 sm:py-28 bg-gradient-to-b from-slate-50/80 to-white relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/[0.04] blur-[100px] pointer-events-none" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-4"
+          >
+            HOW IT WORKS
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="font-display text-3xl sm:text-4xl font-bold text-[#032D60]"
+          >
+            Simple 4-Step Shipping Workflow
+          </motion.h2>
+          <div className="w-14 h-1 bg-primary rounded-full mx-auto mt-4 mb-4" />
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-slate-600 text-sm sm:text-base"
+          >
+            From initial drop-off to final doorstep delivery, every step is clear, transparent, and reliable.
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((s, i) => (
+            <motion.div
+              key={s.step}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.12 }}
+              whileHover={{ y: -5 }}
+              className="group relative rounded-2xl border border-slate-100 bg-white p-7 shadow-sm hover:shadow-xl transition-all duration-400 overflow-hidden"
+            >
+              {/* Step number background watermark */}
+              <div className="absolute -right-3 -top-3 font-display text-8xl font-black text-slate-50 select-none pointer-events-none leading-none">
+                {s.step}
+              </div>
+
+              {/* Hover accent line */}
+              <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${s.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left rounded-b-2xl`} />
+
+              <div className={`relative h-12 w-12 rounded-xl ${s.color} text-white grid place-items-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                <s.icon className="h-5 w-5" />
+              </div>
+              <div className="relative text-xs font-bold text-primary uppercase tracking-widest mb-1">Step {s.step}</div>
+              <h3 className="relative font-display text-lg font-bold text-[#032D60] mb-2">{s.title}</h3>
+              <p className="relative text-xs sm:text-sm text-slate-500 leading-relaxed">{s.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link to="/shipping">
+            <Button className="bg-primary hover:bg-primary-hover text-white font-bold px-8 h-12 rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all">
+              Start Your Shipment <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Coverage Section ──────────────────────────────────────────── */
+function CoverageSection() {
+  return (
+    <section className="py-24 sm:py-28 bg-white relative overflow-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-14 lg:grid-cols-[1fr_1.4fr] lg:items-center">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={containerVariants}
+            className="space-y-5"
+          >
+            <motion.span variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+              GLOBAL COVERAGE
+            </motion.span>
+            <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#032D60]">
+              220+ Countries.{" "}
+              <span className="text-primary">One Integrated Network.</span>
+            </motion.h2>
+            <motion.div variants={itemVariants} className="w-14 h-1 bg-primary rounded-full" />
+            <motion.p variants={itemVariants} className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              An interconnected web of ground fleets, regional air gateways, and verified last-mile
+              partners — coordinated from pickup to proof of delivery.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 mt-4">
+              {[
+                { label: "Air Gateways", value: "72" },
+                { label: "Ground Hubs", value: "1,240" },
+                { label: "Regional Partners", value: "3,800" },
+                { label: "GPS Checkpoints", value: "Real-time" },
+              ].map(({ label, value }) => (
+                <motion.div
+                  key={label}
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  className="rounded-xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm hover:shadow-md transition-all cursor-default"
+                >
+                  <div className="font-display text-2xl font-bold text-[#032D60]">{value}</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-0.5">{label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <Link to="/locations">
+                <Button className="h-12 bg-primary text-white hover:bg-primary-hover font-bold px-7 rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all">
+                  Find a Branch Location <MapPin className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          <div className="flex flex-col gap-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="overflow-hidden rounded-3xl border border-slate-100 shadow-2xl bg-card"
+            >
+              <Suspense fallback={<div className="h-[400px] w-full animate-pulse rounded-3xl bg-slate-100" />}>
+                <CoverageMap />
+              </Suspense>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ──────────────────────────────────────────────── */
 function Testimonials() {
   const items = [
     {
-      quote:
-        "SwiftArc consolidated three separate carriers into one platform for us. We went from guessing to knowing — every pallet, every hub, every status update in real time. Our ops team saved 14 hours a week on tracking alone.",
+      quote: "SwiftArc consolidated our entire international supply chain. We went from guessing to knowing every shipment, every hub, every status update in real time.",
       name: "Michael R. Callahan",
       role: "Head of Operations, Northlight Retail",
       avatar: avatarMichael,
-      location: "Chicago, IL",
+      location: "London, UK",
     },
     {
-      quote:
-        "The delivery prediction is genuinely impressive. It flagged a weather delay at our Dallas hub six hours before our carrier even knew about it. We rerouted the freight and still made the customer's deadline.",
+      quote: "The delay risk forecasting flagged a weather disruption six hours before our regional carrier was aware. We rerouted our freight and kept our delivery on schedule.",
       name: "Sarah D. Thompson",
       role: "Director of Fulfillment, Brightpath Commerce",
       avatar: avatarSarah,
-      location: "Austin, TX",
+      location: "New York, USA",
     },
     {
-      quote:
-        "We're a mid-market distributor, not a Fortune 500 company — but SwiftArc's enterprise SLA felt built for us from day one. The pricing is transparent, the account support is responsive, and the dashboard is the best we've seen at any price point.",
+      quote: "Transparent pricing, dedicated account managers, and reliable physical branch support across Europe and Asia make SwiftArc our go-to carrier.",
       name: "James A. Rivera",
       role: "COO, Meridian Supply Group",
       avatar: avatarJames,
-      location: "Miami, FL",
+      location: "Singapore",
     },
   ];
+
   return (
-    <section className="bg-secondary/40 border-y border-border/50">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16 lg:px-8">
-        <SectionHead eyebrow="Customers" title="Trusted by teams that move product." />
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 items-stretch">
+    <section className="py-24 sm:py-28 relative overflow-hidden" style={{ background: "linear-gradient(160deg, #f8f9ff 0%, #ffffff 50%, #f0f4ff 100%)" }}>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/[0.04] blur-[120px] pointer-events-none" />
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-4"
+          >
+            WHAT OUR CLIENTS SAY
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="font-display text-3xl sm:text-4xl font-bold text-[#032D60]"
+          >
+            Trusted by Businesses{" "}
+            <span className="text-primary">Worldwide</span>
+          </motion.h2>
+          <div className="w-14 h-1 bg-primary rounded-full mx-auto mt-4 mb-4" />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map((t, i) => (
             <motion.figure
               key={t.name}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-sm flex flex-col w-full"
+              transition={{ duration: 0.55, delay: i * 0.12 }}
+              whileHover={{ y: -5 }}
+              className="rounded-2xl border border-white/80 bg-white/70 backdrop-blur-md p-6 sm:p-8 shadow-md hover:shadow-xl transition-all duration-400 flex flex-col justify-between"
             >
-              <div className="flex gap-1 text-amber">
-                {Array.from({ length: 5 }).map((_, k) => (
-                  <Star key={k} className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current" />
-                ))}
+              <div>
+                {/* Stars */}
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: 5 }).map((_, k) => (
+                    <Star key={k} className="h-4 w-4 text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <blockquote className="text-sm leading-relaxed text-slate-700 italic mb-6">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
               </div>
-              <blockquote className="mt-3 sm:mt-4 font-display text-sm sm:text-base leading-relaxed text-foreground font-medium flex-1">
-                "{t.quote}"
-              </blockquote>
-              <figcaption className="mt-5 sm:mt-6 flex items-center gap-3">
+              <figcaption className="flex items-center gap-3 pt-4 border-t border-slate-100">
                 <img
                   src={t.avatar}
                   alt={t.name}
-                  className="h-8 w-8 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-amber/30 shrink-0"
+                  className="h-11 w-11 rounded-full object-cover border-2 border-primary/20 shrink-0"
                 />
                 <div>
-                  <div className="text-[10px] sm:text-sm font-bold text-foreground">{t.name}</div>
-                  <div className="text-[9px] sm:text-xs text-muted-foreground">{t.role}</div>
-                  <div className="text-[9px] sm:text-xs text-amber/70 mt-0.5">{t.location}</div>
+                  <div className="text-sm font-bold text-[#032D60]">{t.name}</div>
+                  <div className="text-xs text-slate-500">{t.role}</div>
+                  <div className="text-[11px] font-bold text-primary mt-0.5">{t.location}</div>
                 </div>
               </figcaption>
             </motion.figure>
@@ -594,494 +977,210 @@ function Testimonials() {
   );
 }
 
-function LatestNews() {
-  const news = [
-    {
-      tag: "Network",
-      title: "SwiftArc Opens Frankfurt Air Gateway, Cutting Transit Times Across Central Europe",
-      excerpt:
-        "The new facility handles up to 18,000 packages per hour and adds direct air connections to 14 additional European destinations.",
-      date: "Jul 3, 2026",
-      readTime: "4 min read",
-      img: newsFrankfurt,
-    },
-    {
-      tag: "Product",
-      title: "Route Optimization Now Covers Full Freight Lanes, Not Just Last-Mile",
-      excerpt:
-        "Our route optimization engine analyzes live traffic, weather patterns, and border wait times across full freight corridors to proactively adjust delivery paths.",
-      date: "Jun 24, 2026",
-      readTime: "6 min read",
-      img: newsRouting,
-    },
-    {
-      tag: "Sustainability",
-      title: "80% of SwiftArc's EU Last-Mile Fleet Now Running on Electric",
-      excerpt:
-        "Ahead of our 2027 zero-emission target, SwiftArc has transitioned the majority of its European urban delivery fleet to electric vehicles, reducing CO₂ by 42,000 tonnes annually.",
-      date: "Jun 12, 2026",
-      readTime: "5 min read",
-      img: newsElectric,
-    },
-  ];
+/* ─── CTA Banner ───────────────────────────────────────────────── */
+function CtaBanner() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:px-8">
-      <SectionHead
-        eyebrow="Newsroom"
-        title="Latest from SwiftArc."
-        link={{ to: "/resources", label: "All stories" }}
+    <section className="relative overflow-hidden py-24 bg-[#032D60] text-white">
+      <div
+        className="absolute inset-0 opacity-[0.07] pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+        aria-hidden
       />
-      <div className="mt-10 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 items-stretch">
-        {news.map((n, i) => (
-          <motion.article
-            key={n.title}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            className="group rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer flex flex-col w-full"
-          >
-            <div className="aspect-[16/9] overflow-hidden bg-secondary">
-              <img
-                src={n.img}
-                alt={n.title}
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+      {/* Glowing orbs */}
+      <div className="absolute -top-20 left-1/4 w-80 h-80 rounded-full bg-primary/25 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-20 right-1/4 w-80 h-80 rounded-full bg-sky-400/15 blur-[100px] pointer-events-none" />
+
+      <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          variants={containerVariants}
+          className="space-y-6"
+        >
+          <motion.span variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 backdrop-blur-sm px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-primary">
+            START SHIPPING TODAY
+          </motion.span>
+
+          <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
+            Ready to Ship Your Next Package?
+          </motion.h2>
+
+          <motion.p variants={itemVariants} className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed">
+            Join thousands of businesses and individuals who trust SwiftArc for reliable, transparent
+            logistics across 220+ countries.
+          </motion.p>
+
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <Link to="/shipping">
+              <Button size="lg" className="group bg-primary text-white hover:bg-primary-hover font-bold px-8 h-13 rounded-xl shadow-lg shadow-primary/30 text-base hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all">
+                Get a Free Quote <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+            <Link to="/tracking">
+              <Button size="lg" variant="outline" className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-13 rounded-xl text-base hover:-translate-y-0.5 transition-all">
+                Track a Shipment
+              </Button>
+            </Link>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-8 text-xs sm:text-sm text-white/60 pt-4">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-primary" />
+              <span>+1 (800) 947-9382</span>
             </div>
-            <div className="p-5 sm:p-6">
-              <div className="flex items-center gap-2">
-                <span className="inline-block rounded-full bg-amber/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber">
-                  {n.tag}
-                </span>
-                <span className="text-xs text-muted-foreground">{n.readTime}</span>
-              </div>
-              <h3 className="mt-3 font-display text-base sm:text-lg font-bold leading-snug text-foreground">
-                {n.title}
-              </h3>
-              <p className="mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                {n.excerpt}
-              </p>
-              <div className="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-sm">
-                <span className="text-muted-foreground">{n.date}</span>
-                <span className="inline-flex items-center gap-1 font-semibold text-amber">
-                  Read more{" "}
-                  <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <span>support@swiftarc.com</span>
             </div>
-          </motion.article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AppPromo() {
-  return (
-    <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
-      <div className="relative overflow-hidden rounded-3xl bg-navy-deep text-cream shadow-2xl">
-        {/* Background accents */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--color-amber)_0%,_transparent_45%)] opacity-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_#3b82f6_0%,_transparent_50%)] opacity-5 pointer-events-none" />
-        <div className="absolute inset-0 arc-grid opacity-10" />
-
-        <div className="relative grid gap-0 lg:grid-cols-2">
-          {/* Left: Content */}
-          <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
-            <p className="inline-flex w-fit items-center gap-2 rounded-full bg-amber/15 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-amber border border-amber/30">
-              <Smartphone className="h-3.5 w-3.5" /> Available now
-            </p>
-            <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-cream sm:text-4xl lg:text-5xl">
-              Your logistics command center, in your pocket.
-            </h2>
-            <p className="mt-4 max-w-md text-cream/70 text-sm sm:text-base leading-relaxed">
-              The SwiftArc mobile app gives you full visibility over every shipment, from booking to
-              delivery confirmation. Get live push notifications the moment a package moves, scan
-              barcodes to look up shipments instantly, and redirect in-transit deliveries with a
-              single tap.
-            </p>
-            <ul className="mt-6 space-y-2.5 text-sm text-cream/80">
-              {[
-                "Live package tracking with GPS updates every 90 seconds",
-                "Instant barcode scanner for quick shipment lookup",
-                "One-tap delivery redirect and hold at location",
-                "Offline label preview — no data connection needed",
-                "Push alerts for delays, exceptions, and successful delivery",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-amber/20 text-amber flex items-center justify-center text-[10px] font-bold">
-                    ✓
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a className="inline-flex h-12 items-center gap-3 rounded-xl bg-cream text-navy-deep px-5 text-sm font-bold hover:bg-amber transition-all shadow-md">
-                <div className="grid h-6 w-6 place-items-center rounded font-bold text-navy-deep">
-                  ⬇
-                </div>
-                App Store
-              </a>
-              <a className="inline-flex h-12 items-center gap-3 rounded-xl border border-cream/20 bg-cream/10 px-5 text-sm font-semibold text-cream hover:bg-cream/20 transition-all">
-                <div className="grid h-6 w-6 place-items-center rounded bg-amber text-navy-deep font-bold text-xs">
-                  G
-                </div>
-                Google Play
-              </a>
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <span>220+ Global Gateways</span>
             </div>
-          </div>
-
-          {/* Right: App screenshot */}
-          <div className="relative flex items-end justify-center overflow-hidden bg-gradient-to-b from-navy/0 to-navy-deep/50 pt-10 lg:pt-0">
-            <img
-              src={appMockup}
-              alt="SwiftArc mobile app tracking screen"
-              loading="lazy"
-              className="relative z-10 mx-auto max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] drop-shadow-2xl transition-transform duration-500 hover:scale-[1.02]"
-            />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-// ----- NEW SECTIONS -----
-
-import { CheckCircle2 } from "lucide-react";
-
-function Features() {
-  const features = [
-    {
-      icon: Zap,
-      title: "Real-time Shipment Visibility",
-      desc: "Every package is tracked from pickup scan to delivered signature. Our network of GPS sensors and carrier integrations provides location updates every 90 seconds across ground, air, and last-mile legs — giving you and your customers a single source of truth, always.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Enterprise-grade Security",
-      desc: "Your freight data and customer information is encrypted at rest and in transit. Role-based access controls let you grant precise permissions to teams, carriers, and third-party platforms without exposing sensitive data. SOC 2 Type II compliant.",
-    },
-    {
-      icon: Sparkles,
-      title: "Delay Risk Analysis",
-      desc: "SwiftArc's risk engine analyzes historical carrier performance, live weather feeds, port congestion data, and facility telemetry to flag potential delays before they happen. You get proactive alerts, not reactive surprises — so you can communicate clearly with customers and reroute when needed.",
-    },
-  ];
-  return (
-    <section className="bg-background py-8 sm:py-10 transition-colors duration-300">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Platform</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-foreground sm:text-4xl">
-            Built to handle the complexity of global logistics
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            From automated dispatch to deep supply chain analytics, SwiftArc handles operational
-            complexity at scale — so your team can focus on growing the business, not managing
-            exceptions.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 pb-6 items-stretch">
-          {features.map((f, i) => {
-            const iconColors = [
-              "bg-primary/15 text-primary",
-              "bg-success/15 text-success",
-              "bg-accent/15 text-accent",
-              "bg-warning/15 text-warning",
-            ];
-            const colorClass = iconColors[i % iconColors.length];
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className={`${i === 2 ? "col-span-2 sm:col-span-2 md:col-span-1" : ""}`}
-              >
-                <Card className="border-border bg-card h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <CardContent className="p-4 sm:p-8 space-y-3 sm:space-y-4">
-                    <div className={`grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-xl ${colorClass}`}>
-                      <f.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                    </div>
-                  <h3 className="font-display text-sm sm:text-xl font-bold text-foreground leading-tight">
-                    {f.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    {f.desc}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorks() {
-  const steps = [
-    {
-      step: "01",
-      title: "Book in Minutes",
-      desc: "Enter your origin, destination, package details, and service level. SwiftArc instantly generates shipping labels, packing slips, and customs documentation — no paperwork, no phone calls, no waiting.",
-    },
-    {
-      step: "02",
-      title: "We Come to You",
-      desc: "Schedule a pickup window that fits your operation. A SwiftArc driver arrives at your facility, scans every item into the network, and hands you a chain-of-custody receipt. Same-day pickup available in most metro areas.",
-    },
-    {
-      step: "03",
-      title: "Track Every Mile",
-      desc: "Your shipment moves through our network under continuous GPS and sensor monitoring. You and your recipient receive live status updates from first scan to final delivery, with a digital proof-of-delivery signature captured at the door.",
-    },
-  ];
-  return (
-    <section className="bg-secondary/30 py-8 sm:py-10 border-y border-border/50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Process</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-foreground sm:text-4xl">
-            How It Works
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            From booking to delivery, SwiftArc handles every step. Here's what the process looks
-            like from your side.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5 md:gap-8 relative pb-8 items-stretch">
-          <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-border -z-10" />
-          {steps.map((s, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
-              className={`text-center flex flex-col items-center group ${i === 2 ? "col-span-2 sm:col-span-2 md:col-span-1" : ""} px-2`}
-            >
-              <div className="h-10 w-10 sm:h-16 sm:w-16 rounded-full bg-primary text-primary-foreground font-display text-sm sm:text-2xl font-bold flex items-center justify-center mb-3 sm:mb-6 ring-4 sm:ring-8 ring-background shadow-md transition-transform duration-300 group-hover:scale-110">
-                {s.step}
-              </div>
-              <h3 className="font-display text-sm sm:text-xl font-bold text-foreground mb-1 sm:mb-2 leading-tight">
-                {s.title}
-              </h3>
-              <p className="text-[10px] sm:text-sm text-muted-foreground leading-relaxed">
-                {s.desc}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-        <div className="mt-16 text-center">
-          <Link to="/register">
-            <Button
-              size="lg"
-              className="bg-amber text-navy-deep hover:bg-amber-soft font-bold shadow-md"
-            >
-              Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Pricing() {
-  const { format, language } = useLocale();
-
-  const plans = [
-    {
-      name: "Pay As You Go",
-      priceUSD: null,
-      priceLabel:
-        language === "fr"
-          ? "Au détail"
-          : language === "de"
-            ? "Einzelpreis"
-            : language === "es"
-              ? "Precio al detalle"
-              : "Retail",
-      desc:
-        language === "fr"
-          ? "Pour les particuliers expédiant des colis occasionnellement."
-          : language === "de"
-            ? "Für Privatpersonen mit gelegentlichen Paketsendungen."
-            : "For individuals shipping occasional parcels.",
-      features: ["Standard tracking", "Drop-off at locations", "Basic email support"],
-    },
-    {
-      name: "Business",
-      priceUSD: null,
-      priceLabel:
-        language === "fr"
-          ? "Remise volume"
-          : language === "de"
-            ? "Mengenrabatt"
-            : language === "es"
-              ? "Descuento por volumen"
-              : "Volume Discount",
-      desc:
-        language === "fr"
-          ? "Pour les e-commerçants et expéditeurs B2B en croissance."
-          : language === "de"
-            ? "Für wachsende E-Commerce- und B2B-Versender."
-            : "For growing e-commerce and B2B shippers.",
-      features: ["Scheduled pickups", "API integrations", "Dedicated account rep", "Net 30 terms"],
-      highlight: true,
-    },
-    {
-      name: "Enterprise",
-      priceUSD: null,
-      priceLabel:
-        language === "fr"
-          ? "Sur devis"
-          : language === "de"
-            ? "Individuell"
-            : language === "es"
-              ? "Personalizado"
-              : "Custom",
-      desc:
-        language === "fr"
-          ? "Pour les chaînes d'approvisionnement à haut volume et multinationales."
-          : language === "de"
-            ? "Für mengenmäßige, multinationale Lieferketten."
-            : "For high-volume, multi-national supply chains.",
-      features: ["Custom SLAs", "Cold-chain monitoring", "White-glove delivery", "Full ERP sync"],
-    },
-  ];
-
-  return (
-    <section className="bg-background py-8 sm:py-10 text-foreground transition-colors duration-300">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber">Pricing</p>
-          <h2 className="mt-3 font-display text-3xl font-bold text-foreground sm:text-4xl">
-            Transparent, Scalable Pricing
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            No hidden fuel surcharges. No surprise residential access fees. No peak-season markups
-            buried in fine print. SwiftArc charges flat, weight-based rates with volume discounts
-            that kick in automatically as your shipping grows.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 md:gap-8 pb-4 items-stretch">
-          {plans.map((p, i) => (
-            <Card
-              key={i}
-              className={`relative flex flex-col justify-between transition-all duration-300 ${
-                p.highlight
-                  ? "border-2 border-amber bg-card shadow-2xl sm:scale-105 z-10 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(245,158,11,0.15)]"
-                  : "border-border bg-card text-card-foreground hover:shadow-lg hover:-translate-y-1"
-              }`}
-            >
-              {p.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-amber px-4 py-1 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-navy-deep shadow-md">
-                  Most Popular
-                </div>
-              )}
-              <CardContent className="p-5 sm:p-8 flex flex-col h-full justify-between">
-                <div>
-                  <h3 className="font-display text-lg sm:text-2xl font-bold text-foreground mb-1 sm:mb-2">
-                    {p.name}
-                  </h3>
-                  <div className="text-base sm:text-lg font-bold text-amber mb-2 sm:mb-4">
-                    {p.priceLabel}
-                  </div>
-                  <p className="mb-4 sm:mb-6 text-xs sm:text-sm text-muted-foreground">{p.desc}</p>
-                  <ul className="space-y-2 sm:space-y-3 mb-5 sm:mb-8">
-                    {p.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-center gap-2 text-xs sm:text-sm text-foreground"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber shrink-0" />{" "}
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Link to="/register">
-                  <Button
-                    className={`w-full font-bold h-10 sm:h-11 text-sm ${p.highlight ? "bg-amber text-navy-deep hover:bg-amber-soft shadow-md" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
-                  >
-                    Open Account
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
+/* ─── FAQ ───────────────────────────────────────────────────────── */
 function FAQ() {
   const items = [
     {
-      q: "How does the delay risk analysis work?",
-      a: "Our system checks historical carrier data, live weather feeds, port congestion reports, and facility telemetry to flag shipments at risk of delay. When a risk is detected, you receive a notification with the reason and recommended action.",
+      q: "How does shipment tracking work?",
+      a: "Once your shipment is booked and dropped off at a courier branch, every scan checkpoint is updated live. You and your recipient receive notifications at each milestone with digital proof-of-delivery.",
     },
     {
-      q: "Can I integrate SwiftArc into my e-commerce store?",
-      a: "Yes. We provide a full REST API and native plugins for Shopify, Magento, and WooCommerce. Business and Enterprise accounts also get access to webhook support for real-time order sync.",
+      q: "How are shipping weights and dimensions verified?",
+      a: "All shipments are inspected and weighed on certified branch scales before dispatch to ensure precise rate calculation and regulatory compliance.",
     },
     {
-      q: "What happens if my package is lost or damaged?",
-      a: "All Business and Enterprise shipments include base insurance coverage up to $100. Optional supplemental coverage is available up to $1,000,000 for high-value items. Claims can be filed directly from your dashboard.",
+      q: "What international customs documents are needed?",
+      a: "For international shipments, a commercial invoice and customs declaration form are required. Our customs portal helps you generate and verify all paperwork before dispatch.",
     },
     {
-      q: "How long does pickup take to arrange?",
-      a: "Same-day pickup is available in most metro areas when booked before midday. Next-business-day pickup is available nationwide. You can schedule recurring pickups from your dashboard.",
-    },
-    {
-      q: "What countries do you ship to?",
-      a: "SwiftArc covers 220+ countries and territories. Customs clearance, duty calculation, and export documentation are handled automatically for international shipments.",
-    },
-    {
-      q: "Is there a minimum shipping volume requirement?",
-      a: "No. The Pay As You Go plan has no minimums. Volume discounts apply automatically as your monthly shipment count increases, with no commitment required.",
+      q: "What happens if a delivery exception occurs?",
+      a: "Our network operations team actively monitors transit risks. If an exception or customs inspection arises, real-time alerts are issued and support coordinates swift resolution.",
     },
   ];
+
   return (
-    <section className="bg-secondary/30 py-8 sm:py-10 border-t border-border/50">
+    <section className="py-24 sm:py-28 bg-white border-t border-slate-100">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber mb-3">Support</p>
-          <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-4"
+          >
+            FAQ
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="font-display text-3xl sm:text-4xl font-bold text-[#032D60]"
+          >
             Frequently Asked Questions
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            If you have a question not listed here, contact our support team from the{" "}
-            <Link to="/support" className="text-amber hover:underline">
-              Support page
+          </motion.h2>
+          <div className="w-14 h-1 bg-primary rounded-full mx-auto mt-4 mb-4" />
+          <p className="text-slate-500 text-sm">
+            Have a question?{" "}
+            <Link to="/contact" className="text-primary hover:underline font-bold">
+              Contact our 24/7 support
             </Link>
             .
           </p>
         </div>
+
         <Accordion type="single" collapsible className="w-full space-y-3">
           {items.map((item, i) => (
-            <AccordionItem
+            <motion.div
               key={i}
-              value={`item-${i}`}
-              className="border border-border rounded-xl px-1 overflow-hidden bg-card"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
             >
-              <AccordionTrigger className="text-foreground font-semibold px-4 py-4 hover:no-underline text-left">
-                {item.q}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground px-4 pb-4 leading-relaxed">
-                {item.a}
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem
+                value={`item-${i}`}
+                className="border border-slate-100 rounded-2xl px-2 bg-slate-50/80 shadow-sm hover:border-primary/20 transition-colors"
+              >
+                <AccordionTrigger className="text-[#032D60] font-bold px-4 py-4 hover:no-underline text-left text-sm sm:text-base hover:text-primary transition-colors">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-slate-600 px-4 pb-4 leading-relaxed text-sm">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            </motion.div>
           ))}
         </Accordion>
+      </div>
+    </section>
+  );
+}
+
+/* ─── App Promo ─────────────────────────────────────────────────── */
+function AppPromo() {
+  return (
+    <section className="py-16 sm:py-20 bg-gradient-to-b from-slate-50 to-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="relative rounded-3xl bg-[#032D60] text-white overflow-hidden p-8 sm:p-12 lg:p-16 shadow-2xl"
+        >
+          {/* Dot grid */}
+          <div
+            className="absolute inset-0 opacity-[0.06] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+            aria-hidden
+          />
+          {/* Glow orbs */}
+          <div className="absolute top-0 right-1/3 w-64 h-64 rounded-full bg-primary/20 blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-sky-400/10 blur-[80px] pointer-events-none" />
+
+          <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7 space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                <Smartphone className="h-3.5 w-3.5" /> MOBILE APP
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Manage Shipments on the Go
+              </h2>
+              <p className="text-base text-white/75 leading-relaxed max-w-xl">
+                Get real-time notifications, scan barcodes, and track packages directly from your
+                mobile phone with the SwiftArc mobile application.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-2">
+                <Button className="group bg-white text-[#032D60] hover:bg-white/90 font-bold px-6 h-12 rounded-xl shadow-md hover:-translate-y-0.5 transition-all">
+                  <Smartphone className="mr-2 h-4 w-4" /> Download for iOS
+                </Button>
+                <Button variant="outline" className="group border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-6 h-12 rounded-xl hover:-translate-y-0.5 transition-all">
+                  <Smartphone className="mr-2 h-4 w-4" /> Download for Android
+                </Button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 flex justify-center">
+              <motion.img
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+                src={appMockup}
+                alt="SwiftArc Mobile Application"
+                className="max-h-80 w-auto object-contain drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -25,7 +25,6 @@ import { Route as CourierRouteImport } from './routes/courier'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackingIndexRouteImport } from './routes/tracking.index'
@@ -133,11 +132,6 @@ const BusinessRoute = BusinessRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccessibilityRoute = AccessibilityRouteImport.update({
-  id: '/accessibility',
-  path: '/accessibility',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -284,7 +278,6 @@ const AdminShipmentsCreateRoute = AdminShipmentsCreateRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/accessibility': typeof AccessibilityRoute
   '/admin': typeof AdminRouteWithChildren
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
@@ -331,7 +324,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/accessibility': typeof AccessibilityRoute
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
   '/courier': typeof CourierRoute
@@ -378,7 +370,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/accessibility': typeof AccessibilityRoute
   '/admin': typeof AdminRouteWithChildren
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
@@ -427,7 +418,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/accessibility'
     | '/admin'
     | '/business'
     | '/contact'
@@ -474,7 +464,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/accessibility'
     | '/business'
     | '/contact'
     | '/courier'
@@ -520,7 +509,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
-    | '/accessibility'
     | '/admin'
     | '/business'
     | '/contact'
@@ -568,7 +556,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AccessibilityRoute: typeof AccessibilityRoute
   AdminRoute: typeof AdminRouteWithChildren
   BusinessRoute: typeof BusinessRoute
   ContactRoute: typeof ContactRoute
@@ -703,13 +690,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/accessibility': {
-      id: '/accessibility'
-      path: '/accessibility'
-      fullPath: '/accessibility'
-      preLoaderRoute: typeof AccessibilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -976,7 +956,6 @@ const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AccessibilityRoute: AccessibilityRoute,
   AdminRoute: AdminRouteWithChildren,
   BusinessRoute: BusinessRoute,
   ContactRoute: ContactRoute,

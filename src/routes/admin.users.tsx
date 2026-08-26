@@ -12,7 +12,7 @@ import { Loader2, Shield, ShieldOff, Trash2, Users, Search, Download } from "luc
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/admin/users")({
-  head: () => ({ meta: [{ title: "Admin â€” Users" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Admin — Users" }, { name: "robots", content: "noindex" }] }),
   component: AdminUsers,
 });
 
@@ -141,17 +141,17 @@ function AdminUsers() {
                               </div>
                               <div>
                                 <p className="font-medium text-foreground">
-                                  {u.displayName || "â€”"}
+                                  {u.displayName || "—"}
                                 </p>
                                 <p className="font-mono text-[10px] text-muted-foreground">
-                                  {u.id.slice(0, 8)}â€¦
+                                  {u.id.slice(0, 8)}...
                                 </p>
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-3 hidden md:table-cell">
                             <span className="text-xs text-muted-foreground">
-                              {(u as any).email || "â€”"}
+                              {(u as any).email || "—"}
                             </span>
                           </td>
                           <td className="px-4 py-3">
