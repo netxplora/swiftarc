@@ -375,7 +375,7 @@ function ServicesOverview() {
   const services = [
     { title: "Air Freight", desc: "Fast, time-sensitive air cargo to 190+ destinations worldwide.", image: aircraft, icon: Plane, iconBg: "bg-sky-500/20 text-sky-600", href: "/shipping", accent: "from-sky-500/20" },
     { title: "Sea Freight", desc: "Cost-effective FCL & LCL ocean freight across all major global routes.", image: svcIntl, icon: Ship, iconBg: "bg-blue-500/20 text-blue-600", href: "/shipping", accent: "from-blue-500/20" },
-    { title: "Door to Door", desc: "Complete pickup-to-delivery service with full GPS tracking and care.", image: delivery, icon: Truck, iconBg: "bg-primary/20 text-primary", href: "/shipping", accent: "from-orange-500/20" },
+    { title: "Road Freight", desc: "Reliable overland transport and trucking solutions for local and cross-border deliveries.", image: delivery, icon: Truck, iconBg: "bg-primary/20 text-primary", href: "/shipping", accent: "from-orange-500/20" },
     { title: "Parcel Services", desc: "Secure parcel shipping for documents, packages, and retail goods.", image: svcEcommerce, icon: Package, iconBg: "bg-purple-500/20 text-purple-600", href: "/shipping", accent: "from-purple-500/20" },
     { title: "Customs Clearance", desc: "Expert customs handling to keep shipments moving without delays.", image: svcWhiteglove, icon: FileCheck2, iconBg: "bg-amber-500/20 text-amber-600", href: "/customs", accent: "from-amber-500/20" },
     { title: "Warehousing", desc: "Secure climate-controlled storage with pick-and-pack fulfillment.", image: warehouse, icon: Warehouse, iconBg: "bg-emerald-500/20 text-emerald-600", href: "/shipping", accent: "from-emerald-500/20" },
