@@ -85,11 +85,19 @@ const containerVariants = {
 // Using cubic-bezier tuple so TypeScript Easing type is satisfied
 const itemVariants = {
   hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+  },
 };
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] },
+  },
 };
 
 /* ─── Home ─────────────────────────────────────────────────────── */
@@ -156,7 +164,9 @@ function Hero() {
             <Globe className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
-            <div className="font-display text-[13px] font-bold text-white leading-tight">220+ Countries</div>
+            <div className="font-display text-[13px] font-bold text-white leading-tight">
+              220+ Countries
+            </div>
             <div className="text-[10px] text-white/55 leading-tight">Global Network</div>
           </div>
         </div>
@@ -165,7 +175,9 @@ function Hero() {
             <TrendingUp className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
-            <div className="font-display text-[13px] font-bold text-white leading-tight">99.7% On-Time</div>
+            <div className="font-display text-[13px] font-bold text-white leading-tight">
+              99.7% On-Time
+            </div>
             <div className="text-[10px] text-white/55 leading-tight">Delivery Rate</div>
           </div>
         </div>
@@ -174,7 +186,9 @@ function Hero() {
             <ShieldCheck className="h-3.5 w-3.5 text-white" />
           </div>
           <div>
-            <div className="font-display text-[13px] font-bold text-white leading-tight">100% Insured</div>
+            <div className="font-display text-[13px] font-bold text-white leading-tight">
+              100% Insured
+            </div>
             <div className="text-[10px] text-white/55 leading-tight">Every Shipment</div>
           </div>
         </div>
@@ -200,13 +214,19 @@ function Hero() {
           </motion.div>
 
           {/* Mobile-only horizontal trust badges (replace floating pills) */}
-          <motion.div variants={itemVariants} className="flex sm:hidden flex-wrap items-center gap-3 pb-1">
+          <motion.div
+            variants={itemVariants}
+            className="flex sm:hidden flex-wrap items-center gap-3 pb-1"
+          >
             {[
               { icon: Globe, label: "220+ Countries", color: "bg-primary/80" },
               { icon: TrendingUp, label: "99.7% On-Time", color: "bg-emerald-500/80" },
               { icon: ShieldCheck, label: "100% Insured", color: "bg-sky-500/80" },
             ].map(({ icon: Icon, label, color }) => (
-              <div key={label} className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 backdrop-blur-sm px-2.5 py-1">
+              <div
+                key={label}
+                className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 backdrop-blur-sm px-2.5 py-1"
+              >
                 <div className={`h-4 w-4 rounded-full ${color} grid place-items-center shrink-0`}>
                   <Icon className="h-2.5 w-2.5 text-white" />
                 </div>
@@ -236,8 +256,8 @@ function Hero() {
             variants={itemVariants}
             className="text-base sm:text-lg text-white/70 leading-relaxed max-w-xl"
           >
-            Fast, secure and reliable shipping to over 220 countries. Real-time tracking,
-            insured handling, and dedicated support at every step.
+            Fast, secure and reliable shipping to over 220 countries. Real-time tracking, insured
+            handling, and dedicated support at every step.
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 pt-1">
@@ -278,7 +298,9 @@ function Hero() {
                 <PackageSearch className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-display text-sm font-bold text-white leading-tight">Track Your Parcel</h3>
+                <h3 className="font-display text-sm font-bold text-white leading-tight">
+                  Track Your Parcel
+                </h3>
                 <p className="text-[11px] text-white/55">Enter your tracking number below.</p>
               </div>
             </div>
@@ -286,7 +308,8 @@ function Hero() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (tn.trim()) navigate({ to: "/tracking/$trackingId", params: { trackingId: tn.trim() } });
+                if (tn.trim())
+                  navigate({ to: "/tracking/$trackingId", params: { trackingId: tn.trim() } });
               }}
               className="relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full"
             >
@@ -333,7 +356,13 @@ function TrustStrip() {
     { value: 220, suffix: "+", label: "Countries Served", icon: Globe, color: "text-primary" },
     { value: 50000, suffix: "+", label: "Monthly Parcels", icon: Package, color: "text-sky-600" },
     { value: 99.7, suffix: "%", label: "On-Time Delivery", icon: Clock, color: "text-emerald-600" },
-    { value: 15000000, suffix: "+", label: "Total Deliveries", icon: TrendingUp, color: "text-amber-600" },
+    {
+      value: 15000000,
+      suffix: "+",
+      label: "Total Deliveries",
+      icon: TrendingUp,
+      color: "text-amber-600",
+    },
   ];
 
   return (
@@ -341,7 +370,10 @@ function TrustStrip() {
       {/* Dot grid overlay */}
       <div
         className="absolute inset-0 opacity-[0.07] pointer-events-none"
-        style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+        style={{
+          backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
         aria-hidden
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -359,9 +391,12 @@ function TrustStrip() {
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div className={`font-display text-2xl sm:text-3xl font-extrabold ${color}`}>
-                <Counter to={value} duration={2} />{suffix}
+                <Counter to={value} duration={2} />
+                {suffix}
               </div>
-              <div className="text-xs text-white/60 font-semibold uppercase tracking-wider mt-1">{label}</div>
+              <div className="text-xs text-white/60 font-semibold uppercase tracking-wider mt-1">
+                {label}
+              </div>
             </motion.div>
           ))}
         </div>
@@ -373,12 +408,60 @@ function TrustStrip() {
 /* ─── Services Overview ─────────────────────────────────────────── */
 function ServicesOverview() {
   const services = [
-    { title: "Air Freight", desc: "Fast, time-sensitive air cargo to 190+ destinations worldwide.", image: aircraft, icon: Plane, iconBg: "bg-sky-500/20 text-sky-600", href: "/shipping", accent: "from-sky-500/20" },
-    { title: "Sea Freight", desc: "Cost-effective FCL & LCL ocean freight across all major global routes.", image: svcIntl, icon: Ship, iconBg: "bg-blue-500/20 text-blue-600", href: "/shipping", accent: "from-blue-500/20" },
-    { title: "Road Freight", desc: "Reliable overland transport and trucking solutions for local and cross-border deliveries.", image: delivery, icon: Truck, iconBg: "bg-primary/20 text-primary", href: "/shipping", accent: "from-orange-500/20" },
-    { title: "Parcel Services", desc: "Secure parcel shipping for documents, packages, and retail goods.", image: svcEcommerce, icon: Package, iconBg: "bg-purple-500/20 text-purple-600", href: "/shipping", accent: "from-purple-500/20" },
-    { title: "Customs Clearance", desc: "Expert customs handling to keep shipments moving without delays.", image: svcWhiteglove, icon: FileCheck2, iconBg: "bg-amber-500/20 text-amber-600", href: "/customs", accent: "from-amber-500/20" },
-    { title: "Warehousing", desc: "Secure climate-controlled storage with pick-and-pack fulfillment.", image: warehouse, icon: Warehouse, iconBg: "bg-emerald-500/20 text-emerald-600", href: "/shipping", accent: "from-emerald-500/20" },
+    {
+      title: "Air Freight",
+      desc: "Fast, time-sensitive air cargo to 190+ destinations worldwide.",
+      image: aircraft,
+      icon: Plane,
+      iconBg: "bg-sky-500/20 text-sky-600",
+      href: "/shipping",
+      accent: "from-sky-500/20",
+    },
+    {
+      title: "Sea Freight",
+      desc: "Cost-effective FCL & LCL ocean freight across all major global routes.",
+      image: svcIntl,
+      icon: Ship,
+      iconBg: "bg-blue-500/20 text-blue-600",
+      href: "/shipping",
+      accent: "from-blue-500/20",
+    },
+    {
+      title: "Road Freight",
+      desc: "Reliable overland transport and trucking solutions for local and cross-border deliveries.",
+      image: delivery,
+      icon: Truck,
+      iconBg: "bg-primary/20 text-primary",
+      href: "/shipping",
+      accent: "from-orange-500/20",
+    },
+    {
+      title: "Parcel Services",
+      desc: "Secure parcel shipping for documents, packages, and retail goods.",
+      image: svcEcommerce,
+      icon: Package,
+      iconBg: "bg-purple-500/20 text-purple-600",
+      href: "/shipping",
+      accent: "from-purple-500/20",
+    },
+    {
+      title: "Customs Clearance",
+      desc: "Expert customs handling to keep shipments moving without delays.",
+      image: svcWhiteglove,
+      icon: FileCheck2,
+      iconBg: "bg-amber-500/20 text-amber-600",
+      href: "/customs",
+      accent: "from-amber-500/20",
+    },
+    {
+      title: "Warehousing",
+      desc: "Secure climate-controlled storage with pick-and-pack fulfillment.",
+      image: warehouse,
+      icon: Warehouse,
+      iconBg: "bg-emerald-500/20 text-emerald-600",
+      href: "/shipping",
+      accent: "from-emerald-500/20",
+    },
   ];
 
   return (
@@ -401,11 +484,16 @@ function ServicesOverview() {
                 <Package className="h-3 w-3" /> OUR SERVICES
               </span>
             </motion.div>
-            <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#032D60] leading-tight">
-              Shipping Solutions{" "}
-              <span className="text-primary">Built Around You</span>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#032D60] leading-tight"
+            >
+              Shipping Solutions <span className="text-primary">Built Around You</span>
             </motion.h2>
-            <motion.div variants={itemVariants} className="w-14 h-1 bg-primary rounded-full mt-4 mb-5" />
+            <motion.div
+              variants={itemVariants}
+              className="w-14 h-1 bg-primary rounded-full mt-4 mb-5"
+            />
             <motion.p variants={itemVariants} className="text-base text-slate-600 leading-relaxed">
               From air and sea freight to door-to-door delivery, we provide end-to-end shipping
               solutions tailored to your business and personal needs.
@@ -428,7 +516,11 @@ function ServicesOverview() {
               transition={{ duration: 0.6 }}
               className="relative rounded-3xl overflow-hidden border border-border shadow-2xl"
             >
-              <img src={heroArc} alt="SwiftArc Global Logistics" className="w-full h-64 sm:h-72 object-cover" />
+              <img
+                src={heroArc}
+                alt="SwiftArc Global Logistics"
+                className="w-full h-64 sm:h-72 object-cover"
+              />
               {/* Glassmorphism stats overlay */}
               <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 shadow-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                 {[
@@ -439,7 +531,9 @@ function ServicesOverview() {
                 ].map(({ v, l }) => (
                   <div key={l}>
                     <div className="text-primary font-display text-2xl font-bold">{v}</div>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{l}</div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      {l}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -460,7 +554,9 @@ function ServicesOverview() {
               <Link to={s.href} className="group block h-full">
                 <div className="h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md transition-all duration-400 hover:shadow-xl hover:-translate-y-2 hover:border-primary/20 flex flex-col">
                   {/* Image */}
-                  <div className={`relative h-48 w-full overflow-hidden bg-gradient-to-br ${s.accent} to-slate-50`}>
+                  <div
+                    className={`relative h-48 w-full overflow-hidden bg-gradient-to-br ${s.accent} to-slate-50`}
+                  >
                     <img
                       src={s.image}
                       alt={s.title}
@@ -468,7 +564,9 @@ function ServicesOverview() {
                     />
                     {/* Glass label badge */}
                     <div className="absolute top-3 left-3">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${s.iconBg} bg-white/80 backdrop-blur-md shadow-sm border border-white/60`}>
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${s.iconBg} bg-white/80 backdrop-blur-md shadow-sm border border-white/60`}
+                      >
                         <s.icon className="h-3.5 w-3.5" />
                         {s.title}
                       </span>
@@ -500,12 +598,48 @@ function ServicesOverview() {
 /* ─── Why Choose Us ────────────────────────────────────────────── */
 function WhyChooseUs() {
   const benefits = [
-    { title: "Reliable & Secure", desc: "Verified security protocols and careful physical handling at every checkpoint.", icon: Shield, gradient: "from-blue-50 to-blue-100/50", iconBg: "bg-blue-500/15 text-blue-600" },
-    { title: "On-Time Delivery", desc: "We prioritize punctuality across every route, ensuring timely arrival.", icon: Clock, gradient: "from-amber-50 to-amber-100/50", iconBg: "bg-amber-500/15 text-amber-600" },
-    { title: "Global Network", desc: "Deliver to over 220 countries with our extensive international logistics hub network.", icon: Globe, gradient: "from-emerald-50 to-emerald-100/50", iconBg: "bg-emerald-500/15 text-emerald-600" },
-    { title: "Real-time Tracking", desc: "Follow every milestone with live GPS status updates and instant notifications.", icon: MapPin, gradient: "from-purple-50 to-purple-100/50", iconBg: "bg-purple-500/15 text-purple-600" },
-    { title: "24/7 Support", desc: "Our dedicated operations team is always available to assist you anytime.", icon: Headphones, gradient: "from-orange-50 to-orange-100/50", iconBg: "bg-primary/15 text-primary" },
-    { title: "Competitive Pricing", desc: "Transparent rates, no hidden fees, and clear volume discounts.", icon: Tag, gradient: "from-cyan-50 to-cyan-100/50", iconBg: "bg-cyan-500/15 text-cyan-600" },
+    {
+      title: "Reliable & Secure",
+      desc: "Verified security protocols and careful physical handling at every checkpoint.",
+      icon: Shield,
+      gradient: "from-blue-50 to-blue-100/50",
+      iconBg: "bg-blue-500/15 text-blue-600",
+    },
+    {
+      title: "On-Time Delivery",
+      desc: "We prioritize punctuality across every route, ensuring timely arrival.",
+      icon: Clock,
+      gradient: "from-amber-50 to-amber-100/50",
+      iconBg: "bg-amber-500/15 text-amber-600",
+    },
+    {
+      title: "Global Network",
+      desc: "Deliver to over 220 countries with our extensive international logistics hub network.",
+      icon: Globe,
+      gradient: "from-emerald-50 to-emerald-100/50",
+      iconBg: "bg-emerald-500/15 text-emerald-600",
+    },
+    {
+      title: "Real-time Tracking",
+      desc: "Follow every milestone with live GPS status updates and instant notifications.",
+      icon: MapPin,
+      gradient: "from-purple-50 to-purple-100/50",
+      iconBg: "bg-purple-500/15 text-purple-600",
+    },
+    {
+      title: "24/7 Support",
+      desc: "Our dedicated operations team is always available to assist you anytime.",
+      icon: Headphones,
+      gradient: "from-orange-50 to-orange-100/50",
+      iconBg: "bg-primary/15 text-primary",
+    },
+    {
+      title: "Competitive Pricing",
+      desc: "Transparent rates, no hidden fees, and clear volume discounts.",
+      icon: Tag,
+      gradient: "from-cyan-50 to-cyan-100/50",
+      iconBg: "bg-cyan-500/15 text-cyan-600",
+    },
   ];
 
   return (
@@ -514,7 +648,6 @@ function WhyChooseUs() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
-
           {/* Left */}
           <div className="lg:col-span-6">
             <motion.div
@@ -529,12 +662,17 @@ function WhyChooseUs() {
                   <Star className="h-3 w-3" /> WHY CHOOSE US
                 </span>
               </motion.div>
-              <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#032D60] leading-tight">
-                Your Trusted Shipping Partner{" "}
-                <span className="text-primary">Worldwide</span>
+              <motion.h2
+                variants={itemVariants}
+                className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#032D60] leading-tight"
+              >
+                Your Trusted Shipping Partner <span className="text-primary">Worldwide</span>
               </motion.h2>
               <motion.div variants={itemVariants} className="w-14 h-1 bg-primary rounded-full" />
-              <motion.p variants={itemVariants} className="text-base text-slate-600 leading-relaxed max-w-xl">
+              <motion.p
+                variants={itemVariants}
+                className="text-base text-slate-600 leading-relaxed max-w-xl"
+              >
                 At SwiftArc, we combine technology, reliability, and physical branch networks to
                 deliver a shipping experience that is fast, secure, and hassle-free.
               </motion.p>
@@ -612,7 +750,10 @@ function ImpactSection() {
           {/* Animated dot grid */}
           <div
             className="absolute inset-0 opacity-[0.08] pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+            style={{
+              backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
             aria-hidden
           />
           {/* Glowing orbs inside card */}
@@ -625,8 +766,7 @@ function ImpactSection() {
                 <Award className="h-3.5 w-3.5" /> OUR IMPACT &amp; ACHIEVEMENTS
               </div>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
-                Delivering Impact.{" "}
-                <span className="text-primary">Building Connections.</span>
+                Delivering Impact. <span className="text-primary">Building Connections.</span>
               </h2>
               <p className="text-base sm:text-lg text-white/75 leading-relaxed max-w-xl">
                 At SwiftArc, every shipment represents trust, responsibility, and real-world impact.
@@ -641,7 +781,8 @@ function ImpactSection() {
                 ].map(({ v, suffix, l }) => (
                   <div key={l}>
                     <div className="font-display text-3xl font-bold text-primary">
-                      <Counter to={v} duration={2.2} />{suffix}
+                      <Counter to={v} duration={2.2} />
+                      {suffix}
                     </div>
                     <div className="text-xs text-white/60 mt-1 font-medium">{l}</div>
                   </div>
@@ -665,8 +806,12 @@ function ImpactSection() {
                     <BarChart3 className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">15M+ packages delivered in 2025</div>
-                    <div className="text-[10px] text-white/65">across 220 countries and territories</div>
+                    <div className="text-xs font-bold text-white">
+                      15M+ packages delivered in 2025
+                    </div>
+                    <div className="text-[10px] text-white/65">
+                      across 220 countries and territories
+                    </div>
                   </div>
                 </div>
               </div>
@@ -681,10 +826,34 @@ function ImpactSection() {
 /* ─── How It Works ──────────────────────────────────────────────── */
 function HowItWorks() {
   const steps = [
-    { step: "01", title: "Visit Nearest Branch", desc: "Bring your package to any local branch or schedule a collection. Our agents assist with destination routing.", icon: MapPin, color: "bg-sky-500" },
-    { step: "02", title: "Inspection & Safe Packing", desc: "Your shipment is securely weighed and packed per international carrier safety standards.", icon: ShieldCheck, color: "bg-primary" },
-    { step: "03", title: "Live Real-Time Transit", desc: "Follow your shipment milestone by milestone with live GPS checkpoints and instant notifications.", icon: Zap, color: "bg-purple-500" },
-    { step: "04", title: "Doorstep Delivery", desc: "Our verified local courier delivers directly to your recipient with digital proof-of-delivery.", icon: CheckCircle2, color: "bg-emerald-500" },
+    {
+      step: "01",
+      title: "Visit Nearest Branch",
+      desc: "Bring your package to any local branch or schedule a collection. Our agents assist with destination routing.",
+      icon: MapPin,
+      color: "bg-sky-500",
+    },
+    {
+      step: "02",
+      title: "Inspection & Safe Packing",
+      desc: "Your shipment is securely weighed and packed per international carrier safety standards.",
+      icon: ShieldCheck,
+      color: "bg-primary",
+    },
+    {
+      step: "03",
+      title: "Live Real-Time Transit",
+      desc: "Follow your shipment milestone by milestone with live GPS checkpoints and instant notifications.",
+      icon: Zap,
+      color: "bg-purple-500",
+    },
+    {
+      step: "04",
+      title: "Doorstep Delivery",
+      desc: "Our verified local courier delivers directly to your recipient with digital proof-of-delivery.",
+      icon: CheckCircle2,
+      color: "bg-emerald-500",
+    },
   ];
 
   return (
@@ -718,7 +887,8 @@ function HowItWorks() {
             transition={{ delay: 0.2 }}
             className="text-slate-600 text-sm sm:text-base"
           >
-            From initial drop-off to final doorstep delivery, every step is clear, transparent, and reliable.
+            From initial drop-off to final doorstep delivery, every step is clear, transparent, and
+            reliable.
           </motion.p>
         </div>
 
@@ -739,13 +909,21 @@ function HowItWorks() {
               </div>
 
               {/* Hover accent line */}
-              <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${s.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left rounded-b-2xl`} />
+              <div
+                className={`absolute bottom-0 left-0 right-0 h-[3px] ${s.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left rounded-b-2xl`}
+              />
 
-              <div className={`relative h-12 w-12 rounded-xl ${s.color} text-white grid place-items-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+              <div
+                className={`relative h-12 w-12 rounded-xl ${s.color} text-white grid place-items-center mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}
+              >
                 <s.icon className="h-5 w-5" />
               </div>
-              <div className="relative text-xs font-bold text-primary uppercase tracking-widest mb-1">Step {s.step}</div>
-              <h3 className="relative font-display text-lg font-bold text-[#032D60] mb-2">{s.title}</h3>
+              <div className="relative text-xs font-bold text-primary uppercase tracking-widest mb-1">
+                Step {s.step}
+              </div>
+              <h3 className="relative font-display text-lg font-bold text-[#032D60] mb-2">
+                {s.title}
+              </h3>
               <p className="relative text-xs sm:text-sm text-slate-500 leading-relaxed">{s.desc}</p>
             </motion.div>
           ))}
@@ -776,15 +954,23 @@ function CoverageSection() {
             variants={containerVariants}
             className="space-y-5"
           >
-            <motion.span variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+            <motion.span
+              variants={itemVariants}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary"
+            >
               GLOBAL COVERAGE
             </motion.span>
-            <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#032D60]">
-              220+ Countries.{" "}
-              <span className="text-primary">One Integrated Network.</span>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#032D60]"
+            >
+              220+ Countries. <span className="text-primary">One Integrated Network.</span>
             </motion.h2>
             <motion.div variants={itemVariants} className="w-14 h-1 bg-primary rounded-full" />
-            <motion.p variants={itemVariants} className="text-slate-600 leading-relaxed text-sm sm:text-base">
+            <motion.p
+              variants={itemVariants}
+              className="text-slate-600 leading-relaxed text-sm sm:text-base"
+            >
               An interconnected web of ground fleets, regional air gateways, and verified last-mile
               partners — coordinated from pickup to proof of delivery.
             </motion.p>
@@ -802,7 +988,9 @@ function CoverageSection() {
                   className="rounded-xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm hover:shadow-md transition-all cursor-default"
                 >
                   <div className="font-display text-2xl font-bold text-[#032D60]">{value}</div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-0.5">{label}</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-0.5">
+                    {label}
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
@@ -824,7 +1012,11 @@ function CoverageSection() {
               transition={{ duration: 0.7 }}
               className="overflow-hidden rounded-3xl border border-slate-100 shadow-2xl bg-card"
             >
-              <Suspense fallback={<div className="h-[400px] w-full animate-pulse rounded-3xl bg-slate-100" />}>
+              <Suspense
+                fallback={
+                  <div className="h-[400px] w-full animate-pulse rounded-3xl bg-slate-100" />
+                }
+              >
                 <CoverageMap />
               </Suspense>
             </motion.div>
@@ -839,21 +1031,24 @@ function CoverageSection() {
 function Testimonials() {
   const items = [
     {
-      quote: "SwiftArc consolidated our entire international supply chain. We went from guessing to knowing every shipment, every hub, every status update in real time.",
+      quote:
+        "SwiftArc consolidated our entire international supply chain. We went from guessing to knowing every shipment, every hub, every status update in real time.",
       name: "Michael R. Callahan",
       role: "Head of Operations, Northlight Retail",
       avatar: avatarMichael,
       location: "London, UK",
     },
     {
-      quote: "The delay risk forecasting flagged a weather disruption six hours before our regional carrier was aware. We rerouted our freight and kept our delivery on schedule.",
+      quote:
+        "The delay risk forecasting flagged a weather disruption six hours before our regional carrier was aware. We rerouted our freight and kept our delivery on schedule.",
       name: "Sarah D. Thompson",
       role: "Director of Fulfillment, Brightpath Commerce",
       avatar: avatarSarah,
       location: "New York, USA",
     },
     {
-      quote: "Transparent pricing, dedicated account managers, and reliable physical branch support across Europe and Asia make SwiftArc our go-to carrier.",
+      quote:
+        "Transparent pricing, dedicated account managers, and reliable physical branch support across Europe and Asia make SwiftArc our go-to carrier.",
       name: "James A. Rivera",
       role: "COO, Meridian Supply Group",
       avatar: avatarJames,
@@ -862,7 +1057,10 @@ function Testimonials() {
   ];
 
   return (
-    <section className="py-24 sm:py-28 relative overflow-hidden" style={{ background: "linear-gradient(160deg, #f8f9ff 0%, #ffffff 50%, #f0f4ff 100%)" }}>
+    <section
+      className="py-24 sm:py-28 relative overflow-hidden"
+      style={{ background: "linear-gradient(160deg, #f8f9ff 0%, #ffffff 50%, #f0f4ff 100%)" }}
+    >
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/[0.04] blur-[120px] pointer-events-none" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -882,8 +1080,7 @@ function Testimonials() {
             transition={{ delay: 0.1 }}
             className="font-display text-3xl sm:text-4xl font-bold text-[#032D60]"
           >
-            Trusted by Businesses{" "}
-            <span className="text-primary">Worldwide</span>
+            Trusted by Businesses <span className="text-primary">Worldwide</span>
           </motion.h2>
           <div className="w-14 h-1 bg-primary rounded-full mx-auto mt-4 mb-4" />
         </div>
@@ -936,7 +1133,10 @@ function CtaBanner() {
     <section className="relative overflow-hidden py-24 bg-[#032D60] text-white">
       <div
         className="absolute inset-0 opacity-[0.07] pointer-events-none"
-        style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+        style={{
+          backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
         aria-hidden
       />
       {/* Glowing orbs */}
@@ -951,33 +1151,56 @@ function CtaBanner() {
           variants={containerVariants}
           className="space-y-6"
         >
-          <motion.span variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 backdrop-blur-sm px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-primary">
+          <motion.span
+            variants={itemVariants}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 backdrop-blur-sm px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-primary"
+          >
             START SHIPPING TODAY
           </motion.span>
 
-          <motion.h2 variants={itemVariants} className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
+          <motion.h2
+            variants={itemVariants}
+            className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight"
+          >
             Ready to Ship Your Next Package?
           </motion.h2>
 
-          <motion.p variants={itemVariants} className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of businesses and individuals who trust SwiftArc for reliable, transparent
-            logistics across 220+ countries.
+          <motion.p
+            variants={itemVariants}
+            className="text-base sm:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed"
+          >
+            Join thousands of businesses and individuals who trust SwiftArc for reliable,
+            transparent logistics across 220+ countries.
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-wrap items-center justify-center gap-4 pt-2"
+          >
             <Link to="/shipping">
-              <Button size="lg" className="group bg-primary text-white hover:bg-primary-hover font-bold px-8 h-13 rounded-xl shadow-lg shadow-primary/30 text-base hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all">
-                Get a Free Quote <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Button
+                size="lg"
+                className="group bg-primary text-white hover:bg-primary-hover font-bold px-8 h-13 rounded-xl shadow-lg shadow-primary/30 text-base hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all"
+              >
+                Get a Free Quote{" "}
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link to="/tracking">
-              <Button size="lg" variant="outline" className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-13 rounded-xl text-base hover:-translate-y-0.5 transition-all">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-13 rounded-xl text-base hover:-translate-y-0.5 transition-all"
+              >
                 Track a Shipment
               </Button>
             </Link>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-8 text-xs sm:text-sm text-white/60 pt-4">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-wrap items-center justify-center gap-8 text-xs sm:text-sm text-white/60 pt-4"
+          >
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary" />
               <span>+1 (800) 947-9382</span>
@@ -1092,7 +1315,10 @@ function AppPromo() {
           {/* Dot grid */}
           <div
             className="absolute inset-0 opacity-[0.06] pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+            style={{
+              backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
             aria-hidden
           />
           {/* Glow orbs */}
@@ -1115,7 +1341,10 @@ function AppPromo() {
                 <Button className="group bg-white text-[#032D60] hover:bg-white/90 font-bold px-6 h-12 rounded-xl shadow-md hover:-translate-y-0.5 transition-all">
                   <Smartphone className="mr-2 h-4 w-4" /> Download for iOS
                 </Button>
-                <Button variant="outline" className="group border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-6 h-12 rounded-xl hover:-translate-y-0.5 transition-all">
+                <Button
+                  variant="outline"
+                  className="group border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-6 h-12 rounded-xl hover:-translate-y-0.5 transition-all"
+                >
                   <Smartphone className="mr-2 h-4 w-4" /> Download for Android
                 </Button>
               </div>

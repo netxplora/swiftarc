@@ -134,7 +134,9 @@ export function DashboardHeader() {
             className="w-80 p-0 rounded-[8px] overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.12)] border-border bg-white dark:bg-secondary dark:border-white/20"
           >
             <div className="flex items-center justify-between border-b border-border p-4 bg-muted dark:bg-white/5 dark:border-white/10">
-              <h3 className="font-bold text-[14px] text-secondary dark:text-white">Notifications</h3>
+              <h3 className="font-bold text-[14px] text-secondary dark:text-white">
+                Notifications
+              </h3>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllMut.mutate()}
@@ -169,7 +171,9 @@ export function DashboardHeader() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
-                            <p className="text-[13px] font-semibold text-secondary dark:text-white truncate pr-2">{n.title}</p>
+                            <p className="text-[13px] font-semibold text-secondary dark:text-white truncate pr-2">
+                              {n.title}
+                            </p>
                             <span className="text-[11px] text-muted-foreground dark:text-white/60 shrink-0">
                               {relative(n.created_at)}
                             </span>
@@ -197,7 +201,9 @@ export function DashboardHeader() {
           <div className="grid h-7 w-7 place-items-center rounded-full bg-accent text-[12px] font-bold text-white">
             {initials}
           </div>
-          <span className="hidden sm:block text-[13px] font-semibold text-secondary dark:text-white">{name}</span>
+          <span className="hidden sm:block text-[13px] font-semibold text-secondary dark:text-white">
+            {name}
+          </span>
         </Link>
       </div>
     </div>

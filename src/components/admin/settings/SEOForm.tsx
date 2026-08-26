@@ -39,7 +39,16 @@ export function SEOForm({ initialData }: { initialData: any }) {
     mutationFn: () =>
       updateSettings({
         data: {
-          global_seo: { defaultTitle, defaultDescription, canonicalUrl, ogTitle, ogDescription, ogImage, robotsConfig, sitemapConfig },
+          global_seo: {
+            defaultTitle,
+            defaultDescription,
+            canonicalUrl,
+            ogTitle,
+            ogDescription,
+            ogImage,
+            robotsConfig,
+            sitemapConfig,
+          },
         },
       }),
     onSuccess: () => {
@@ -110,7 +119,8 @@ export function SEOForm({ initialData }: { initialData: any }) {
               className="mt-1.5 min-h-[80px]"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Used as the &lt;meta name=&quot;description&quot;&gt; fallback. Keep between 50–160 characters for best results.
+              Used as the &lt;meta name=&quot;description&quot;&gt; fallback. Keep between 50–160
+              characters for best results.
             </p>
           </div>
         </div>
@@ -121,17 +131,37 @@ export function SEOForm({ initialData }: { initialData: any }) {
         <div className="grid gap-5 max-w-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">OG:Title Fallback</Label>
-              <Input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)} placeholder="SwiftArc" className="mt-1.5" />
+              <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                OG:Title Fallback
+              </Label>
+              <Input
+                value={ogTitle}
+                onChange={(e) => setOgTitle(e.target.value)}
+                placeholder="SwiftArc"
+                className="mt-1.5"
+              />
             </div>
             <div>
-              <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">OG:Image URL</Label>
-              <Input value={ogImage} onChange={(e) => setOgImage(e.target.value)} placeholder="https://..." className="mt-1.5" />
+              <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                OG:Image URL
+              </Label>
+              <Input
+                value={ogImage}
+                onChange={(e) => setOgImage(e.target.value)}
+                placeholder="https://..."
+                className="mt-1.5"
+              />
             </div>
           </div>
           <div>
-            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">OG:Description</Label>
-            <Textarea value={ogDescription} onChange={(e) => setOgDescription(e.target.value)} className="mt-1.5 min-h-[80px]" />
+            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              OG:Description
+            </Label>
+            <Textarea
+              value={ogDescription}
+              onChange={(e) => setOgDescription(e.target.value)}
+              className="mt-1.5 min-h-[80px]"
+            />
           </div>
         </div>
       </div>
@@ -140,12 +170,26 @@ export function SEOForm({ initialData }: { initialData: any }) {
         <h3 className="font-semibold text-base border-b pb-3 mb-5">Crawlers & Bots</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl">
           <div>
-            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Robots Configuration</Label>
-            <Input value={robotsConfig} onChange={(e) => setRobotsConfig(e.target.value)} placeholder="index, follow" className="mt-1.5" />
+            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Robots Configuration
+            </Label>
+            <Input
+              value={robotsConfig}
+              onChange={(e) => setRobotsConfig(e.target.value)}
+              placeholder="index, follow"
+              className="mt-1.5"
+            />
           </div>
           <div>
-            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Sitemap Path</Label>
-            <Input value={sitemapConfig} onChange={(e) => setSitemapConfig(e.target.value)} placeholder="/sitemap.xml" className="mt-1.5" />
+            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Sitemap Path
+            </Label>
+            <Input
+              value={sitemapConfig}
+              onChange={(e) => setSitemapConfig(e.target.value)}
+              placeholder="/sitemap.xml"
+              className="mt-1.5"
+            />
           </div>
         </div>
       </div>

@@ -3,7 +3,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Calculator, Info, Globe2, FileText, Download, Loader2, Plus, Trash2, ShieldCheck, ArrowRight, FileCheck2, CheckCircle2 } from "lucide-react";
+import {
+  Calculator,
+  Info,
+  Globe2,
+  FileText,
+  Download,
+  Loader2,
+  Plus,
+  Trash2,
+  ShieldCheck,
+  ArrowRight,
+  FileCheck2,
+  CheckCircle2,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -23,9 +36,14 @@ export const Route = createFileRoute("/customs")({
       { property: "og:title", content: "Customs & Duties Calculator — SwiftArc" },
       {
         property: "og:description",
-        content: "Clear landed cost estimates and documentation requirements across 220+ destinations.",
+        content:
+          "Clear landed cost estimates and documentation requirements across 220+ destinations.",
       },
-      { name: "keywords", content: "customs duty calculator, landed cost, VAT estimator, import tariff, clearance documents" },
+      {
+        name: "keywords",
+        content:
+          "customs duty calculator, landed cost, VAT estimator, import tariff, clearance documents",
+      },
     ],
     links: [{ rel: "canonical", href: "/customs" }],
   }),
@@ -172,7 +190,10 @@ function CustomsPage() {
       >
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          style={{
+            backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+            backgroundSize: "26px 26px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-0 w-[480px] h-[480px] rounded-full bg-primary/[0.06] blur-[130px] pointer-events-none" />
@@ -181,7 +202,11 @@ function CustomsPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-6">
-              <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45 }}
+              >
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm">
                   <FileCheck2 className="h-3 w-3" />
                   International Compliance
@@ -197,7 +222,12 @@ function CustomsPage() {
                 Customs Duties &{" "}
                 <span className="relative">
                   <span className="text-primary">Tax Calculator</span>
-                  <motion.span className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8 }} />
+                  <motion.span
+                    className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40"
+                    initial={{ scaleX: 0, originX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.7, delay: 0.8 }}
+                  />
                 </span>
               </motion.h1>
 
@@ -207,7 +237,8 @@ function CustomsPage() {
                 transition={{ duration: 0.6, delay: 0.15 }}
                 className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
               >
-                Estimate landed costs before shipping internationally. Calculate duties, VAT, and required documentation instantly based on current trade tariffs.
+                Estimate landed costs before shipping internationally. Calculate duties, VAT, and
+                required documentation instantly based on current trade tariffs.
               </motion.p>
             </div>
 
@@ -219,7 +250,11 @@ function CustomsPage() {
                 className="relative"
               >
                 <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/25 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/12">
-                  <img src={heroImg} alt="SwiftArc Customs Service" className="w-full h-72 sm:h-80 rounded-2xl object-cover" />
+                  <img
+                    src={heroImg}
+                    alt="SwiftArc Customs Service"
+                    className="w-full h-72 sm:h-80 rounded-2xl object-cover"
+                  />
                   <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
                 </div>
               </motion.div>
@@ -231,7 +266,6 @@ function CustomsPage() {
       {/* ── Calculator Main Section ── */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-12">
-          
           {/* Controls Column */}
           <div className="lg:col-span-7">
             <FadeInSection direction="left" className="space-y-6">
@@ -241,18 +275,30 @@ function CustomsPage() {
                     <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                       <FileText className="h-5 w-5" />
                     </div>
-                    <h2 className="font-display text-2xl font-bold text-[#032D60]">Declared Items</h2>
+                    <h2 className="font-display text-2xl font-bold text-[#032D60]">
+                      Declared Items
+                    </h2>
                   </div>
-                  <Button onClick={addItem} variant="outline" size="sm" className="font-bold border-2 rounded-xl text-primary border-primary/20 hover:bg-primary/5 hover:border-primary">
+                  <Button
+                    onClick={addItem}
+                    variant="outline"
+                    size="sm"
+                    className="font-bold border-2 rounded-xl text-primary border-primary/20 hover:bg-primary/5 hover:border-primary"
+                  >
                     <Plus className="h-4 w-4 mr-1.5" /> Add Item
                   </Button>
                 </div>
 
                 <div className="space-y-4">
                   {items.map((it, idx) => (
-                    <div key={it.id} className="group relative grid gap-4 rounded-xl border border-slate-100 bg-slate-50 p-5 pr-12 transition-all hover:border-primary/30 hover:shadow-sm sm:grid-cols-12">
+                    <div
+                      key={it.id}
+                      className="group relative grid gap-4 rounded-xl border border-slate-100 bg-slate-50 p-5 pr-12 transition-all hover:border-primary/30 hover:shadow-sm sm:grid-cols-12"
+                    >
                       <div className="sm:col-span-5 space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Item Description</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          Item Description
+                        </Label>
                         <Input
                           value={it.name}
                           onChange={(e) => patch(it.id, { name: e.target.value })}
@@ -260,7 +306,9 @@ function CustomsPage() {
                         />
                       </div>
                       <div className="sm:col-span-3 space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Category</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          Category
+                        </Label>
                         <select
                           value={it.category}
                           onChange={(e) => patch(it.id, { category: e.target.value })}
@@ -274,7 +322,9 @@ function CustomsPage() {
                         </select>
                       </div>
                       <div className="sm:col-span-2 space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Qty</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          Qty
+                        </Label>
                         <Input
                           type="number"
                           min={1}
@@ -284,12 +334,16 @@ function CustomsPage() {
                         />
                       </div>
                       <div className="sm:col-span-2 space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Val ($)</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          Val ($)
+                        </Label>
                         <Input
                           type="number"
                           min={1}
                           value={it.unitValue}
-                          onChange={(e) => patch(it.id, { unitValue: Math.max(1, +e.target.value) })}
+                          onChange={(e) =>
+                            patch(it.id, { unitValue: Math.max(1, +e.target.value) })
+                          }
                           className="h-10 bg-white border-slate-200 rounded-lg font-mono shadow-sm"
                         />
                       </div>
@@ -307,8 +361,12 @@ function CustomsPage() {
                 </div>
 
                 <div className="mt-6 flex justify-between items-center rounded-xl bg-slate-100/50 p-4 border border-slate-100">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Total Goods Value</span>
-                  <span className="font-mono text-xl font-bold text-[#032D60]">${totalValue.toFixed(2)} USD</span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                    Total Goods Value
+                  </span>
+                  <span className="font-mono text-xl font-bold text-[#032D60]">
+                    ${totalValue.toFixed(2)} USD
+                  </span>
                 </div>
               </div>
 
@@ -317,12 +375,16 @@ function CustomsPage() {
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                     <Globe2 className="h-5 w-5" />
                   </div>
-                  <h2 className="font-display text-2xl font-bold text-[#032D60]">Shipping Logistics</h2>
+                  <h2 className="font-display text-2xl font-bold text-[#032D60]">
+                    Shipping Logistics
+                  </h2>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Destination Country</Label>
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                      Destination Country
+                    </Label>
                     <select
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
@@ -341,7 +403,8 @@ function CustomsPage() {
                       <span className="group relative">
                         <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
                         <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded-md bg-slate-800 p-2 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100 z-10 font-normal normal-case">
-                          Harmonized System Code for exact duty percentage. We estimate based on category if blank.
+                          Harmonized System Code for exact duty percentage. We estimate based on
+                          category if blank.
                         </span>
                       </span>
                     </Label>
@@ -353,7 +416,9 @@ function CustomsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Freight Cost (USD)</Label>
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                      Freight Cost (USD)
+                    </Label>
                     <Input
                       type="number"
                       min={0}
@@ -363,7 +428,9 @@ function CustomsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Cargo Insurance (USD)</Label>
+                    <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                      Cargo Insurance (USD)
+                    </Label>
                     <Input
                       type="number"
                       min={0}
@@ -379,7 +446,8 @@ function CustomsPage() {
                     <ShieldCheck className="h-4 w-4 text-sky-600" /> Estimation Notice
                   </p>
                   <p className="pl-6 mt-1.5">
-                    Calculations use CIF (Cost, Insurance, and Freight) value. Final duties are assessed by local customs officials upon import.
+                    Calculations use CIF (Cost, Insurance, and Freight) value. Final duties are
+                    assessed by local customs officials upon import.
                   </p>
                 </div>
               </div>
@@ -407,16 +475,18 @@ function CustomsPage() {
                   <div className="space-y-8">
                     <div>
                       <div className="mb-4 flex items-end justify-between">
-                        <span className="text-slate-500 font-medium text-sm">Estimated Total Duties & Taxes</span>
+                        <span className="text-slate-500 font-medium text-sm">
+                          Estimated Total Duties & Taxes
+                        </span>
                         <span className="font-display text-4xl font-extrabold text-[#032D60]">
                           ${est.data.total.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                         <span className="text-xs font-bold text-slate-600">Total Landed Cost</span>
-                         <span className="font-mono font-bold text-emerald-600">
-                           ${(est.data.total + totalValue + freight + insurance).toFixed(2)}
-                         </span>
+                        <span className="text-xs font-bold text-slate-600">Total Landed Cost</span>
+                        <span className="font-mono font-bold text-emerald-600">
+                          ${(est.data.total + totalValue + freight + insurance).toFixed(2)}
+                        </span>
                       </div>
                     </div>
 
@@ -427,7 +497,9 @@ function CustomsPage() {
                       <dl className="space-y-3 text-sm">
                         {est.data.breakdown.map((b) => (
                           <div key={b.label} className="flex justify-between items-center group">
-                            <dt className="text-slate-500 group-hover:text-[#032D60] transition-colors">{b.label}</dt>
+                            <dt className="text-slate-500 group-hover:text-[#032D60] transition-colors">
+                              {b.label}
+                            </dt>
                             <dd className="font-mono font-semibold text-slate-700">
                               ${b.amount.toFixed(2)}
                             </dd>
@@ -442,7 +514,10 @@ function CustomsPage() {
                       </h4>
                       <ul className="space-y-2">
                         {est.data.documents.map((d) => (
-                          <li key={d} className="flex items-start gap-2.5 text-xs text-slate-600 font-medium">
+                          <li
+                            key={d}
+                            className="flex items-start gap-2.5 text-xs text-slate-600 font-medium"
+                          >
                             <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                             {d}
                           </li>
@@ -451,9 +526,12 @@ function CustomsPage() {
                     </div>
 
                     <div className="pt-4 border-t border-slate-100">
-                       <Button onClick={exportSummary} className="w-full bg-[#032D60] hover:bg-[#032D60]/90 text-white font-bold h-12 rounded-xl shadow-md transition-all">
-                         <Download className="mr-2 h-4 w-4" /> Export CSV Summary
-                       </Button>
+                      <Button
+                        onClick={exportSummary}
+                        className="w-full bg-[#032D60] hover:bg-[#032D60]/90 text-white font-bold h-12 rounded-xl shadow-md transition-all"
+                      >
+                        <Download className="mr-2 h-4 w-4" /> Export CSV Summary
+                      </Button>
                     </div>
                   </div>
                 ) : null}

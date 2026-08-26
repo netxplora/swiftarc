@@ -34,7 +34,14 @@ export function ComplianceForm({ initialData }: { initialData: any }) {
     mutationFn: () =>
       updateSettings({
         data: {
-          compliance_legal: { termsUrl, privacyUrl, shippingPolicy, cookiePolicy, refundPolicy, otherLegal },
+          compliance_legal: {
+            termsUrl,
+            privacyUrl,
+            shippingPolicy,
+            cookiePolicy,
+            refundPolicy,
+            otherLegal,
+          },
         },
       }),
     onSuccess: () => {

@@ -4,7 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Phone, Mail, Building2, Globe, Globe2, MessageSquare, Clock, ArrowRight } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Building2,
+  Globe,
+  Globe2,
+  MessageSquare,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero-bg.jpg";
@@ -21,9 +31,14 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "Contact Us — SwiftArc Logistics" },
       {
         property: "og:description",
-        content: "Get in touch with SwiftArc for international courier support, rates, and tracking help.",
+        content:
+          "Get in touch with SwiftArc for international courier support, rates, and tracking help.",
       },
-      { name: "keywords", content: "contact swiftarc, customer support, shipping inquiry, courier office, tracking help" },
+      {
+        name: "keywords",
+        content:
+          "contact swiftarc, customer support, shipping inquiry, courier office, tracking help",
+      },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
   }),
@@ -147,8 +162,13 @@ function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-display font-bold text-foreground">Phone Support</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Available 24/7 for urgent inquiries</p>
-                  <a href="tel:+18009479382" className="text-sm font-semibold text-primary mt-2 inline-block hover:underline">
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Available 24/7 for urgent inquiries
+                  </p>
+                  <a
+                    href="tel:+18009479382"
+                    className="text-sm font-semibold text-primary mt-2 inline-block hover:underline"
+                  >
                     +1 (800) 947-9382
                   </a>
                 </div>
@@ -163,7 +183,10 @@ function ContactPage() {
                 <div>
                   <h3 className="font-display font-bold text-foreground">Email Support</h3>
                   <p className="text-sm text-muted-foreground mt-1">Replies within 2 to 4 hours</p>
-                  <a href="mailto:support@swiftarc.com" className="text-sm font-semibold text-primary mt-2 inline-block hover:underline">
+                  <a
+                    href="mailto:support@swiftarc.com"
+                    className="text-sm font-semibold text-primary mt-2 inline-block hover:underline"
+                  >
                     support@swiftarc.com
                   </a>
                 </div>
@@ -177,8 +200,13 @@ function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-display font-bold text-foreground">Courier Offices</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Find your nearest drop-off hub</p>
-                  <Link to="/locations" className="text-sm font-semibold text-primary mt-2 inline-flex items-center hover:underline">
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Find your nearest drop-off hub
+                  </p>
+                  <Link
+                    to="/locations"
+                    className="text-sm font-semibold text-primary mt-2 inline-flex items-center hover:underline"
+                  >
                     Find Locations <ArrowRight className="ml-1 h-3 w-3" />
                   </Link>
                 </div>
@@ -194,13 +222,15 @@ function ContactPage() {
           {/* Contact Form */}
           <div className="lg:col-span-7">
             <div className="mb-8">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Send a Message</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Send a Message
+              </p>
               <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 How Can We Help You?
               </h2>
               <p className="mt-3 text-muted-foreground">
-                Fill out the form below with your shipment details or general inquiry, and our support
-                team will get back to you promptly.
+                Fill out the form below with your shipment details or general inquiry, and our
+                support team will get back to you promptly.
               </p>
             </div>
 
@@ -213,7 +243,8 @@ function ContactPage() {
                     </div>
                     <h3 className="font-display text-2xl font-bold text-foreground">Thank You!</h3>
                     <p className="text-muted-foreground max-w-md mx-auto text-sm">
-                      Your message has been received. One of our support representatives will contact you via email shortly.
+                      Your message has been received. One of our support representatives will
+                      contact you via email shortly.
                     </p>
                     <Button onClick={() => setSubmitted(false)} variant="outline" className="mt-4">
                       Send Another Message
@@ -223,50 +254,101 @@ function ContactPage() {
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                        <Label
+                          htmlFor="firstName"
+                          className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                        >
                           First Name *
                         </Label>
-                        <Input id="firstName" required placeholder="John" className="h-11 bg-background" />
+                        <Input
+                          id="firstName"
+                          required
+                          placeholder="John"
+                          className="h-11 bg-background"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="lastName" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                        <Label
+                          htmlFor="lastName"
+                          className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                        >
                           Last Name *
                         </Label>
-                        <Input id="lastName" required placeholder="Doe" className="h-11 bg-background" />
+                        <Input
+                          id="lastName"
+                          required
+                          placeholder="Doe"
+                          className="h-11 bg-background"
+                        />
                       </div>
                     </div>
 
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                        <Label
+                          htmlFor="email"
+                          className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                        >
                           Email Address *
                         </Label>
-                        <Input id="email" type="email" required placeholder="john.doe@example.com" className="h-11 bg-background" />
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          placeholder="john.doe@example.com"
+                          className="h-11 bg-background"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                        <Label
+                          htmlFor="phone"
+                          className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                        >
                           Phone Number
                         </Label>
-                        <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" className="h-11 bg-background" />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="+1 (555) 000-0000"
+                          className="h-11 bg-background"
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="trackingNumber" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                      <Label
+                        htmlFor="trackingNumber"
+                        className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                      >
                         Tracking Number (Optional)
                       </Label>
-                      <Input id="trackingNumber" placeholder="e.g. SA-7241-9032-11" className="h-11 bg-background font-mono text-sm" />
+                      <Input
+                        id="trackingNumber"
+                        placeholder="e.g. SA-7241-9032-11"
+                        className="h-11 bg-background font-mono text-sm"
+                      />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="subject" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                      <Label
+                        htmlFor="subject"
+                        className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                      >
                         Inquiry Subject *
                       </Label>
-                      <Input id="subject" required placeholder="Shipment status / Shipping quote / General question" className="h-11 bg-background" />
+                      <Input
+                        id="subject"
+                        required
+                        placeholder="Shipment status / Shipping quote / General question"
+                        className="h-11 bg-background"
+                      />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                      <Label
+                        htmlFor="message"
+                        className="text-xs font-semibold uppercase tracking-wider text-foreground/80"
+                      >
                         Message Details *
                       </Label>
                       <textarea
@@ -295,7 +377,9 @@ function ContactPage() {
           {/* Regional Offices */}
           <div className="lg:col-span-5 space-y-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Global Presence</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Global Presence
+              </p>
               <h3 className="mt-2 font-display text-2xl font-bold text-foreground">
                 Regional Hubs
               </h3>
@@ -306,14 +390,19 @@ function ContactPage() {
 
             <div className="space-y-4">
               {offices.map((office) => (
-                <Card key={office.city} className="border-border bg-card hover:border-primary/40 transition-colors">
+                <Card
+                  key={office.city}
+                  className="border-border bg-card hover:border-primary/40 transition-colors"
+                >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-3">
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                         <Building2 className="h-5 w-5" />
                       </div>
                       <div className="space-y-1.5 flex-1">
-                        <h4 className="font-display font-bold text-foreground text-base">{office.city}</h4>
+                        <h4 className="font-display font-bold text-foreground text-base">
+                          {office.city}
+                        </h4>
                         <span className="inline-block text-[11px] font-semibold uppercase tracking-wider text-primary">
                           {office.region}
                         </span>
@@ -345,7 +434,8 @@ function ContactPage() {
                 Track an Active Shipment
               </h4>
               <p className="mt-2 text-xs text-white/80 leading-relaxed">
-                Already have a tracking code? Check the real-time location and expected delivery date instantly online.
+                Already have a tracking code? Check the real-time location and expected delivery
+                date instantly online.
               </p>
               <div className="mt-4">
                 <Link to="/tracking">

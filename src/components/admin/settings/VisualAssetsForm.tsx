@@ -38,7 +38,16 @@ export function VisualAssetsForm({ initialData }: { initialData: any }) {
     mutationFn: () =>
       updateSettings({
         data: {
-          visual_assets: { primaryLogo, logoLight, logoDark, favicon, appIcon, socialImage, emailLogo, documentLogo },
+          visual_assets: {
+            primaryLogo,
+            logoLight,
+            logoDark,
+            favicon,
+            appIcon,
+            socialImage,
+            emailLogo,
+            documentLogo,
+          },
         },
       }),
     onSuccess: () => {
@@ -66,7 +75,7 @@ export function VisualAssetsForm({ initialData }: { initialData: any }) {
           Manage platform logos and imagery. SVG format is recommended for logos.
         </p>
       </div>
-      
+
       <div className="rounded-[8px] border border-border dark:border-border bg-white dark:bg-card p-6 shadow-[0_2px_4px_rgba(0,0,0,0.07)]">
         <div className="grid gap-5 max-w-2xl">
           <div>
@@ -93,7 +102,7 @@ export function VisualAssetsForm({ initialData }: { initialData: any }) {
                 className="mt-1.5"
               />
             </div>
-            
+
             <div>
               <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Dark Mode Logo URL

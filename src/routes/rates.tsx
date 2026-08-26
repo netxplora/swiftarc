@@ -1,7 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Calculator, Plane, Truck, Package, Zap, ArrowRight, ShieldCheck, MapPin } from "lucide-react";
+import {
+  Calculator,
+  Plane,
+  Truck,
+  Package,
+  Zap,
+  ArrowRight,
+  ShieldCheck,
+  MapPin,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -23,9 +32,14 @@ export const Route = createFileRoute("/rates")({
       { property: "og:title", content: "Shipping Rates Calculator — SwiftArc" },
       {
         property: "og:description",
-        content: "Instant estimated shipping quotes and delivery schedules for air, ground, and sea freight.",
+        content:
+          "Instant estimated shipping quotes and delivery schedules for air, ground, and sea freight.",
       },
-      { name: "keywords", content: "shipping rate calculator, freight quotes, courier costs, international parcel pricing" },
+      {
+        name: "keywords",
+        content:
+          "shipping rate calculator, freight quotes, courier costs, international parcel pricing",
+      },
     ],
     links: [{ rel: "canonical", href: "/rates" }],
   }),
@@ -41,7 +55,9 @@ const icons = {
 
 function RatesPage() {
   const [weight, setWeight] = useState(4.5);
-  const [zone, setZone] = useState<"regional" | "international" | "intercontinental">("international");
+  const [zone, setZone] = useState<"regional" | "international" | "intercontinental">(
+    "international",
+  );
 
   const fetchRates = useServerFn(calculateRates);
   const { data: quotes, isFetching } = useQuery({
@@ -59,7 +75,10 @@ function RatesPage() {
       >
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          style={{
+            backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+            backgroundSize: "26px 26px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-0 w-[480px] h-[480px] rounded-full bg-primary/[0.06] blur-[130px] pointer-events-none" />
@@ -68,7 +87,11 @@ function RatesPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-6">
-              <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45 }}
+              >
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm">
                   <Calculator className="h-3 w-3" />
                   Instant Transit Calculator
@@ -84,7 +107,12 @@ function RatesPage() {
                 Calculate Shipping Rates &{" "}
                 <span className="relative">
                   <span className="text-primary">Transit Times</span>
-                  <motion.span className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8 }} />
+                  <motion.span
+                    className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40"
+                    initial={{ scaleX: 0, originX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.7, delay: 0.8 }}
+                  />
                 </span>
               </motion.h1>
 
@@ -94,7 +122,8 @@ function RatesPage() {
                 transition={{ duration: 0.6, delay: 0.15 }}
                 className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
               >
-                Compare estimated transit options for your package weight and destination zone. Final quotes are confirmed during on-site branch weighing.
+                Compare estimated transit options for your package weight and destination zone.
+                Final quotes are confirmed during on-site branch weighing.
               </motion.p>
             </div>
 
@@ -106,7 +135,11 @@ function RatesPage() {
                 className="relative"
               >
                 <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/25 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/12">
-                  <img src={heroImg} alt="SwiftArc Shipping Rates" className="w-full h-72 sm:h-80 rounded-2xl object-cover" />
+                  <img
+                    src={heroImg}
+                    alt="SwiftArc Shipping Rates"
+                    className="w-full h-72 sm:h-80 rounded-2xl object-cover"
+                  />
                   <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
                 </div>
               </motion.div>
@@ -118,15 +151,19 @@ function RatesPage() {
       {/* ── Main Calculator Layout ── */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-12">
-          
           {/* Controls Column */}
           <div className="lg:col-span-5">
-            <FadeInSection direction="left" className="sticky top-28 rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-[#032D60]/5">
+            <FadeInSection
+              direction="left"
+              className="sticky top-28 rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-[#032D60]/5"
+            >
               <div className="flex items-center gap-3 pb-6 border-b border-slate-100 mb-6">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                   <Calculator className="h-5 w-5" />
                 </div>
-                <h2 className="font-display text-2xl font-bold text-[#032D60]">Package Parameters</h2>
+                <h2 className="font-display text-2xl font-bold text-[#032D60]">
+                  Package Parameters
+                </h2>
               </div>
 
               <div className="space-y-8">
@@ -135,13 +172,21 @@ function RatesPage() {
                     <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Origin Location
                     </Label>
-                    <Input defaultValue="London, UK" className="h-12 bg-slate-50 border-slate-200 rounded-xl font-medium focus:border-primary/40 focus:ring-primary/20 shadow-sm" placeholder="City, Country" />
+                    <Input
+                      defaultValue="London, UK"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl font-medium focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                      placeholder="City, Country"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Destination Location
                     </Label>
-                    <Input defaultValue="New York, USA" className="h-12 bg-slate-50 border-slate-200 rounded-xl font-medium focus:border-primary/40 focus:ring-primary/20 shadow-sm" placeholder="City, Country" />
+                    <Input
+                      defaultValue="New York, USA"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl font-medium focus:border-primary/40 focus:ring-primary/20 shadow-sm"
+                      placeholder="City, Country"
+                    />
                   </div>
                 </div>
 
@@ -150,7 +195,9 @@ function RatesPage() {
                     <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Estimated Weight
                     </Label>
-                    <span className="font-display text-lg font-bold text-primary">{weight.toFixed(1)} kg</span>
+                    <span className="font-display text-lg font-bold text-primary">
+                      {weight.toFixed(1)} kg
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -196,7 +243,8 @@ function RatesPage() {
                     <ShieldCheck className="h-4 w-4 text-sky-600" /> Important Note:
                   </p>
                   <p className="pl-6">
-                    Online rates are approximations. Exact dimensional weight and final pricing are confirmed when you drop off the package at a SwiftArc office.
+                    Online rates are approximations. Exact dimensional weight and final pricing are
+                    confirmed when you drop off the package at a SwiftArc office.
                   </p>
                 </div>
               </div>
@@ -209,7 +257,9 @@ function RatesPage() {
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-primary mb-3">
                 SERVICE OPTIONS
               </span>
-              <h3 className="font-display text-3xl font-bold text-[#032D60]">Available Transit Tiers</h3>
+              <h3 className="font-display text-3xl font-bold text-[#032D60]">
+                Available Transit Tiers
+              </h3>
             </FadeInSection>
 
             <StaggerGrid className="space-y-5">
@@ -217,20 +267,25 @@ function RatesPage() {
                 const Icon = icons[q.id as keyof typeof icons] || Package;
                 return (
                   <StaggerItem key={q.name}>
-                    <div className={`group rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/15 transition-all duration-400 flex flex-col sm:flex-row sm:items-center justify-between gap-6 ${isFetching ? "opacity-50 pointer-events-none" : ""}`}>
+                    <div
+                      className={`group rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/15 transition-all duration-400 flex flex-col sm:flex-row sm:items-center justify-between gap-6 ${isFetching ? "opacity-50 pointer-events-none" : ""}`}
+                    >
                       <div className="flex items-start sm:items-center gap-5">
                         <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary group-hover:scale-110 group-hover:bg-primary/15 transition-all">
                           <Icon className="h-7 w-7" />
                         </div>
                         <div>
                           <div className="flex flex-wrap items-center gap-3 mb-1">
-                            <h4 className="font-display font-bold text-[#032D60] text-xl group-hover:text-primary transition-colors">{q.name}</h4>
+                            <h4 className="font-display font-bold text-[#032D60] text-xl group-hover:text-primary transition-colors">
+                              {q.name}
+                            </h4>
                             <span className="rounded-md bg-slate-100 border border-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                               {q.days} {q.days === 1 ? "Day" : "Days"} Transit
                             </span>
                           </div>
                           <p className="text-sm text-slate-500 leading-relaxed">
-                            Includes live tracking, terminal handling, and standard liability coverage.
+                            Includes live tracking, terminal handling, and standard liability
+                            coverage.
                           </p>
                         </div>
                       </div>
@@ -249,14 +304,21 @@ function RatesPage() {
               })}
             </StaggerGrid>
 
-            <FadeInSection direction="up" delay={0.3} className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-8">
+            <FadeInSection
+              direction="up"
+              delay={0.3}
+              className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-8"
+            >
               <Link to="/locations">
                 <Button className="bg-primary hover:bg-primary-hover text-white font-bold h-12 px-7 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
                   Find Nearest Office to Ship <MapPin className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button variant="outline" className="font-bold h-12 px-7 rounded-xl border-2 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
+                <Button
+                  variant="outline"
+                  className="font-bold h-12 px-7 rounded-xl border-2 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+                >
                   Custom Freight Quote
                 </Button>
               </Link>

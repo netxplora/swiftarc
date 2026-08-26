@@ -90,7 +90,9 @@ export function SiteFooter() {
               ].map(({ value, label }) => (
                 <div key={label} className="text-center">
                   <div className="font-display text-xl font-extrabold text-primary">{value}</div>
-                  <div className="text-[11px] uppercase tracking-wider text-slate-400 mt-0.5">{label}</div>
+                  <div className="text-[11px] uppercase tracking-wider text-slate-400 mt-0.5">
+                    {label}
+                  </div>
                 </div>
               ))}
             </div>

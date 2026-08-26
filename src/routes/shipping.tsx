@@ -38,7 +38,8 @@ export const Route = createFileRoute("/shipping")({
       { property: "og:title", content: "Shipping Services — SwiftArc Logistics" },
       {
         property: "og:description",
-        content: "Reliable freight and parcel shipping worldwide. Track your shipment in real time.",
+        content:
+          "Reliable freight and parcel shipping worldwide. Track your shipment in real time.",
       },
     ],
     links: [{ rel: "canonical", href: "/shipping" }],
@@ -56,7 +57,12 @@ const services = [
     slug: "sea-freight",
     image: svcIntlImg,
     desc: "Full container load (FCL) and less-than-container-load (LCL) shipping across all major global trade routes. Ideal for large or heavy cargo where transit time is flexible.",
-    features: ["FCL & LCL options", "Port-to-port and door-to-door", "Customs clearance included", "Reefer containers available"],
+    features: [
+      "FCL & LCL options",
+      "Port-to-port and door-to-door",
+      "Customs clearance included",
+      "Reefer containers available",
+    ],
   },
   {
     icon: Truck,
@@ -67,7 +73,12 @@ const services = [
     slug: "road",
     image: deliveryImg,
     desc: "Scheduled and on-demand ground transport covering regional and cross-border routes. Our fleet handles everything from parcels to full truck loads.",
-    features: ["Scheduled & express options", "Cross-border clearance", "Real-time GPS tracking", "Tail-lift delivery available"],
+    features: [
+      "Scheduled & express options",
+      "Cross-border clearance",
+      "Real-time GPS tracking",
+      "Tail-lift delivery available",
+    ],
   },
   {
     icon: Plane,
@@ -78,7 +89,12 @@ const services = [
     slug: "air-freight",
     image: aircraftImg,
     desc: "Time-critical air cargo services to 190+ destinations. Choose between next-day express, priority air, and economy freight options.",
-    features: ["Next-day express available", "190+ destinations", "Dangerous goods certified", "Temperature-sensitive cargo"],
+    features: [
+      "Next-day express available",
+      "190+ destinations",
+      "Dangerous goods certified",
+      "Temperature-sensitive cargo",
+    ],
   },
   {
     icon: Warehouse,
@@ -89,7 +105,12 @@ const services = [
     slug: "warehousing",
     image: warehouseImg,
     desc: "Secure, climate-controlled storage with flexible lease terms. Pick-and-pack, inventory management, and order fulfillment across global hubs.",
-    features: ["Climate-controlled storage", "Pick-and-pack fulfillment", "Inventory management", "Bonded warehouse options"],
+    features: [
+      "Climate-controlled storage",
+      "Pick-and-pack fulfillment",
+      "Inventory management",
+      "Bonded warehouse options",
+    ],
   },
   {
     icon: Package,
@@ -100,7 +121,12 @@ const services = [
     slug: "packaging",
     image: svcEcommerceImg,
     desc: "Professional packaging solutions for fragile, oversized, and high-value items. Short-term and long-term storage available at every major hub.",
-    features: ["Custom crating and wrapping", "Fragile item handling", "Short & long-term storage", "Export-compliant packing"],
+    features: [
+      "Custom crating and wrapping",
+      "Fragile item handling",
+      "Short & long-term storage",
+      "Export-compliant packing",
+    ],
   },
   {
     icon: ShieldCheck,
@@ -111,20 +137,42 @@ const services = [
     slug: "diplomatic",
     image: svcWhitegloveImg,
     desc: "Specialist handling for diplomatic pouches, government cargo, and high-value assets with full chain-of-custody documentation.",
-    features: ["Diplomatic pouch handling", "High-value asset transport", "Full chain-of-custody", "Dedicated escort service"],
+    features: [
+      "Diplomatic pouch handling",
+      "High-value asset transport",
+      "Full chain-of-custody",
+      "Dedicated escort service",
+    ],
   },
 ];
 
 const steps = [
-  { step: "01", title: "Visit Your Nearest Office", icon: MapPin, color: "bg-sky-500", desc: "Bring your package to any SwiftArc courier office. Our staff will inspect, weigh, and measure it on certified scales." },
-  { step: "02", title: "We Process Your Shipment", icon: FileCheck2, color: "bg-primary", desc: "An agent creates your shipment record, prepares customs documentation, and issues your tracking receipt immediately." },
-  { step: "03", title: "Track Every Milestone", icon: Zap, color: "bg-emerald-500", desc: "Your shipment is scanned at each network node. You receive live status updates from dispatch to delivery." },
+  {
+    step: "01",
+    title: "Visit Your Nearest Office",
+    icon: MapPin,
+    color: "bg-sky-500",
+    desc: "Bring your package to any SwiftArc courier office. Our staff will inspect, weigh, and measure it on certified scales.",
+  },
+  {
+    step: "02",
+    title: "We Process Your Shipment",
+    icon: FileCheck2,
+    color: "bg-primary",
+    desc: "An agent creates your shipment record, prepares customs documentation, and issues your tracking receipt immediately.",
+  },
+  {
+    step: "03",
+    title: "Track Every Milestone",
+    icon: Zap,
+    color: "bg-emerald-500",
+    desc: "Your shipment is scanned at each network node. You receive live status updates from dispatch to delivery.",
+  },
 ];
 
 function ShippingPage() {
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
-
       {/* ── Cinematic Hero ── */}
       <section
         className="relative min-h-[72vh] flex items-center overflow-hidden pt-12 pb-16"
@@ -133,7 +181,10 @@ function ShippingPage() {
         {/* Dot grid */}
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          style={{
+            backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+            backgroundSize: "26px 26px",
+          }}
           aria-hidden
         />
         {/* Glow orbs */}
@@ -142,7 +193,6 @@ function ShippingPage() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
-
             {/* ── Left copy ── */}
             <div className="lg:col-span-7 space-y-6">
               <motion.div
@@ -181,7 +231,8 @@ function ShippingPage() {
                 className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
               >
                 Whether you're sending a single parcel or managing recurring international freight,
-                SwiftArc delivers across 220+ countries with end-to-end tracking and insured handling.
+                SwiftArc delivers across 220+ countries with end-to-end tracking and insured
+                handling.
               </motion.p>
 
               <motion.div
@@ -191,12 +242,19 @@ function ShippingPage() {
                 className="flex flex-wrap gap-4"
               >
                 <Link to="/locations">
-                  <Button size="lg" className="group bg-primary text-white hover:bg-primary-hover font-bold px-7 h-12 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/35 hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                  <Button
+                    size="lg"
+                    className="group bg-primary text-white hover:bg-primary-hover font-bold px-7 h-12 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/35 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                  >
                     Find Nearest Branch <MapPin className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
                 <Link to="/rates">
-                  <Button size="lg" variant="outline" className="border-2 border-[#032D60]/20 text-[#032D60] hover:border-primary hover:text-primary hover:bg-primary/5 font-bold px-7 h-12 rounded-xl bg-white/60 backdrop-blur-sm hover:-translate-y-0.5 transition-all">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-[#032D60]/20 text-[#032D60] hover:border-primary hover:text-primary hover:bg-primary/5 font-bold px-7 h-12 rounded-xl bg-white/60 backdrop-blur-sm hover:-translate-y-0.5 transition-all"
+                  >
                     <Calculator className="mr-2 h-4 w-4 text-primary" /> Calculate Rates
                   </Button>
                 </Link>
@@ -209,11 +267,16 @@ function ShippingPage() {
                 transition={{ duration: 0.6, delay: 0.35 }}
                 className="flex flex-wrap gap-3 pt-2"
               >
-                {["100% Insured", "220+ Countries", "Real-time Tracking", "24/7 Support"].map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-white/80 border border-slate-200 rounded-full px-3 py-1 backdrop-blur-sm">
-                    <CheckCircle2 className="h-3 w-3 text-primary" /> {tag}
-                  </span>
-                ))}
+                {["100% Insured", "220+ Countries", "Real-time Tracking", "24/7 Support"].map(
+                  (tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-white/80 border border-slate-200 rounded-full px-3 py-1 backdrop-blur-sm"
+                    >
+                      <CheckCircle2 className="h-3 w-3 text-primary" /> {tag}
+                    </span>
+                  ),
+                )}
               </motion.div>
             </div>
 
@@ -242,10 +305,16 @@ function ShippingPage() {
                   transition={{ delay: 0.75 }}
                   className="absolute -bottom-5 left-4 right-4 sm:left-6 sm:right-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 shadow-xl p-3 grid grid-cols-3 gap-3 text-center"
                 >
-                  {[{ v: "220+", l: "Countries" }, { v: "99.7%", l: "On-Time" }, { v: "24/7", l: "Support" }].map(({ v, l }) => (
+                  {[
+                    { v: "220+", l: "Countries" },
+                    { v: "99.7%", l: "On-Time" },
+                    { v: "24/7", l: "Support" },
+                  ].map(({ v, l }) => (
                     <div key={l}>
                       <div className="font-display text-lg font-bold text-primary">{v}</div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{l}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                        {l}
+                      </div>
                     </div>
                   ))}
                 </motion.div>
@@ -259,12 +328,18 @@ function ShippingPage() {
       <div className="bg-[#032D60]/95 backdrop-blur-sm border-y border-white/10 py-3.5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center gap-3 text-sm text-white/80">
-            <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold">i</span>
+            <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold">
+              i
+            </span>
             <span className="font-semibold text-white">How to ship with SwiftArc:</span>
             <span className="text-white/70 text-xs sm:text-sm">
-              Bring your package to any branch office — our staff will handle weighing, documentation, and dispatch.
+              Bring your package to any branch office — our staff will handle weighing,
+              documentation, and dispatch.
             </span>
-            <Link to="/locations" className="ml-auto shrink-0 font-bold text-primary hover:underline text-xs sm:text-sm inline-flex items-center gap-1">
+            <Link
+              to="/locations"
+              className="ml-auto shrink-0 font-bold text-primary hover:underline text-xs sm:text-sm inline-flex items-center gap-1"
+            >
               Find a branch <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -294,7 +369,9 @@ function ShippingPage() {
                 className={`group h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md transition-all duration-400 hover:shadow-2xl hover:-translate-y-2 hover:border-primary/15 ${s.hoverGlow} flex flex-col`}
               >
                 {/* Image with glass badge overlay */}
-                <div className={`relative h-52 overflow-hidden bg-gradient-to-br ${s.accent} to-white`}>
+                <div
+                  className={`relative h-52 overflow-hidden bg-gradient-to-br ${s.accent} to-white`}
+                >
                   <img
                     src={s.image}
                     alt={s.title}
@@ -302,7 +379,9 @@ function ShippingPage() {
                   />
                   {/* Glass badge */}
                   <div className="absolute top-3 left-3">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${s.iconBg} bg-white/80 backdrop-blur-md shadow-md border border-white/60`}>
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${s.iconBg} bg-white/80 backdrop-blur-md shadow-md border border-white/60`}
+                    >
                       <s.icon className="h-3.5 w-3.5" />
                       {s.title}
                     </span>
@@ -376,13 +455,21 @@ function ShippingPage() {
                   {st.step}
                 </div>
                 {/* Accent bottom line */}
-                <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${st.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left rounded-b-2xl`} />
+                <div
+                  className={`absolute bottom-0 left-0 right-0 h-[3px] ${st.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left rounded-b-2xl`}
+                />
 
-                <div className={`relative h-14 w-14 rounded-2xl ${st.color} text-white grid place-items-center mx-auto mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                <div
+                  className={`relative h-14 w-14 rounded-2xl ${st.color} text-white grid place-items-center mx-auto mb-5 shadow-md group-hover:scale-110 transition-transform duration-300`}
+                >
                   <st.icon className="h-6 w-6" />
                 </div>
-                <div className="relative text-xs font-bold text-primary uppercase tracking-widest mb-1">Step {st.step}</div>
-                <h3 className="relative font-display text-lg font-bold text-[#032D60] mb-2">{st.title}</h3>
+                <div className="relative text-xs font-bold text-primary uppercase tracking-widest mb-1">
+                  Step {st.step}
+                </div>
+                <h3 className="relative font-display text-lg font-bold text-[#032D60] mb-2">
+                  {st.title}
+                </h3>
                 <p className="relative text-sm text-slate-500 leading-relaxed">{st.desc}</p>
               </motion.div>
             ))}
@@ -394,7 +481,10 @@ function ShippingPage() {
       <section className="relative overflow-hidden py-20 bg-[#032D60] text-white">
         <div
           className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+          style={{
+            backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-1/4 w-80 h-80 rounded-full bg-primary/25 blur-[100px] pointer-events-none" />
@@ -409,12 +499,19 @@ function ShippingPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4 pt-2">
               <Link to="/locations">
-                <Button size="lg" className="group bg-primary hover:bg-primary-hover text-white font-bold px-8 h-12 rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all">
+                <Button
+                  size="lg"
+                  className="group bg-primary hover:bg-primary-hover text-white font-bold px-8 h-12 rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all"
+                >
                   Find a Branch <MapPin className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button size="lg" variant="outline" className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-12 rounded-xl hover:-translate-y-0.5 transition-all">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-12 rounded-xl hover:-translate-y-0.5 transition-all"
+                >
                   Contact Support
                 </Button>
               </Link>

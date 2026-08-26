@@ -129,35 +129,43 @@ const STATUS_BUTTON_STYLES: Record<string, { active: string; inactive: string }>
   },
   created: {
     active: "bg-blue-600 text-white shadow-md font-semibold ring-2 ring-blue-600/30",
-    inactive: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 font-medium",
+    inactive:
+      "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 font-medium",
   },
   confirmed: {
     active: "bg-indigo-600 text-white shadow-md font-semibold ring-2 ring-indigo-600/30",
-    inactive: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/20 font-medium",
+    inactive:
+      "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/20 font-medium",
   },
   assigned: {
     active: "bg-cyan-600 text-white shadow-md font-semibold ring-2 ring-cyan-600/30",
-    inactive: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 font-medium",
+    inactive:
+      "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 font-medium",
   },
   picked_up: {
     active: "bg-amber-600 text-white shadow-md font-semibold ring-2 ring-amber-600/30",
-    inactive: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 font-medium",
+    inactive:
+      "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 font-medium",
   },
   in_transit: {
     active: "bg-sky-600 text-white shadow-md font-semibold ring-2 ring-sky-600/30",
-    inactive: "bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/20 font-medium",
+    inactive:
+      "bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/20 font-medium",
   },
   near_destination: {
     active: "bg-purple-600 text-white shadow-md font-semibold ring-2 ring-purple-600/30",
-    inactive: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 font-medium",
+    inactive:
+      "bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 font-medium",
   },
   delivered: {
     active: "bg-emerald-600 text-white shadow-md font-semibold ring-2 ring-emerald-600/30",
-    inactive: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 font-medium",
+    inactive:
+      "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 font-medium",
   },
   exception: {
     active: "bg-red-600 text-white shadow-md font-semibold ring-2 ring-red-600/30",
-    inactive: "bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/30 hover:bg-red-500/20 font-medium",
+    inactive:
+      "bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/30 hover:bg-red-500/20 font-medium",
   },
 };
 
@@ -184,7 +192,9 @@ function AdminShipments() {
     queryKey: ["admin-users"],
     queryFn: () => listUsers(),
   });
-  const users = (uq.data ?? []).filter((u: any) => u.roles.includes("moderator") || u.roles.includes("admin"));
+  const users = (uq.data ?? []).filter(
+    (u: any) => u.roles.includes("moderator") || u.roles.includes("admin"),
+  );
 
   useEffect(() => {
     const channel = supabase
@@ -303,7 +313,9 @@ function AdminShipments() {
             Check Delay Risks
           </Button>
           <Link to="/admin/shipments/create">
-            <Button className="bg-primary text-white hover:bg-primary-hover font-semibold">New Shipment</Button>
+            <Button className="bg-primary text-white hover:bg-primary-hover font-semibold">
+              New Shipment
+            </Button>
           </Link>
         </div>
       </div>
@@ -321,10 +333,9 @@ function AdminShipments() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilter("all")}
-            className={`rounded-full px-3.5 py-1.5 text-xs transition-all ${filter === "all"
-              ? STATUS_BUTTON_STYLES.all.active
-              : STATUS_BUTTON_STYLES.all.inactive
-              }`}
+            className={`rounded-full px-3.5 py-1.5 text-xs transition-all ${
+              filter === "all" ? STATUS_BUTTON_STYLES.all.active : STATUS_BUTTON_STYLES.all.inactive
+            }`}
           >
             All
           </button>
@@ -335,8 +346,9 @@ function AdminShipments() {
               <button
                 key={s}
                 onClick={() => setFilter(s)}
-                className={`rounded-full px-3.5 py-1.5 text-xs transition-all ${isSelected ? style.active : style.inactive
-                  }`}
+                className={`rounded-full px-3.5 py-1.5 text-xs transition-all ${
+                  isSelected ? style.active : style.inactive
+                }`}
               >
                 {statusLabels[s] || s}
               </button>
@@ -710,7 +722,11 @@ function UpdateLocationDialog({
               disabled={loading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MapPin className="h-4 w-4 mr-2" />}
+              {loading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <MapPin className="h-4 w-4 mr-2" />
+              )}
               Save Location
             </Button>
           </div>
@@ -1477,7 +1493,7 @@ function PackageTab({
           {Math.max(
             parseFloat(weight) || 0,
             ((parseFloat(length) || 0) * (parseFloat(width) || 0) * (parseFloat(height) || 0)) /
-            5000,
+              5000,
           ).toFixed(2)}{" "}
           kg
         </p>

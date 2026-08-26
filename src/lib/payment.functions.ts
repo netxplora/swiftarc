@@ -36,17 +36,19 @@ export const adminGetCryptoAssets = createServerFn({ method: "GET" })
 export const adminUpsertCryptoAsset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) =>
-    z.object({
-      id: z.string().uuid().optional(),
-      asset_name: z.string(),
-      symbol: z.string(),
-      network: z.string(),
-      wallet_address: z.string(),
-      qr_code_url: z.string().optional(),
-      min_payment_amount: z.number().optional(),
-      instructions: z.string().optional(),
-      is_active: z.boolean(),
-    }).parse(i)
+    z
+      .object({
+        id: z.string().uuid().optional(),
+        asset_name: z.string(),
+        symbol: z.string(),
+        network: z.string(),
+        wallet_address: z.string(),
+        qr_code_url: z.string().optional(),
+        min_payment_amount: z.number().optional(),
+        instructions: z.string().optional(),
+        is_active: z.boolean(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
@@ -59,7 +61,9 @@ export const adminUpsertCryptoAsset = createServerFn({ method: "POST" })
         .eq("id", data.id);
       if (error) fail(error);
     } else {
-      const { error } = await (supabaseAdmin as any).from("digital_currency_assets").insert(data as any);
+      const { error } = await (supabaseAdmin as any)
+        .from("digital_currency_assets")
+        .insert(data as any);
       if (error) fail(error);
     }
 
@@ -94,18 +98,20 @@ export const adminGetPurchaseProviders = createServerFn({ method: "GET" })
 export const adminUpsertPurchaseProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) =>
-    z.object({
-      id: z.string().uuid().optional(),
-      provider_name: z.string(),
-      website_url: z.string().url(),
-      supported_countries: z.string().optional(),
-      supported_assets: z.string().optional(),
-      supported_networks: z.string().optional(),
-      instructions: z.string().optional(),
-      customer_facing_description: z.string().optional(),
-      is_active: z.boolean(),
-      sort_order: z.number().default(0),
-    }).parse(i)
+    z
+      .object({
+        id: z.string().uuid().optional(),
+        provider_name: z.string(),
+        website_url: z.string().url(),
+        supported_countries: z.string().optional(),
+        supported_assets: z.string().optional(),
+        supported_networks: z.string().optional(),
+        instructions: z.string().optional(),
+        customer_facing_description: z.string().optional(),
+        is_active: z.boolean(),
+        sort_order: z.number().default(0),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
@@ -118,7 +124,9 @@ export const adminUpsertPurchaseProvider = createServerFn({ method: "POST" })
         .eq("id", data.id);
       if (error) fail(error);
     } else {
-      const { error } = await (supabaseAdmin as any).from("crypto_purchase_providers").insert(data as any);
+      const { error } = await (supabaseAdmin as any)
+        .from("crypto_purchase_providers")
+        .insert(data as any);
       if (error) fail(error);
     }
 
@@ -139,10 +147,12 @@ export const adminUpsertPurchaseProvider = createServerFn({ method: "POST" })
 export const customerCreatePaymentQuote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) =>
-    z.object({
-      customs_hold_id: z.string().uuid(),
-      asset_id: z.string().uuid(),
-    }).parse(i)
+    z
+      .object({
+        customs_hold_id: z.string().uuid(),
+        asset_id: z.string().uuid(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -227,10 +237,12 @@ export const customerCreatePaymentQuote = createServerFn({ method: "POST" })
 export const customerSubmitTransaction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) =>
-    z.object({
-      quote_id: z.string().uuid(),
-      transaction_hash: z.string(),
-    }).parse(i)
+    z
+      .object({
+        quote_id: z.string().uuid(),
+        transaction_hash: z.string(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -292,11 +304,13 @@ export const customerSubmitTransaction = createServerFn({ method: "POST" })
 export const adminVerifyPaymentSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i) =>
-    z.object({
-      submission_id: z.string().uuid(),
-      status: z.enum(["verified", "rejected", "underpaid", "overpaid"]),
-      notes: z.string().optional(),
-    }).parse(i)
+    z
+      .object({
+        submission_id: z.string().uuid(),
+        status: z.enum(["verified", "rejected", "underpaid", "overpaid"]),
+        notes: z.string().optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     await requireAdmin(context);
@@ -323,7 +337,7 @@ export const adminVerifyPaymentSubmission = createServerFn({ method: "POST" })
     // Update customs hold based on payment decision
     let holdStatus = "payment_verification";
     let paymentStatus = data.status === "verified" ? "paid" : data.status;
-    
+
     if (data.status === "verified") {
       holdStatus = "clearance_processing"; // Move forward!
     } else if (data.status === "rejected") {

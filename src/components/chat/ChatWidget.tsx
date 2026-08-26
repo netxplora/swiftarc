@@ -5,13 +5,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { MessageCircle, Send, X, Headphones } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  getOrCreateConversation, 
-  listMessages, 
+import {
+  getOrCreateConversation,
+  listMessages,
   sendMessage,
   guestGetOrCreateConversation,
   guestListMessages,
-  guestSendMessage
+  guestSendMessage,
 } from "@/lib/chat.functions";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,9 @@ type Msg = {
 };
 
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -40,7 +41,7 @@ export function ChatWidget() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  
+
   const [guestId, setGuestId] = useState<string | null>(null);
   const [guestSetupComplete, setGuestSetupComplete] = useState(false);
   const [guestName, setGuestName] = useState("");
@@ -51,7 +52,7 @@ export function ChatWidget() {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (
-        widgetRef.current && 
+        widgetRef.current &&
         !widgetRef.current.contains(e.target as Node) &&
         triggerRef.current &&
         !triggerRef.current.contains(e.target as Node)
@@ -90,18 +91,20 @@ export function ChatWidget() {
   const convo = useQuery({
     queryKey: ["chat", "convo", signedIn ? user?.id : guestId],
     enabled: open && (signedIn ? !!user?.id : !!guestId && guestSetupComplete),
-    queryFn: () => signedIn 
-      ? authStartConvo() 
-      : guestStartConvo({ data: { guestId: guestId!, name: guestName, email: guestEmail } }),
+    queryFn: () =>
+      signedIn
+        ? authStartConvo()
+        : guestStartConvo({ data: { guestId: guestId!, name: guestName, email: guestEmail } }),
     staleTime: 60_000,
   });
 
   const msgs = useQuery({
     queryKey: ["chat", "msgs", convo.data?.id],
     enabled: !!convo.data?.id,
-    queryFn: () => signedIn
-      ? authFetchMsgs({ data: { conversationId: convo.data!.id } })
-      : guestFetchMsgs({ data: { conversationId: convo.data!.id, guestId: guestId! } }),
+    queryFn: () =>
+      signedIn
+        ? authFetchMsgs({ data: { conversationId: convo.data!.id } })
+        : guestFetchMsgs({ data: { conversationId: convo.data!.id, guestId: guestId! } }),
   });
 
   // Realtime subscription
@@ -130,9 +133,10 @@ export function ChatWidget() {
   }, [msgs.data, open]);
 
   const send = useMutation({
-    mutationFn: (body: string) => signedIn
-      ? authPostMsg({ data: { conversationId: convo.data!.id, body } })
-      : guestPostMsg({ data: { conversationId: convo.data!.id, guestId: guestId!, body } }),
+    mutationFn: (body: string) =>
+      signedIn
+        ? authPostMsg({ data: { conversationId: convo.data!.id, body } })
+        : guestPostMsg({ data: { conversationId: convo.data!.id, guestId: guestId!, body } }),
     onSuccess: () => {
       setText("");
       qc.invalidateQueries({ queryKey: ["chat", "msgs", convo.data?.id] });
@@ -178,7 +182,7 @@ export function ChatWidget() {
                   Online • replies in seconds
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => setOpen(false)}
                 className="rounded-full p-1 text-white/80 hover:text-white hover:bg-white/20 transition-colors"
                 aria-label="Close chat"
@@ -194,9 +198,11 @@ export function ChatWidget() {
                     <MessageCircle className="h-7 w-7" />
                   </div>
                   <h3 className="font-bold text-lg text-foreground">Welcome to Live Chat</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Introduce yourself to start chatting with our logistics team.</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Introduce yourself to start chatting with our logistics team.
+                  </p>
                 </div>
-                <form 
+                <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (guestName.trim()) {
@@ -206,21 +212,24 @@ export function ChatWidget() {
                   }}
                   className="space-y-3"
                 >
-                  <Input 
-                    placeholder="Your Name (required)" 
+                  <Input
+                    placeholder="Your Name (required)"
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     required
                     className="h-11 rounded-xl"
                   />
-                  <Input 
-                    placeholder="Email Address (optional)" 
+                  <Input
+                    placeholder="Email Address (optional)"
                     type="email"
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                     className="h-11 rounded-xl"
                   />
-                  <Button type="submit" className="w-full h-11 font-bold bg-primary text-white hover:bg-primary-hover rounded-xl mt-2">
+                  <Button
+                    type="submit"
+                    className="w-full h-11 font-bold bg-primary text-white hover:bg-primary-hover rounded-xl mt-2"
+                  >
                     Start Chatting
                   </Button>
                 </form>
@@ -229,69 +238,69 @@ export function ChatWidget() {
               <>
                 <div className="flex-1 space-y-2.5 overflow-y-auto bg-background p-4">
                   {(msgs.data ?? []).map((m: Msg, i: number, arr: Msg[]) => {
-                const mine = m.sender_role === "user";
-                const isSystem = m.sender_role === "system";
-                const prevMsg = i > 0 ? arr[i - 1] : null;
-                const showLabel = !prevMsg || prevMsg.sender_role !== m.sender_role;
+                    const mine = m.sender_role === "user";
+                    const isSystem = m.sender_role === "system";
+                    const prevMsg = i > 0 ? arr[i - 1] : null;
+                    const showLabel = !prevMsg || prevMsg.sender_role !== m.sender_role;
 
-                return (
-                  <motion.div
-                    key={m.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex flex-col ${mine ? "items-end" : "items-start"}`}
-                  >
-                    {showLabel && !isSystem && (
-                      <span className="text-[10px] font-semibold text-muted-foreground mb-1 px-1">
-                        {mine ? "You" : "Support Agent"}
-                      </span>
-                    )}
-                    <div
-                      className={
-                        isSystem
-                          ? "max-w-[85%] rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground self-center mt-2 mb-2 text-center"
-                          : mine
-                            ? "max-w-[85%] rounded-2xl rounded-br-xs bg-primary px-3.5 py-2.5 text-sm text-white shadow-sm"
-                            : "max-w-[85%] rounded-2xl rounded-bl-xs bg-muted border border-border px-3.5 py-2.5 text-sm text-foreground shadow-sm"
-                      }
-                    >
-                      {m.body}
-                      {!isSystem && (
+                    return (
+                      <motion.div
+                        key={m.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex flex-col ${mine ? "items-end" : "items-start"}`}
+                      >
+                        {showLabel && !isSystem && (
+                          <span className="text-[10px] font-semibold text-muted-foreground mb-1 px-1">
+                            {mine ? "You" : "Support Agent"}
+                          </span>
+                        )}
                         <div
-                          className={`text-[9px] mt-1 ${mine ? "text-white/70 text-right" : "text-muted-foreground"}`}
+                          className={
+                            isSystem
+                              ? "max-w-[85%] rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground self-center mt-2 mb-2 text-center"
+                              : mine
+                                ? "max-w-[85%] rounded-2xl rounded-br-xs bg-primary px-3.5 py-2.5 text-sm text-white shadow-sm"
+                                : "max-w-[85%] rounded-2xl rounded-bl-xs bg-muted border border-border px-3.5 py-2.5 text-sm text-foreground shadow-sm"
+                          }
                         >
-                          {format(new Date(m.created_at), "HH:mm")}
+                          {m.body}
+                          {!isSystem && (
+                            <div
+                              className={`text-[9px] mt-1 ${mine ? "text-white/70 text-right" : "text-muted-foreground"}`}
+                            >
+                              {format(new Date(m.created_at), "HH:mm")}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-              <div ref={bottomRef} />
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (text.trim() && convo.data?.id) send.mutate(text.trim());
-              }}
-              className="flex items-center gap-2 border-t border-border bg-card p-3"
-            >
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Type your message…"
-                className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/40"
-              />
-              <button
-                type="submit"
-                disabled={!text.trim() || send.isPending}
-                className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white disabled:opacity-40 hover:bg-primary-hover transition-colors shadow-sm"
-                aria-label="Send message"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </form>
-            </>
+                      </motion.div>
+                    );
+                  })}
+                  <div ref={bottomRef} />
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (text.trim() && convo.data?.id) send.mutate(text.trim());
+                  }}
+                  className="flex items-center gap-2 border-t border-border bg-card p-3"
+                >
+                  <input
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Type your message…"
+                    className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!text.trim() || send.isPending}
+                    className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white disabled:opacity-40 hover:bg-primary-hover transition-colors shadow-sm"
+                    aria-label="Send message"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </form>
+              </>
             )}
           </motion.div>
         )}

@@ -229,10 +229,10 @@ function RootComponent() {
     // Lazy import so SSR doesn't hit the client module at module scope
     import("@/integrations/supabase/client").then(({ supabase }) => {
       let currentUser: string | null = null;
-      
+
       const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
         const userId = session?.user?.id || null;
-        
+
         // Only invalidate if the user actually changed (e.g. login/logout)
         // This prevents full page refreshes when Supabase simply refreshes the token on window focus
         if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
@@ -242,7 +242,7 @@ function RootComponent() {
           }
         }
       });
-      
+
       // Initialize currentUser
       supabase.auth.getSession().then(({ data }) => {
         currentUser = data.session?.user?.id || null;
@@ -255,7 +255,8 @@ function RootComponent() {
   const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
   const isPrint = pathname.startsWith("/invoice");
   const isAdmin = pathname.startsWith("/admin");
-  const isAuth = pathname === "/login" || pathname === "/register" || pathname === "/reset-password";
+  const isAuth =
+    pathname === "/login" || pathname === "/register" || pathname === "/reset-password";
   const hideNavAndFooter = isDashboard || isPrint || isAuth;
 
   return (

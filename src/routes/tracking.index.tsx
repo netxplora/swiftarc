@@ -23,7 +23,8 @@ export const Route = createFileRoute("/tracking/")({
       { property: "og:title", content: "Track a Shipment — SwiftArc Logistics" },
       {
         property: "og:description",
-        content: "Real-time visibility, checkpoint timelines, and proof of delivery across 220+ countries.",
+        content:
+          "Real-time visibility, checkpoint timelines, and proof of delivery across 220+ countries.",
       },
       { property: "og:url", content: "/tracking" },
     ],
@@ -242,7 +243,9 @@ function TrackingLanding() {
                     <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
                       <f.icon className="h-6 w-6" />
                     </div>
-                    <h3 className="font-display font-bold text-lg text-foreground mb-2">{f.title}</h3>
+                    <h3 className="font-display font-bold text-lg text-foreground mb-2">
+                      {f.title}
+                    </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
                   </CardContent>
                 </Card>

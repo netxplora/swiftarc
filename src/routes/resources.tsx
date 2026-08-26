@@ -19,9 +19,14 @@ export const Route = createFileRoute("/resources")({
       { property: "og:title", content: "Resources & News — SwiftArc Logistics" },
       {
         property: "og:description",
-        content: "Practical guides and operational insights for international shipping and freight logistics.",
+        content:
+          "Practical guides and operational insights for international shipping and freight logistics.",
       },
-      { name: "keywords", content: "logistics guides, customs tips, freight news, supply chain articles, shipping resources" },
+      {
+        name: "keywords",
+        content:
+          "logistics guides, customs tips, freight news, supply chain articles, shipping resources",
+      },
     ],
     links: [{ rel: "canonical", href: "/resources" }],
   }),
@@ -72,11 +77,16 @@ function ResourcesPage() {
     <>
       {/* Hero Header */}
       <section className="relative overflow-hidden text-white" style={{ minHeight: "48vh" }}>
-        <img src={heroImg} alt="SwiftArc logistics resources" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={heroImg}
+          alt="SwiftArc logistics resources"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, rgba(3,45,96,0.94) 0%, rgba(3,45,96,0.82) 60%, rgba(3,45,96,0.68) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(3,45,96,0.94) 0%, rgba(3,45,96,0.82) 60%, rgba(3,45,96,0.68) 100%)",
           }}
           aria-hidden
         />
@@ -86,7 +96,10 @@ function ResourcesPage() {
           aria-hidden
         />
 
-        <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-20 sm:px-6 lg:px-8 flex flex-col justify-center" style={{ minHeight: "48vh" }}>
+        <div
+          className="relative mx-auto max-w-7xl px-4 pt-20 pb-20 sm:px-6 lg:px-8 flex flex-col justify-center"
+          style={{ minHeight: "48vh" }}
+        >
           <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -109,7 +122,8 @@ function ResourcesPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-4 max-w-2xl text-base text-white/80 leading-relaxed"
           >
-            Browse operational guides, customs tips, packaging standards, and technical documentation to streamline your shipments.
+            Browse operational guides, customs tips, packaging standards, and technical
+            documentation to streamline your shipments.
           </motion.p>
         </div>
       </section>
@@ -140,7 +154,9 @@ function ResourcesPage() {
               <h2 className="mt-4 font-display text-2xl font-bold leading-snug text-foreground sm:text-3xl">
                 {posts[0].title}
               </h2>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{posts[0].excerpt}</p>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                {posts[0].excerpt}
+              </p>
               <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-4">
                 <span>{posts[0].date}</span>
                 <span>By {posts[0].author}</span>
@@ -162,7 +178,10 @@ function ResourcesPage() {
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:grid-cols-2">
             {posts.slice(1).map((post) => (
-              <Card key={post.title} className="group overflow-hidden border-border bg-card hover:shadow-md transition-shadow">
+              <Card
+                key={post.title}
+                className="group overflow-hidden border-border bg-card hover:shadow-md transition-shadow"
+              >
                 <div className="aspect-[16/9] overflow-hidden">
                   <img
                     src={post.img}
@@ -180,7 +199,9 @@ function ResourcesPage() {
                       <Clock className="h-3 w-3" /> {post.readTime}
                     </span>
                   </div>
-                  <h3 className="mt-3 font-display text-xl font-bold text-foreground">{post.title}</h3>
+                  <h3 className="mt-3 font-display text-xl font-bold text-foreground">
+                    {post.title}
+                  </h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
                     {post.excerpt}
                   </p>
@@ -204,27 +225,38 @@ function ResourcesPage() {
       {/* Resource Sections */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 border-t border-border">
         <div className="mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Guides & Reference</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            Guides & Reference
+          </p>
           <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Operational Documentation
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Clear, practical guides to assist with cargo preparation, customs documents, and technical integrations.
+            Clear, practical guides to assist with cargo preparation, customs documents, and
+            technical integrations.
           </p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
           {resourceCategories.map((cat) => (
-            <Card key={cat.title} className="border-border bg-card hover:border-primary/40 transition-all flex flex-col justify-between">
+            <Card
+              key={cat.title}
+              className="border-border bg-card hover:border-primary/40 transition-all flex flex-col justify-between"
+            >
               <CardContent className="p-8">
                 <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary mb-5">
                   <cat.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-display text-2xl font-bold text-foreground mb-3">{cat.title}</h3>
+                <h3 className="font-display text-2xl font-bold text-foreground mb-3">
+                  {cat.title}
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">{cat.desc}</p>
                 <ul className="space-y-2.5 border-t border-border/60 pt-5">
                   {cat.links.map((link) => (
-                    <li key={link} className="flex items-center gap-2 text-xs font-medium text-foreground/80">
+                    <li
+                      key={link}
+                      className="flex items-center gap-2 text-xs font-medium text-foreground/80"
+                    >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
                       <span>{link}</span>
                     </li>
@@ -243,16 +275,24 @@ function ResourcesPage() {
             Need specialized advice on your shipment?
           </h2>
           <p className="mt-3 text-sm sm:text-base text-white/80 leading-relaxed">
-            Our logistics support team is ready to guide you through dangerous goods regulations, temperature control, or international customs paperwork.
+            Our logistics support team is ready to guide you through dangerous goods regulations,
+            temperature control, or international customs paperwork.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link to="/contact">
-              <Button size="lg" className="bg-primary text-white hover:bg-primary-hover font-bold shadow-lg px-8">
+              <Button
+                size="lg"
+                className="bg-primary text-white hover:bg-primary-hover font-bold shadow-lg px-8"
+              >
                 Contact Our Support Team <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link to="/support">
-              <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/10 hover:bg-white/20 font-semibold px-8">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/30 text-white bg-white/10 hover:bg-white/20 font-semibold px-8"
+              >
                 Visit Help Center
               </Button>
             </Link>

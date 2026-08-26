@@ -1155,7 +1155,6 @@ export const createPaymentIntent = createServerFn({ method: "POST" })
     return { clientSecret: paymentIntent.client_secret };
   });
 
-
 export const getCourierManifest = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {

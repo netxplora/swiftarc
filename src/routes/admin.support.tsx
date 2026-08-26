@@ -102,10 +102,8 @@ function AdminSupport() {
   useEffect(() => {
     const channel = supabase
       .channel("admin-chat-convos")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "chat_conversations" },
-        () => qc.invalidateQueries({ queryKey: ["admin-chats"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_conversations" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin-chats"] }),
       )
       .subscribe();
     return () => {
@@ -126,8 +124,7 @@ function AdminSupport() {
   }, [activeId]);
 
   const send = useMutation({
-    mutationFn: (body: string) =>
-      postMsg({ data: { conversationId: activeId!, body } }),
+    mutationFn: (body: string) => postMsg({ data: { conversationId: activeId!, body } }),
     onSuccess: () => {
       setText("");
       qc.invalidateQueries({ queryKey: ["admin-chat-msgs", activeId] });
@@ -149,21 +146,14 @@ function AdminSupport() {
     if (filter === "closed" && c.status !== "closed") return false;
     if (search) {
       const q = search.toLowerCase();
-      return (
-        (c.subject ?? "").toLowerCase().includes(q) ||
-        c.id.toLowerCase().includes(q)
-      );
+      return (c.subject ?? "").toLowerCase().includes(q) || c.id.toLowerCase().includes(q);
     }
     return true;
   });
 
-  const activeConvo = (convos.data ?? []).find(
-    (c: Conversation) => c.id === activeId,
-  );
+  const activeConvo = (convos.data ?? []).find((c: Conversation) => c.id === activeId);
 
-  const openCount = (convos.data ?? []).filter(
-    (c: Conversation) => c.status === "open",
-  ).length;
+  const openCount = (convos.data ?? []).filter((c: Conversation) => c.status === "open").length;
 
   return (
     <div className="grid h-[calc(100vh-theme(spacing.16))] grid-cols-1 md:grid-cols-[340px_1fr] border border-border rounded-xl overflow-hidden bg-card">
@@ -233,11 +223,7 @@ function AdminSupport() {
                         : "bg-amber/15 text-amber-deep",
                     )}
                   >
-                    {isGuest ? (
-                      <UserRound className="h-4 w-4" />
-                    ) : (
-                      <User className="h-4 w-4" />
-                    )}
+                    {isGuest ? <UserRound className="h-4 w-4" /> : <User className="h-4 w-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-0.5">
@@ -256,8 +242,7 @@ function AdminSupport() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-muted-foreground font-mono">
-                        {isGuest ? "Guest" : "User"} •{" "}
-                        {c.id.split("-")[0]}
+                        {isGuest ? "Guest" : "User"} • {c.id.split("-")[0]}
                       </span>
                       {c.status === "open" ? (
                         <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
@@ -325,12 +310,10 @@ function AdminSupport() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <AnimatePresence initial={false}>
                 {msgs.data?.map((m: Msg, i: number, arr: Msg[]) => {
-                  const isAdmin =
-                    m.sender_role === "agent" || m.sender_role === "admin";
+                  const isAdmin = m.sender_role === "agent" || m.sender_role === "admin";
                   const isSystem = m.sender_role === "system";
                   const prevMsg = i > 0 ? arr[i - 1] : null;
-                  const showLabel =
-                    !prevMsg || prevMsg.sender_role !== m.sender_role;
+                  const showLabel = !prevMsg || prevMsg.sender_role !== m.sender_role;
 
                   return (
                     <motion.div
@@ -339,11 +322,7 @@ function AdminSupport() {
                       animate={{ opacity: 1, y: 0 }}
                       className={cn(
                         "flex flex-col",
-                        isSystem
-                          ? "items-center"
-                          : isAdmin
-                            ? "items-end"
-                            : "items-start",
+                        isSystem ? "items-center" : isAdmin ? "items-end" : "items-start",
                       )}
                     >
                       {showLabel && !isSystem && (
@@ -368,9 +347,7 @@ function AdminSupport() {
                           <div
                             className={cn(
                               "text-[10px] mt-1",
-                              isAdmin
-                                ? "text-cream/50 text-right"
-                                : "text-muted-foreground",
+                              isAdmin ? "text-cream/50 text-right" : "text-muted-foreground",
                             )}
                           >
                             {format(new Date(m.created_at), "HH:mm")}

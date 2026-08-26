@@ -46,7 +46,8 @@ export function AuditLogs() {
           <Clock className="h-5 w-5 text-accent" /> Audit Logs
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          View a history of all platform settings changes. Logs are captured automatically by database triggers.
+          View a history of all platform settings changes. Logs are captured automatically by
+          database triggers.
         </p>
       </div>
 
@@ -87,9 +88,7 @@ export function AuditLogs() {
                         >
                           {log.category.replace(/_/g, " ")}
                         </Badge>
-                        <span className="text-sm font-medium text-foreground">
-                          {log.action}
-                        </span>
+                        <span className="text-sm font-medium text-foreground">{log.action}</span>
                       </div>
                       {log.previous_value && log.new_value && (
                         <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">

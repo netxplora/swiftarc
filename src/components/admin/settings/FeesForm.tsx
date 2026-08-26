@@ -72,9 +72,7 @@ export function FeesForm({ initialData }: { initialData: PlatformFee[] }) {
                   key={fee.id}
                   className="border-b border-border dark:border-border last:border-0 hover:bg-muted/60 dark:hover:bg-muted/20 transition-colors"
                 >
-                  <td className="px-5 py-3 font-medium text-foreground">
-                    {fee.name}
-                  </td>
+                  <td className="px-5 py-3 font-medium text-foreground">{fee.name}</td>
                   <td className="px-5 py-3">
                     <Badge
                       variant="outline"

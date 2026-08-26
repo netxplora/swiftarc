@@ -44,7 +44,7 @@ export function SiteHeader() {
         "sticky top-0 z-40 h-[60px] transition-all duration-300",
         scrolled
           ? "bg-white/85 dark:bg-card/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm shadow-slate-200/40"
-          : "bg-white dark:bg-card border-b border-border"
+          : "bg-white dark:bg-card border-b border-border",
       )}
     >
       <div className="mx-auto flex h-[60px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:gap-6 lg:px-8">
@@ -66,7 +66,7 @@ export function SiteHeader() {
                   "relative flex h-[60px] items-center px-3.5 text-[14px] font-medium transition-colors",
                   active
                     ? "text-primary font-semibold"
-                    : "text-slate-600 dark:text-slate-300 hover:text-[#032D60] dark:hover:text-white"
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#032D60] dark:hover:text-white",
                 )}
               >
                 {item.tKey ? t(item.tKey) : item.label}
@@ -127,11 +127,23 @@ export function SiteHeader() {
         >
           <AnimatePresence mode="wait" initial={false}>
             {open ? (
-              <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <motion.span
+                key="x"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
                 <X className="h-5 w-5" />
               </motion.span>
             ) : (
-              <motion.span key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <motion.span
+                key="menu"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
                 <Menu className="h-5 w-5" />
               </motion.span>
             )}
@@ -164,7 +176,7 @@ export function SiteHeader() {
                       "flex items-center justify-between rounded-xl px-4 py-3 text-[14px] font-medium transition-colors",
                       pathname === item.to || (item.to !== "/" && pathname.startsWith(item.to))
                         ? "bg-primary/8 text-primary"
-                        : "text-foreground hover:bg-slate-50 dark:hover:bg-muted"
+                        : "text-foreground hover:bg-slate-50 dark:hover:bg-muted",
                     )}
                   >
                     {item.tKey ? t(item.tKey) : item.label}
@@ -174,7 +186,10 @@ export function SiteHeader() {
               ))}
               <div className="mt-2 pt-2 border-t border-border">
                 <Link to="/contact" onClick={() => setOpen(false)}>
-                  <button type="button" className="w-full h-11 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+                  <button
+                    type="button"
+                    className="w-full h-11 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
+                  >
                     Get a Quote
                   </button>
                 </Link>

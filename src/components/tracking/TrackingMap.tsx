@@ -53,9 +53,9 @@ const createCurrentIcon = () =>
     iconAnchor: [11, 11],
   });
 
-const originIcon      = createDotIcon("#1e293b", 18); // navy
-const destIcon        = createDotIcon("#f59e0b", 18); // amber
-const checkpointIcon  = createDotIcon("#94a3b8", 11); // slate
+const originIcon = createDotIcon("#1e293b", 18); // navy
+const destIcon = createDotIcon("#f59e0b", 18); // amber
+const checkpointIcon = createDotIcon("#94a3b8", 11); // slate
 
 // ── Great-circle arc ───────────────────────────────────────────────────────
 function getArcPoints(
@@ -65,10 +65,13 @@ function getArcPoints(
 ): [number, number][] {
   const toRad = (d: number) => d * (Math.PI / 180);
   const toDeg = (r: number) => r * (180 / Math.PI);
-  const lat1 = toRad(start[0]), lon1 = toRad(start[1]);
-  const lat2 = toRad(end[0]),   lon2 = toRad(end[1]);
+  const lat1 = toRad(start[0]),
+    lon1 = toRad(start[1]);
+  const lat2 = toRad(end[0]),
+    lon2 = toRad(end[1]);
   const d =
-    2 * Math.asin(
+    2 *
+    Math.asin(
       Math.sqrt(
         Math.pow(Math.sin((lat1 - lat2) / 2), 2) +
           Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lon1 - lon2) / 2), 2),
@@ -112,11 +115,13 @@ export function TrackingMap({
   // memoised so the icon object isn't recreated each render
   const currentIcon = useMemo(() => createCurrentIcon(), []);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const hasOrigin  = origin[0]      !== 0 || origin[1]      !== 0;
-  const hasDest    = destination[0] !== 0 || destination[1] !== 0;
-  const hasCurrent = current[0]     !== 0 || current[1]     !== 0;
+  const hasOrigin = origin[0] !== 0 || origin[1] !== 0;
+  const hasDest = destination[0] !== 0 || destination[1] !== 0;
+  const hasCurrent = current[0] !== 0 || current[1] !== 0;
 
   /** Full planned-route arc — dashed grey */
   const fullArc = useMemo(
@@ -132,8 +137,8 @@ export function TrackingMap({
 
   const allPoints = useMemo(() => {
     const pts: [number, number][] = [];
-    if (hasOrigin)  pts.push(origin);
-    if (hasDest)    pts.push(destination);
+    if (hasOrigin) pts.push(origin);
+    if (hasDest) pts.push(destination);
     if (hasCurrent) pts.push(current);
     checkpoints.forEach((c) => {
       if (c.lat !== 0 || c.lng !== 0) pts.push([c.lat, c.lng]);
@@ -143,7 +148,11 @@ export function TrackingMap({
 
   if (!mounted) {
     return (
-      <div style={{ height }} className="w-full animate-pulse rounded-2xl bg-secondary" aria-hidden />
+      <div
+        style={{ height }}
+        className="w-full animate-pulse rounded-2xl bg-secondary"
+        aria-hidden
+      />
     );
   }
 

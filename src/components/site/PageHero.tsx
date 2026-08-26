@@ -97,11 +97,7 @@ export function PageHero({
             >
               {/* Glass frame around image */}
               <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/30 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/10">
-                <img
-                  src={imageSrc}
-                  alt={title}
-                  className="h-72 w-full rounded-2xl object-cover"
-                />
+                <img src={imageSrc} alt={title} className="h-72 w-full rounded-2xl object-cover" />
                 {/* Subtle gradient overlay */}
                 <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
               </div>

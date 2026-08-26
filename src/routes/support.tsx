@@ -1,7 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { PhoneCall, Mail, HelpCircle, Search, CheckCircle2, ArrowRight, ShieldCheck, MapPin, Globe } from "lucide-react";
+import {
+  PhoneCall,
+  Mail,
+  HelpCircle,
+  Search,
+  CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  MapPin,
+  Globe,
+} from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -27,7 +37,11 @@ export const Route = createFileRoute("/support")({
         property: "og:description",
         content: "24/7 help center and answers for all your shipping and tracking inquiries.",
       },
-      { name: "keywords", content: "logistics help center, shipment FAQ, track parcel, courier assistance, shipping support" },
+      {
+        name: "keywords",
+        content:
+          "logistics help center, shipment FAQ, track parcel, courier assistance, shipping support",
+      },
     ],
     links: [{ rel: "canonical", href: "/support" }],
   }),
@@ -89,13 +103,19 @@ function SupportPage() {
   const [q, setQ] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const categories = ["All", "Tracking", "Shipping", "Delivery", "Customs & Clearance", "Insurance & Claims"];
+  const categories = [
+    "All",
+    "Tracking",
+    "Shipping",
+    "Delivery",
+    "Customs & Clearance",
+    "Insurance & Claims",
+  ];
 
   const filtered = useMemo(() => {
     return faqs.filter((f) => {
       const matchesSearch =
-        !q.trim() ||
-        (f.q + " " + f.a + " " + f.cat).toLowerCase().includes(q.toLowerCase().trim());
+        !q.trim() || (f.q + " " + f.a + " " + f.cat).toLowerCase().includes(q.toLowerCase().trim());
       const matchesCategory = activeCategory === "All" || f.cat === activeCategory;
       return matchesSearch && matchesCategory;
     });
@@ -110,7 +130,10 @@ function SupportPage() {
       >
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          style={{
+            backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+            backgroundSize: "26px 26px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-0 w-[460px] h-[460px] rounded-full bg-primary/[0.06] blur-[130px] pointer-events-none" />
@@ -119,7 +142,11 @@ function SupportPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-6">
-              <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45 }}
+              >
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm">
                   <Globe className="h-3 w-3" />
                   Help & Knowledge Center
@@ -135,7 +162,12 @@ function SupportPage() {
                 How Can We{" "}
                 <span className="relative">
                   <span className="text-primary">Assist You</span>
-                  <motion.span className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8 }} />
+                  <motion.span
+                    className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40"
+                    initial={{ scaleX: 0, originX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.7, delay: 0.8 }}
+                  />
                 </span>{" "}
                 Today?
               </motion.h1>
@@ -146,7 +178,8 @@ function SupportPage() {
                 transition={{ duration: 0.6, delay: 0.15 }}
                 className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
               >
-                Find fast answers regarding tracking, office drop-offs, customs clearance, and delivery procedures across our global network.
+                Find fast answers regarding tracking, office drop-offs, customs clearance, and
+                delivery procedures across our global network.
               </motion.p>
 
               {/* Search Bar */}
@@ -173,7 +206,11 @@ function SupportPage() {
                 transition={{ duration: 0.75, delay: 0.2 }}
               >
                 <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/25 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/12">
-                  <img src={heroImg} alt="SwiftArc Support Center" className="w-full h-72 sm:h-80 rounded-2xl object-cover" />
+                  <img
+                    src={heroImg}
+                    alt="SwiftArc Support Center"
+                    className="w-full h-72 sm:h-80 rounded-2xl object-cover"
+                  />
                   <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
                 </div>
               </motion.div>
@@ -187,12 +224,56 @@ function SupportPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             {[
-              { icon: PhoneCall, color: "bg-primary/10 text-primary", title: "Call Support", desc: "Speak directly with a representative 24/7.", link: <a href="tel:+18009479382" className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:underline">+1 (800) 947-9382 <ArrowRight className="ml-1 h-3.5 w-3.5" /></a> },
-              { icon: Mail, color: "bg-sky-500/10 text-sky-600", title: "Email Inquiry", desc: "Send a message and get a reply in a few hours.", link: <a href="mailto:support@swiftarc.com" className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:underline">support@swiftarc.com <ArrowRight className="ml-1 h-3.5 w-3.5" /></a> },
-              { icon: MapPin, color: "bg-emerald-500/10 text-emerald-600", title: "Visit an Office", desc: "Find your nearest physical branch for direct service.", link: <Link to="/locations" className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:underline">View Office Locations <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link> },
+              {
+                icon: PhoneCall,
+                color: "bg-primary/10 text-primary",
+                title: "Call Support",
+                desc: "Speak directly with a representative 24/7.",
+                link: (
+                  <a
+                    href="tel:+18009479382"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:underline"
+                  >
+                    +1 (800) 947-9382 <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  </a>
+                ),
+              },
+              {
+                icon: Mail,
+                color: "bg-sky-500/10 text-sky-600",
+                title: "Email Inquiry",
+                desc: "Send a message and get a reply in a few hours.",
+                link: (
+                  <a
+                    href="mailto:support@swiftarc.com"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:underline"
+                  >
+                    support@swiftarc.com <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  </a>
+                ),
+              },
+              {
+                icon: MapPin,
+                color: "bg-emerald-500/10 text-emerald-600",
+                title: "Visit an Office",
+                desc: "Find your nearest physical branch for direct service.",
+                link: (
+                  <Link
+                    to="/locations"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:underline"
+                  >
+                    View Office Locations <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  </Link>
+                ),
+              },
             ].map(({ icon: Icon, color, title, desc, link }) => (
-              <div key={title} className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/15 transition-all duration-300">
-                <div className={`h-12 w-12 rounded-xl ${color} grid place-items-center mb-4 group-hover:scale-110 transition-transform`}>
+              <div
+                key={title}
+                className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/15 transition-all duration-300"
+              >
+                <div
+                  className={`h-12 w-12 rounded-xl ${color} grid place-items-center mb-4 group-hover:scale-110 transition-transform`}
+                >
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-display font-bold text-[#032D60] text-lg">{title}</h3>
@@ -211,7 +292,9 @@ function SupportPage() {
           <div className="lg:col-span-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary">Questions & Answers</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                  Questions & Answers
+                </p>
                 <h2 className="mt-1 font-display text-3xl font-bold tracking-tight text-foreground">
                   Frequently Asked Questions
                 </h2>
@@ -238,12 +321,16 @@ function SupportPage() {
             {filtered.length === 0 ? (
               <Card className="border-border bg-card p-8 text-center">
                 <HelpCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <h3 className="font-display font-bold text-foreground">No matching questions found</h3>
+                <h3 className="font-display font-bold text-foreground">
+                  No matching questions found
+                </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   Try searching with different terms or contact our support team directly.
                 </p>
                 <Link to="/contact" className="mt-4 inline-block">
-                  <Button className="bg-primary text-white hover:bg-primary-hover">Contact Support</Button>
+                  <Button className="bg-primary text-white hover:bg-primary-hover">
+                    Contact Support
+                  </Button>
                 </Link>
               </Card>
             ) : (
@@ -276,7 +363,9 @@ function SupportPage() {
             <Card className="border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <h3 className="font-display font-bold text-foreground text-base">Network Operational Status</h3>
+                  <h3 className="font-display font-bold text-foreground text-base">
+                    Network Operational Status
+                  </h3>
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                     All Normal
@@ -299,7 +388,8 @@ function SupportPage() {
               <ShieldCheck className="h-8 w-8 text-primary mb-3" />
               <h3 className="font-display font-bold text-lg">Need Further Assistance?</h3>
               <p className="mt-2 text-xs text-white/80 leading-relaxed">
-                If you have a complex claim, customized freight requirement, or urgent package query, our team is ready to help.
+                If you have a complex claim, customized freight requirement, or urgent package
+                query, our team is ready to help.
               </p>
               <div className="mt-5">
                 <Link to="/contact">

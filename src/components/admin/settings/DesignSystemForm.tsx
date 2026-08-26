@@ -154,50 +154,178 @@ export function DesignSystemForm({ initialData }: { initialData: any }) {
         <div className="rounded-[8px] border border-border dark:border-border bg-white dark:bg-card p-6 shadow-[0_2px_4px_rgba(0,0,0,0.07)]">
           <h3 className="font-semibold text-base border-b pb-3 mb-5">Light Mode Palette</h3>
           <div className="grid grid-cols-2 gap-4">
-            <ColorInput label="Primary" value={lightMode.primary} onChange={(v) => handleLightChange("primary", v)} />
-            <ColorInput label="Primary Hover" value={lightMode.primaryHover} onChange={(v) => handleLightChange("primaryHover", v)} />
-            <ColorInput label="Secondary" value={lightMode.secondary} onChange={(v) => handleLightChange("secondary", v)} />
-            <ColorInput label="Accent" value={lightMode.accent} onChange={(v) => handleLightChange("accent", v)} />
+            <ColorInput
+              label="Primary"
+              value={lightMode.primary}
+              onChange={(v) => handleLightChange("primary", v)}
+            />
+            <ColorInput
+              label="Primary Hover"
+              value={lightMode.primaryHover}
+              onChange={(v) => handleLightChange("primaryHover", v)}
+            />
+            <ColorInput
+              label="Secondary"
+              value={lightMode.secondary}
+              onChange={(v) => handleLightChange("secondary", v)}
+            />
+            <ColorInput
+              label="Accent"
+              value={lightMode.accent}
+              onChange={(v) => handleLightChange("accent", v)}
+            />
             <div className="col-span-2 my-2 border-t border-dashed" />
-            <ColorInput label="Background" value={lightMode.background} onChange={(v) => handleLightChange("background", v)} />
-            <ColorInput label="Foreground" value={lightMode.foreground} onChange={(v) => handleLightChange("foreground", v)} />
-            <ColorInput label="Card bg" value={lightMode.card} onChange={(v) => handleLightChange("card", v)} />
-            <ColorInput label="Card Border" value={lightMode.cardBorder} onChange={(v) => handleLightChange("cardBorder", v)} />
+            <ColorInput
+              label="Background"
+              value={lightMode.background}
+              onChange={(v) => handleLightChange("background", v)}
+            />
+            <ColorInput
+              label="Foreground"
+              value={lightMode.foreground}
+              onChange={(v) => handleLightChange("foreground", v)}
+            />
+            <ColorInput
+              label="Card bg"
+              value={lightMode.card}
+              onChange={(v) => handleLightChange("card", v)}
+            />
+            <ColorInput
+              label="Card Border"
+              value={lightMode.cardBorder}
+              onChange={(v) => handleLightChange("cardBorder", v)}
+            />
             <div className="col-span-2 my-2 border-t border-dashed" />
-            <ColorInput label="Muted Bg" value={lightMode.mutedBackground} onChange={(v) => handleLightChange("mutedBackground", v)} />
-            <ColorInput label="Muted Text" value={lightMode.mutedText} onChange={(v) => handleLightChange("mutedText", v)} />
-            <ColorInput label="Input Bg" value={lightMode.inputBackground} onChange={(v) => handleLightChange("inputBackground", v)} />
-            <ColorInput label="Input Border" value={lightMode.inputBorder} onChange={(v) => handleLightChange("inputBorder", v)} />
+            <ColorInput
+              label="Muted Bg"
+              value={lightMode.mutedBackground}
+              onChange={(v) => handleLightChange("mutedBackground", v)}
+            />
+            <ColorInput
+              label="Muted Text"
+              value={lightMode.mutedText}
+              onChange={(v) => handleLightChange("mutedText", v)}
+            />
+            <ColorInput
+              label="Input Bg"
+              value={lightMode.inputBackground}
+              onChange={(v) => handleLightChange("inputBackground", v)}
+            />
+            <ColorInput
+              label="Input Border"
+              value={lightMode.inputBorder}
+              onChange={(v) => handleLightChange("inputBorder", v)}
+            />
             <div className="col-span-2 my-2 border-t border-dashed" />
-            <ColorInput label="Success" value={lightMode.success} onChange={(v) => handleLightChange("success", v)} />
-            <ColorInput label="Warning" value={lightMode.warning} onChange={(v) => handleLightChange("warning", v)} />
-            <ColorInput label="Error" value={lightMode.error} onChange={(v) => handleLightChange("error", v)} />
-            <ColorInput label="Info" value={lightMode.info} onChange={(v) => handleLightChange("info", v)} />
+            <ColorInput
+              label="Success"
+              value={lightMode.success}
+              onChange={(v) => handleLightChange("success", v)}
+            />
+            <ColorInput
+              label="Warning"
+              value={lightMode.warning}
+              onChange={(v) => handleLightChange("warning", v)}
+            />
+            <ColorInput
+              label="Error"
+              value={lightMode.error}
+              onChange={(v) => handleLightChange("error", v)}
+            />
+            <ColorInput
+              label="Info"
+              value={lightMode.info}
+              onChange={(v) => handleLightChange("info", v)}
+            />
           </div>
         </div>
 
         <div className="rounded-[8px] border border-border dark:border-border bg-white dark:bg-card p-6 shadow-[0_2px_4px_rgba(0,0,0,0.07)]">
           <h3 className="font-semibold text-base border-b pb-3 mb-5">Dark Mode Palette</h3>
           <div className="grid grid-cols-2 gap-4">
-            <ColorInput label="Primary" value={darkMode.primary} onChange={(v) => handleDarkChange("primary", v)} />
-            <ColorInput label="Primary Hover" value={darkMode.primaryHover} onChange={(v) => handleDarkChange("primaryHover", v)} />
-            <ColorInput label="Secondary" value={darkMode.secondary} onChange={(v) => handleDarkChange("secondary", v)} />
-            <ColorInput label="Accent" value={darkMode.accent} onChange={(v) => handleDarkChange("accent", v)} />
+            <ColorInput
+              label="Primary"
+              value={darkMode.primary}
+              onChange={(v) => handleDarkChange("primary", v)}
+            />
+            <ColorInput
+              label="Primary Hover"
+              value={darkMode.primaryHover}
+              onChange={(v) => handleDarkChange("primaryHover", v)}
+            />
+            <ColorInput
+              label="Secondary"
+              value={darkMode.secondary}
+              onChange={(v) => handleDarkChange("secondary", v)}
+            />
+            <ColorInput
+              label="Accent"
+              value={darkMode.accent}
+              onChange={(v) => handleDarkChange("accent", v)}
+            />
             <div className="col-span-2 my-2 border-t border-dashed" />
-            <ColorInput label="Background" value={darkMode.background} onChange={(v) => handleDarkChange("background", v)} />
-            <ColorInput label="Foreground" value={darkMode.foreground} onChange={(v) => handleDarkChange("foreground", v)} />
-            <ColorInput label="Card bg" value={darkMode.card} onChange={(v) => handleDarkChange("card", v)} />
-            <ColorInput label="Card Border" value={darkMode.cardBorder} onChange={(v) => handleDarkChange("cardBorder", v)} />
+            <ColorInput
+              label="Background"
+              value={darkMode.background}
+              onChange={(v) => handleDarkChange("background", v)}
+            />
+            <ColorInput
+              label="Foreground"
+              value={darkMode.foreground}
+              onChange={(v) => handleDarkChange("foreground", v)}
+            />
+            <ColorInput
+              label="Card bg"
+              value={darkMode.card}
+              onChange={(v) => handleDarkChange("card", v)}
+            />
+            <ColorInput
+              label="Card Border"
+              value={darkMode.cardBorder}
+              onChange={(v) => handleDarkChange("cardBorder", v)}
+            />
             <div className="col-span-2 my-2 border-t border-dashed" />
-            <ColorInput label="Muted Bg" value={darkMode.mutedBackground} onChange={(v) => handleDarkChange("mutedBackground", v)} />
-            <ColorInput label="Muted Text" value={darkMode.mutedText} onChange={(v) => handleDarkChange("mutedText", v)} />
-            <ColorInput label="Input Bg" value={darkMode.inputBackground} onChange={(v) => handleDarkChange("inputBackground", v)} />
-            <ColorInput label="Input Border" value={darkMode.inputBorder} onChange={(v) => handleDarkChange("inputBorder", v)} />
+            <ColorInput
+              label="Muted Bg"
+              value={darkMode.mutedBackground}
+              onChange={(v) => handleDarkChange("mutedBackground", v)}
+            />
+            <ColorInput
+              label="Muted Text"
+              value={darkMode.mutedText}
+              onChange={(v) => handleDarkChange("mutedText", v)}
+            />
+            <ColorInput
+              label="Input Bg"
+              value={darkMode.inputBackground}
+              onChange={(v) => handleDarkChange("inputBackground", v)}
+            />
+            <ColorInput
+              label="Input Border"
+              value={darkMode.inputBorder}
+              onChange={(v) => handleDarkChange("inputBorder", v)}
+            />
             <div className="col-span-2 my-2 border-t border-dashed" />
-            <ColorInput label="Success" value={darkMode.success} onChange={(v) => handleDarkChange("success", v)} />
-            <ColorInput label="Warning" value={darkMode.warning} onChange={(v) => handleDarkChange("warning", v)} />
-            <ColorInput label="Error" value={darkMode.error} onChange={(v) => handleDarkChange("error", v)} />
-            <ColorInput label="Info" value={darkMode.info} onChange={(v) => handleDarkChange("info", v)} />
+            <ColorInput
+              label="Success"
+              value={darkMode.success}
+              onChange={(v) => handleDarkChange("success", v)}
+            />
+            <ColorInput
+              label="Warning"
+              value={darkMode.warning}
+              onChange={(v) => handleDarkChange("warning", v)}
+            />
+            <ColorInput
+              label="Error"
+              value={darkMode.error}
+              onChange={(v) => handleDarkChange("error", v)}
+            />
+            <ColorInput
+              label="Info"
+              value={darkMode.info}
+              onChange={(v) => handleDarkChange("info", v)}
+            />
           </div>
         </div>
       </div>

@@ -459,9 +459,7 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
           .default("pending"),
         verification_notes: z.string().optional(),
         route_stops: z.array(z.any()).optional(),
-        origin_source: z
-          .enum(["gps", "branch", "manual", "map_adjustment"])
-          .default("manual"),
+        origin_source: z.enum(["gps", "branch", "manual", "map_adjustment"]).default("manual"),
         origin_branch_id: z.string().uuid().optional(),
         origin_accuracy_m: z.number().optional(),
         distance_km: z.number().optional().nullable(),
@@ -510,10 +508,7 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
     // --- Calculate distance if coordinates available ---
     let distance_km = data.distance_km ?? null;
     let estimated_travel_time = data.estimated_travel_time ?? null;
-    if (
-      !distance_km &&
-      origin?.lat && origin?.lng && dest?.lat && dest?.lng
-    ) {
+    if (!distance_km && origin?.lat && origin?.lng && dest?.lat && dest?.lng) {
       try {
         const routeRes = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=false`,
@@ -571,7 +566,9 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
           if (data.signature_required) subtotal += signatureFee;
           shipping_fee = Math.round((subtotal + subtotal * (taxRate / 100)) * 100) / 100;
         }
-      } catch { /* pricing rules may not exist yet */ }
+      } catch {
+        /* pricing rules may not exist yet */
+      }
     }
 
     // --- Calculate estimated delivery ---
@@ -583,12 +580,16 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
         .eq("name", data.service)
         .maybeSingle();
       if (svc) {
-        const avgDays = Math.ceil(((svc.estimated_days_min || 3) + (svc.estimated_days_max || 7)) / 2);
+        const avgDays = Math.ceil(
+          ((svc.estimated_days_min || 3) + (svc.estimated_days_max || 7)) / 2,
+        );
         const d = new Date();
         d.setDate(d.getDate() + avgDays);
         estimated_delivery = d.toISOString();
       }
-    } catch { /* service table may not exist */ }
+    } catch {
+      /* service table may not exist */
+    }
 
     // --- Insert shipment ---
     const { data: inserted, error } = await supabaseAdmin
@@ -625,15 +626,16 @@ export const adminCreateShipment = createServerFn({ method: "POST" })
     if (error) fail(error);
 
     // --- Create initial tracking event ---
-    const originLabel =
-      origin.contact_name
-        ? `${origin.contact_name}, ${origin.city || ""}`
-        : origin.city || "Origin Office";
+    const originLabel = origin.contact_name
+      ? `${origin.contact_name}, ${origin.city || ""}`
+      : origin.city || "Origin Office";
     await supabaseAdmin.from("shipment_events").insert({
       shipment_id: inserted!.id,
       status: "label_created",
       description: "Shipment Registered — Package accepted at " + originLabel,
-      location: origin.city ? `${origin.city}, ${origin.country_code || origin.region || ""}`.trim() : "Office",
+      location: origin.city
+        ? `${origin.city}, ${origin.country_code || origin.region || ""}`.trim()
+        : "Office",
       occurred_at: new Date().toISOString(),
     });
 
@@ -698,7 +700,9 @@ export const adminCalculateRoute = createServerFn({ method: "POST" })
           };
         }
       }
-    } catch { /* fall through to haversine */ }
+    } catch {
+      /* fall through to haversine */
+    }
 
     // Haversine fallback
     const R = 6371;
@@ -742,7 +746,8 @@ export const adminCalculatePrice = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", "00000000-0000-0000-0000-000000000001")
       .single();
-    if (error || !rules) return { breakdown: null, total: 0, error: "Pricing rules not configured." };
+    if (error || !rules)
+      return { breakdown: null, total: 0, error: "Pricing rules not configured." };
 
     const baseFee = Number(rules.base_fee) || 0;
     const distCharge = data.distance_km * (Number(rules.per_km_rate) || 0);
@@ -752,7 +757,8 @@ export const adminCalculatePrice = createServerFn({ method: "POST" })
       : 0;
     const hazmatCharge = data.is_hazmat ? Number(rules.hazmat_surcharge) || 0 : 0;
     const signatureCharge = data.signature_required ? Number(rules.signature_fee) || 0 : 0;
-    const subtotal = baseFee + distCharge + weightCharge + insuranceCharge + hazmatCharge + signatureCharge;
+    const subtotal =
+      baseFee + distCharge + weightCharge + insuranceCharge + hazmatCharge + signatureCharge;
     const taxRate = Number(rules.tax_rate) || 0;
     const tax = subtotal * (taxRate / 100);
     const total = Math.round((subtotal + tax) * 100) / 100;
@@ -1043,9 +1049,10 @@ export const adminCreatePickup = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Auto-generate reference if not provided
-    const ref = data.reference && data.reference.trim()
-      ? data.reference.trim()
-      : `PKP-${Date.now().toString(36).toUpperCase()}`;
+    const ref =
+      data.reference && data.reference.trim()
+        ? data.reference.trim()
+        : `PKP-${Date.now().toString(36).toUpperCase()}`;
 
     const { data: inserted, error } = await supabaseAdmin
       .from("pickups")
@@ -2336,7 +2343,7 @@ export const adminGetPaymentSubmissions = createServerFn({ method: "GET" })
     const { data, error } = await (supabaseAdmin as any)
       .from("payment_submissions")
       .select(
-        "*, customs_holds(amount_due, currency, status, shipments(tracking_number)), digital_currency_assets(symbol, wallet_address)"
+        "*, customs_holds(amount_due, currency, status, shipments(tracking_number)), digital_currency_assets(symbol, wallet_address)",
       )
       .order("submitted_at", { ascending: false })
       .limit(300);

@@ -9,7 +9,7 @@ export function PlatformSettingsProvider({ children }: { children: React.ReactNo
     if (!settings?.design_system) return;
 
     const { lightMode, darkMode, borderRadius, cardRadius } = settings.design_system;
-    
+
     // Construct dynamic CSS block
     let css = "";
 

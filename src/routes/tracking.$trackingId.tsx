@@ -43,12 +43,7 @@ import { statusLabels } from "@/lib/types";
 import { resolveTracking } from "@/lib/api.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { TrackingSkeleton } from "@/components/skeletons/TrackingSkeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const TrackingMap = lazy(() =>
   import("@/components/tracking/TrackingMap").then((m) => ({ default: m.TrackingMap })),
@@ -361,7 +356,14 @@ function TrackingDetail() {
           </div>
           <div className="doc-type-block">
             <div className="doc-type">Shipment Waybill</div>
-            <div className="doc-date">Printed: {new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</div>
+            <div className="doc-date">
+              Printed:{" "}
+              {new Date().toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
           </div>
         </div>
 
@@ -378,7 +380,11 @@ function TrackingDetail() {
             <h4>Sender</h4>
             <p>{shipment.origin.contact}</p>
             {shipment.origin.line1 && <p className="sub">{shipment.origin.line1}</p>}
-            <p className="sub">{shipment.origin.city}{shipment.origin.country ? `, ${shipment.origin.country}` : ""}{shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}</p>
+            <p className="sub">
+              {shipment.origin.city}
+              {shipment.origin.country ? `, ${shipment.origin.country}` : ""}
+              {shipment.origin.zip ? ` ${shipment.origin.zip}` : ""}
+            </p>
             {shipment.origin.phone && <p className="sub">Tel: {shipment.origin.phone}</p>}
             {shipment.origin.email && <p className="sub">{shipment.origin.email}</p>}
           </div>
@@ -386,14 +392,20 @@ function TrackingDetail() {
             <h4>Recipient</h4>
             <p>{shipment.destination.contact}</p>
             {shipment.destination.line1 && <p className="sub">{shipment.destination.line1}</p>}
-            <p className="sub">{shipment.destination.city}{shipment.destination.country ? `, ${shipment.destination.country}` : ""}{shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}</p>
+            <p className="sub">
+              {shipment.destination.city}
+              {shipment.destination.country ? `, ${shipment.destination.country}` : ""}
+              {shipment.destination.zip ? ` ${shipment.destination.zip}` : ""}
+            </p>
             {shipment.destination.phone && <p className="sub">Tel: {shipment.destination.phone}</p>}
             {shipment.destination.email && <p className="sub">{shipment.destination.email}</p>}
           </div>
           <div className="waybill-section">
             <h4>Service Type</h4>
             <p>{shipment.service}</p>
-            <p className="sub">{shipment.type} · {shipment.priority} Priority</p>
+            <p className="sub">
+              {shipment.type} · {shipment.priority} Priority
+            </p>
           </div>
           <div className="waybill-section">
             <h4>Reference No.</h4>
@@ -401,36 +413,62 @@ function TrackingDetail() {
           </div>
           <div className="waybill-section">
             <h4>Origin</h4>
-            <p>{shipment.origin.city}, {shipment.origin.country}</p>
+            <p>
+              {shipment.origin.city}, {shipment.origin.country}
+            </p>
           </div>
           <div className="waybill-section">
             <h4>Destination</h4>
-            <p>{shipment.destination.city}, {shipment.destination.country}</p>
+            <p>
+              {shipment.destination.city}, {shipment.destination.country}
+            </p>
           </div>
           <div className="waybill-section">
             <h4>Booking Date</h4>
-            <p>{new Date(shipment.shipDate).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}</p>
+            <p>
+              {new Date(shipment.shipDate).toLocaleDateString(undefined, {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
           </div>
           <div className="waybill-section">
             <h4>Estimated Delivery</h4>
-            <p>{new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}</p>
+            <p>
+              {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
           </div>
           <div className="waybill-section">
             <h4>Package Details</h4>
             {shipment.description && <p>{shipment.description}</p>}
-            <p className="sub">{shipment.weightKg} kg · {shipment.dimensions} · {shipment.pieces} pcs</p>
-            {shipment.declaredValue > 0 && <p className="sub">Declared Value: ${shipment.declaredValue.toFixed(2)}{shipment.insurance ? " · Insured" : ""}</p>}
+            <p className="sub">
+              {shipment.weightKg} kg · {shipment.dimensions} · {shipment.pieces} pcs
+            </p>
+            {shipment.declaredValue > 0 && (
+              <p className="sub">
+                Declared Value: ${shipment.declaredValue.toFixed(2)}
+                {shipment.insurance ? " · Insured" : ""}
+              </p>
+            )}
           </div>
           <div className="waybill-section">
             <h4>Shipping Charges</h4>
             <p>{shipment.shippingFee}</p>
-            {shipment.distanceKm !== "N/A" && <p className="sub">Distance: {shipment.distanceKm}</p>}
+            {shipment.distanceKm !== "N/A" && (
+              <p className="sub">Distance: {shipment.distanceKm}</p>
+            )}
           </div>
         </div>
 
         <div className="waybill-footer">
           <div className="disclaimer">
-            This document is an official shipment record issued by SwiftArc Logistics. Please retain this document for your records. For queries, contact support@swiftarc.com
+            This document is an official shipment record issued by SwiftArc Logistics. Please retain
+            this document for your records. For queries, contact support@swiftarc.com
           </div>
           <div className="brand-small">SWIFTARC</div>
         </div>
@@ -443,7 +481,10 @@ function TrackingDetail() {
         {/* Minimal Nav / Search Bar */}
         <div className="border-b border-border/40 bg-card/50 backdrop-blur-md sticky top-16 z-30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-            <Link to="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link
+              to="/"
+              className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
               <ArrowLeft className="h-4 w-4 mr-1.5" /> Home
             </Link>
             <form onSubmit={onSearch} className="flex gap-2">
@@ -461,11 +502,12 @@ function TrackingDetail() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
-          
           {/* 1. TRACKING HERO (Tracking ID & Big Status) */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <p className="text-sm font-bold uppercase tracking-widest text-amber mb-2">Tracking ID</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-amber mb-2">
+                Tracking ID
+              </p>
               <div className="flex items-center gap-3">
                 <h1 className="text-4xl sm:text-5xl font-display font-extrabold tracking-tight">
                   {shipment.trackingNumber}
@@ -482,12 +524,19 @@ function TrackingDetail() {
                 </button>
               </div>
             </motion.div>
-            
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-left md:text-right">
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-left md:text-right"
+            >
               <p className="text-sm text-muted-foreground mb-1">Estimated Delivery</p>
               <h2 className="text-2xl sm:text-3xl font-bold">
                 {new Date(shipment.estimatedDelivery).toLocaleDateString(undefined, {
-                  weekday: 'short', month: "short", day: "numeric"
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
                 })}
               </h2>
               <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber/10 border border-amber/20 text-amber font-bold text-sm shadow-inner shadow-amber/5">
@@ -500,37 +549,58 @@ function TrackingDetail() {
           {/* 2. CUSTOMS HOLD ALERT (If any) */}
           {hasCustomsHold &&
             (() => {
-              const isResolved = activeHold?.status === "released" || activeHold?.payment_status === "paid";
+              const isResolved =
+                activeHold?.status === "released" || activeHold?.payment_status === "paid";
               return (
-                <div className={`${isResolved ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"} dark:bg-card dark:border-border rounded-3xl p-6 shadow-sm border`}>
+                <div
+                  className={`${isResolved ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"} dark:bg-card dark:border-border rounded-3xl p-6 shadow-sm border`}
+                >
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`h-12 w-12 rounded-full flex items-center justify-center shrink-0 ${isResolved ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20" : "bg-red-100 text-red-600 dark:bg-red-500/20"}`}>
-                        {isResolved ? <CheckCircle2 className="h-6 w-6" /> : <ShieldAlert className="h-6 w-6" />}
+                      <div
+                        className={`h-12 w-12 rounded-full flex items-center justify-center shrink-0 ${isResolved ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20" : "bg-red-100 text-red-600 dark:bg-red-500/20"}`}
+                      >
+                        {isResolved ? (
+                          <CheckCircle2 className="h-6 w-6" />
+                        ) : (
+                          <ShieldAlert className="h-6 w-6" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-bold text-xl leading-tight">
                           {isResolved ? "Clearance Complete" : "Customs Hold Requires Action"}
                         </h3>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {isResolved ? "Shipment has been released for delivery." : activeHold?.hold_reason || "Customs inspection required."}
+                          {isResolved
+                            ? "Shipment has been released for delivery."
+                            : activeHold?.hold_reason || "Customs inspection required."}
                         </p>
                       </div>
                     </div>
-                    {!isResolved && activeHold && ["payment_required", "open"].includes(activeHold.status) && (
-                      <Button asChild className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-12 px-6">
-                        <Link to="/pay/$caseId" params={{ caseId: activeHold.id }}>
-                          Resolve & Pay Fees
-                        </Link>
-                      </Button>
-                    )}
+                    {!isResolved &&
+                      activeHold &&
+                      ["payment_required", "open"].includes(activeHold.status) && (
+                        <Button
+                          asChild
+                          className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-12 px-6"
+                        >
+                          <Link to="/pay/$caseId" params={{ caseId: activeHold.id }}>
+                            Resolve & Pay Fees
+                          </Link>
+                        </Button>
+                      )}
                   </div>
                 </div>
               );
             })()}
 
           {/* 3. MAP HERO */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="relative h-[400px] sm:h-[500px] lg:h-[650px] w-full bg-muted rounded-3xl overflow-hidden shadow-2xl border border-border/50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="relative h-[400px] sm:h-[500px] lg:h-[650px] w-full bg-muted rounded-3xl overflow-hidden shadow-2xl border border-border/50"
+          >
             <Suspense fallback={<div className="h-full w-full bg-muted animate-pulse" />}>
               <TrackingMap
                 origin={[shipment.origin.lat, shipment.origin.lng]}
@@ -553,7 +623,7 @@ function TrackingDetail() {
                 {livePos[0].toFixed(4)}°, {livePos[1].toFixed(4)}°
               </p>
             </div>
-            
+
             <button className="absolute top-4 right-4 bg-background/80 text-foreground backdrop-blur-md rounded-full px-4 py-2.5 shadow-lg border border-white/10 font-bold text-xs flex items-center gap-2 hover:bg-background transition-colors">
               <Maximize className="h-4 w-4" /> <span className="hidden sm:inline">Fullscreen</span>
             </button>
@@ -561,7 +631,6 @@ function TrackingDetail() {
 
           {/* 4. DETAILS ROW (Timeline + Package Info) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             {/* Left: Checkpoint Timeline (Occupies 2 columns on lg) */}
             <div className="lg:col-span-2 space-y-6">
               <h3 className="font-display font-bold text-2xl">Tracking History</h3>
@@ -569,36 +638,52 @@ function TrackingDetail() {
                 <div className="relative space-y-8">
                   <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border rounded-full"></div>
 
-                  {[...realtimeCheckpoints].slice().reverse().map((c: any, i) => {
-                    const isLatest = i === 0;
+                  {[...realtimeCheckpoints]
+                    .slice()
+                    .reverse()
+                    .map((c: any, i) => {
+                      const isLatest = i === 0;
 
-                    let Icon = isLatest ? Navigation : MapPin;
-                    let bgClass = isLatest ? "bg-amber text-navy-deep border-amber/20" : "bg-card text-muted-foreground border-border";
-                    let textClass = isLatest ? "text-foreground font-bold" : "text-muted-foreground font-medium";
+                      let Icon = isLatest ? Navigation : MapPin;
+                      let bgClass = isLatest
+                        ? "bg-amber text-navy-deep border-amber/20"
+                        : "bg-card text-muted-foreground border-border";
+                      let textClass = isLatest
+                        ? "text-foreground font-bold"
+                        : "text-muted-foreground font-medium";
 
-                    if (c.type === "hold_placed") {
-                      Icon = ShieldAlert; bgClass = "bg-red-500 text-white border-red-500/20"; textClass = "text-red-600 font-bold dark:text-red-400";
-                    } else if (c.type === "hold_released") {
-                      Icon = CheckCircle2; bgClass = "bg-emerald-500 text-white border-emerald-500/20"; textClass = "text-emerald-600 font-bold dark:text-emerald-400";
-                    }
+                      if (c.type === "hold_placed") {
+                        Icon = ShieldAlert;
+                        bgClass = "bg-red-500 text-white border-red-500/20";
+                        textClass = "text-red-600 font-bold dark:text-red-400";
+                      } else if (c.type === "hold_released") {
+                        Icon = CheckCircle2;
+                        bgClass = "bg-emerald-500 text-white border-emerald-500/20";
+                        textClass = "text-emerald-600 font-bold dark:text-emerald-400";
+                      }
 
-                    return (
-                      <div key={c.id} className="relative flex gap-5">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 z-10 border-[3px] shadow-sm ${bgClass}`}>
-                          <Icon className="h-3.5 w-3.5" />
+                      return (
+                        <div key={c.id} className="relative flex gap-5">
+                          <div
+                            className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 z-10 border-[3px] shadow-sm ${bgClass}`}
+                          >
+                            <Icon className="h-3.5 w-3.5" />
+                          </div>
+                          <div className="pt-0.5 pb-2">
+                            <p className={`text-base ${textClass}`}>{c.status}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{c.facility}</p>
+                            <p className="text-xs text-muted-foreground/60 mt-1.5 font-mono">
+                              {new Date(c.timestamp).toLocaleString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </div>
                         </div>
-                        <div className="pt-0.5 pb-2">
-                          <p className={`text-base ${textClass}`}>{c.status}</p>
-                          <p className="text-sm text-muted-foreground mt-1">{c.facility}</p>
-                          <p className="text-xs text-muted-foreground/60 mt-1.5 font-mono">
-                            {new Date(c.timestamp).toLocaleString(undefined, {
-                              month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               </div>
             </div>
@@ -606,14 +691,18 @@ function TrackingDetail() {
             {/* Right: Detailed Shipment Overview */}
             <div className="lg:col-span-1 space-y-6">
               <div className="flex items-center justify-between">
-                 <h3 className="font-display font-bold text-2xl">Overview</h3>
-                 <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground no-print" onClick={() => window.print()}>
-                   <Printer className="h-4 w-4" /> Print
-                 </Button>
+                <h3 className="font-display font-bold text-2xl">Overview</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-2 text-muted-foreground hover:text-foreground no-print"
+                  onClick={() => window.print()}
+                >
+                  <Printer className="h-4 w-4" /> Print
+                </Button>
               </div>
-              
+
               <div className="w-full space-y-4">
-                
                 <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl px-6 shadow-sm">
                   <div className="py-6 border-b border-border/10">
                     <div className="flex items-center gap-3">
@@ -622,7 +711,9 @@ function TrackingDetail() {
                       </div>
                       <div className="text-left">
                         <p className="font-bold text-base">Shipment Details</p>
-                        <p className="text-xs text-muted-foreground font-normal mt-0.5">{shipment.service} · {shipment.weightKg} kg</p>
+                        <p className="text-xs text-muted-foreground font-normal mt-0.5">
+                          {shipment.service} · {shipment.weightKg} kg
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -655,11 +746,16 @@ function TrackingDetail() {
                           <p className="font-bold text-sm">{shipment.distanceKm}</p>
                         </div>
                       </div>
-                      
+
                       {shipment.declaredValue > 0 && (
                         <div className="pt-2">
                           <p className="text-xs text-muted-foreground mb-1">Declared Value</p>
-                          <p className="font-bold text-sm">${shipment.declaredValue.toFixed(2)} {shipment.insurance && <span className="text-emerald-500 font-semibold ml-2">✓ Insured</span>}</p>
+                          <p className="font-bold text-sm">
+                            ${shipment.declaredValue.toFixed(2)}{" "}
+                            {shipment.insurance && (
+                              <span className="text-emerald-500 font-semibold ml-2">✓ Insured</span>
+                            )}
+                          </p>
                         </div>
                       )}
 
@@ -670,9 +766,13 @@ function TrackingDetail() {
                             onClick={() => setImageModalOpen(true)}
                             className="w-full rounded-2xl overflow-hidden border border-border hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 bg-muted/50"
                           >
-                            <img 
-                              src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl} 
-                              alt="Package Photo" 
+                            <img
+                              src={
+                                supabase.storage
+                                  .from("shipment-package-images")
+                                  .getPublicUrl(shipment.packageImage).data.publicUrl
+                              }
+                              alt="Package Photo"
                               className="h-32 w-full object-contain"
                             />
                           </button>
@@ -681,7 +781,6 @@ function TrackingDetail() {
                     </div>
                   </div>
                 </div>
-
 
                 {/* Sender & Receiver — combined card */}
                 <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl px-6 shadow-sm">
@@ -701,7 +800,9 @@ function TrackingDetail() {
                         <div className="h-6 w-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
                           <User className="h-3.5 w-3.5" />
                         </div>
-                        <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide">Sender</p>
+                        <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide">
+                          Sender
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Name</p>
@@ -709,8 +810,12 @@ function TrackingDetail() {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Address</p>
-                        {shipment.origin.line1 && <p className="text-sm">{shipment.origin.line1}</p>}
-                        <p className="text-sm">{shipment.origin.city}, {shipment.origin.country} {shipment.origin.zip}</p>
+                        {shipment.origin.line1 && (
+                          <p className="text-sm">{shipment.origin.line1}</p>
+                        )}
+                        <p className="text-sm">
+                          {shipment.origin.city}, {shipment.origin.country} {shipment.origin.zip}
+                        </p>
                       </div>
                       {shipment.origin.phone && (
                         <div>
@@ -732,7 +837,9 @@ function TrackingDetail() {
                         <div className="h-6 w-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                           <Building className="h-3.5 w-3.5" />
                         </div>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wide">Receiver</p>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wide">
+                          Receiver
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Name</p>
@@ -740,8 +847,13 @@ function TrackingDetail() {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-0.5">Address</p>
-                        {shipment.destination.line1 && <p className="text-sm">{shipment.destination.line1}</p>}
-                        <p className="text-sm">{shipment.destination.city}, {shipment.destination.country} {shipment.destination.zip}</p>
+                        {shipment.destination.line1 && (
+                          <p className="text-sm">{shipment.destination.line1}</p>
+                        )}
+                        <p className="text-sm">
+                          {shipment.destination.city}, {shipment.destination.country}{" "}
+                          {shipment.destination.zip}
+                        </p>
                       </div>
                       {shipment.destination.phone && (
                         <div>
@@ -759,7 +871,6 @@ function TrackingDetail() {
                   </div>
                 </div>
 
-                
                 {hasCustomsHold && (
                   <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl px-6 shadow-sm">
                     <div className="py-6 border-b border-border/10">
@@ -769,7 +880,9 @@ function TrackingDetail() {
                         </div>
                         <div className="text-left">
                           <p className="font-bold text-base">Clearance Details</p>
-                          <p className="text-xs text-muted-foreground font-normal mt-0.5">Status: {activeHold?.status}</p>
+                          <p className="text-xs text-muted-foreground font-normal mt-0.5">
+                            Status: {activeHold?.status}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -777,26 +890,31 @@ function TrackingDetail() {
                       <div className="space-y-3">
                         <div>
                           <p className="text-xs text-muted-foreground mb-0.5">Reason</p>
-                          <p className="font-bold text-sm">{activeHold?.hold_reason || "Customs inspection required."}</p>
+                          <p className="font-bold text-sm">
+                            {activeHold?.hold_reason || "Customs inspection required."}
+                          </p>
                         </div>
                         {activeHold?.amount_due > 0 && (
                           <div>
                             <p className="text-xs text-muted-foreground mb-0.5">Amount Due</p>
-                            <p className="text-sm text-red-600 font-bold">${activeHold.amount_due.toFixed(2)}</p>
+                            <p className="text-sm text-red-600 font-bold">
+                              ${activeHold.amount_due.toFixed(2)}
+                            </p>
                           </div>
                         )}
                         <div>
                           <p className="text-xs text-muted-foreground mb-0.5">Payment Status</p>
-                          <p className="text-sm capitalize">{activeHold?.payment_status || "Unpaid"}</p>
+                          <p className="text-sm capitalize">
+                            {activeHold?.payment_status || "Unpaid"}
+                          </p>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
-
               </div>
             </div>
-</div>
+          </div>
         </div>
       </div>
 
@@ -805,8 +923,12 @@ function TrackingDetail() {
         <DialogContent className="max-w-3xl bg-background text-foreground border-none shadow-2xl p-0 overflow-hidden">
           <div className="relative w-full h-[80vh] flex items-center justify-center bg-black/5">
             {shipment.packageImage && (
-              <img 
-                src={supabase.storage.from("shipment-package-images").getPublicUrl(shipment.packageImage).data.publicUrl}
+              <img
+                src={
+                  supabase.storage
+                    .from("shipment-package-images")
+                    .getPublicUrl(shipment.packageImage).data.publicUrl
+                }
                 alt="Package Photo Full View"
                 className="max-w-full max-h-full object-contain"
               />

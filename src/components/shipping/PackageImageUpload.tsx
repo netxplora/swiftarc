@@ -14,7 +14,9 @@ interface PackageImageUploadProps {
 export function PackageImageUpload({ value, onChange, className }: PackageImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    value ? supabase.storage.from("shipment-package-images").getPublicUrl(value).data.publicUrl : null
+    value
+      ? supabase.storage.from("shipment-package-images").getPublicUrl(value).data.publicUrl
+      : null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,11 +43,11 @@ export function PackageImageUpload({ value, onChange, className }: PackageImageU
         maxWidthOrHeight: 1200,
         useWebWorker: true,
       };
-      
+
       const compressedFile = await imageCompression(file, options);
-      
+
       // 2. Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileExt = file.name.split(".").pop() || "jpg";
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
@@ -62,7 +64,8 @@ export function PackageImageUpload({ value, onChange, className }: PackageImageU
 
       // 3. Update state
       onChange(data.path);
-      const publicUrl = supabase.storage.from("shipment-package-images").getPublicUrl(data.path).data.publicUrl;
+      const publicUrl = supabase.storage.from("shipment-package-images").getPublicUrl(data.path)
+        .data.publicUrl;
       setPreviewUrl(publicUrl);
       toast.success("Package photo uploaded successfully.");
     } catch (err: any) {
@@ -121,7 +124,9 @@ export function PackageImageUpload({ value, onChange, className }: PackageImageU
       ) : (
         <div
           className={`border-2 border-dashed rounded-xl p-8 transition-colors flex flex-col items-center justify-center gap-4 text-center cursor-pointer ${
-            isUploading ? "bg-secondary/30 border-primary/30" : "bg-card hover:bg-secondary/20 hover:border-primary/50"
+            isUploading
+              ? "bg-secondary/30 border-primary/30"
+              : "bg-card hover:bg-secondary/20 hover:border-primary/50"
           }`}
           onClick={() => !isUploading && fileInputRef.current?.click()}
         >

@@ -531,16 +531,13 @@ function AdminCreateShipmentPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="border-t pt-6 mt-2">
               <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-widest mb-4">
                 Package Photo (Optional)
               </h3>
               <div className="max-w-md">
-                <PackageImageUpload 
-                  value={packageImagePath} 
-                  onChange={setPackageImagePath} 
-                />
+                <PackageImageUpload value={packageImagePath} onChange={setPackageImagePath} />
               </div>
             </div>
 
@@ -634,14 +631,18 @@ function AdminCreateShipmentPage() {
                   <p className="text-sm font-medium">${priceInfo?.total.toFixed(2)}</p>
                 </div>
               </div>
-              
+
               {packageImagePath && (
                 <div className="sm:col-span-2 border-t pt-4">
                   <h4 className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mb-2">
                     Package Photo
                   </h4>
-                  <img 
-                    src={supabase.storage.from("shipment-package-images").getPublicUrl(packageImagePath).data.publicUrl}
+                  <img
+                    src={
+                      supabase.storage
+                        .from("shipment-package-images")
+                        .getPublicUrl(packageImagePath).data.publicUrl
+                    }
                     alt="Package"
                     className="max-w-[200px] h-auto rounded-lg border shadow-sm"
                   />

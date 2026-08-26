@@ -36,16 +36,34 @@ export const Route = createFileRoute("/admin/broadcast")({
 type Tone = "default" | "success" | "warning" | "danger";
 
 const TONE_CONFIG: Record<Tone, { label: string; icon: React.ReactNode; color: string }> = {
-  default: { label: "Info", icon: <Info className="h-3.5 w-3.5" />, color: "bg-blue-100 text-blue-800 border-blue-200" },
-  success: { label: "Success", icon: <CheckCircle2 className="h-3.5 w-3.5" />, color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  warning: { label: "Warning", icon: <AlertTriangle className="h-3.5 w-3.5" />, color: "bg-amber-100 text-amber-800 border-amber-200" },
-  danger: { label: "Danger", icon: <AlertTriangle className="h-3.5 w-3.5" />, color: "bg-red-100 text-red-800 border-red-200" },
+  default: {
+    label: "Info",
+    icon: <Info className="h-3.5 w-3.5" />,
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+  },
+  success: {
+    label: "Success",
+    icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+    color: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  },
+  warning: {
+    label: "Warning",
+    icon: <AlertTriangle className="h-3.5 w-3.5" />,
+    color: "bg-amber-100 text-amber-800 border-amber-200",
+  },
+  danger: {
+    label: "Danger",
+    icon: <AlertTriangle className="h-3.5 w-3.5" />,
+    color: "bg-red-100 text-red-800 border-red-200",
+  },
 };
 
 function ToneBadge({ tone }: { tone: string }) {
   const cfg = TONE_CONFIG[tone as Tone] ?? TONE_CONFIG.default;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${cfg.color}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${cfg.color}`}
+    >
       {cfg.icon} {cfg.label}
     </span>
   );
@@ -75,10 +93,11 @@ function AdminBroadcast() {
     enabled: target === "user",
   });
 
-  const filteredUsers = (usersQ.data ?? []).filter((u: any) =>
-    !userSearch ||
-    u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.display_name?.toLowerCase().includes(userSearch.toLowerCase())
+  const filteredUsers = (usersQ.data ?? []).filter(
+    (u: any) =>
+      !userSearch ||
+      u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.display_name?.toLowerCase().includes(userSearch.toLowerCase()),
   );
 
   const mut = useMutation({
@@ -104,7 +123,8 @@ function AdminBroadcast() {
   });
 
   const charCount = body.length;
-  const isValid = title.trim().length > 0 && body.trim().length > 0 && (target === "all" || !!targetUserId);
+  const isValid =
+    title.trim().length > 0 && body.trim().length > 0 && (target === "all" || !!targetUserId);
 
   return (
     <div className="space-y-6">
@@ -180,7 +200,10 @@ function AdminBroadcast() {
                         <button
                           key={u.id}
                           type="button"
-                          onClick={() => { setTargetUserId(u.id); setUserSearch(u.email || u.display_name || ""); }}
+                          onClick={() => {
+                            setTargetUserId(u.id);
+                            setUserSearch(u.email || u.display_name || "");
+                          }}
                           className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted/50 ${targetUserId === u.id ? "bg-primary/5 font-medium" : ""}`}
                         >
                           <span className="block">{u.display_name || "No name"}</span>
@@ -188,7 +211,9 @@ function AdminBroadcast() {
                         </button>
                       ))}
                       {filteredUsers.length === 0 && (
-                        <p className="px-3 py-4 text-xs text-muted-foreground text-center">No users found.</p>
+                        <p className="px-3 py-4 text-xs text-muted-foreground text-center">
+                          No users found.
+                        </p>
                       )}
                     </div>
                     {targetUserId && (
@@ -254,7 +279,9 @@ function AdminBroadcast() {
             {/* Preview */}
             {title && body && (
               <div className="rounded-xl border border-border bg-secondary/30 p-4">
-                <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Preview</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+                  Preview
+                </p>
                 <div className="flex items-start gap-3">
                   <Bell className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
@@ -272,10 +299,14 @@ function AdminBroadcast() {
               className="w-full bg-navy-deep text-cream hover:bg-navy"
             >
               {mut.isPending ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                </>
               ) : (
-                <><Send className="mr-2 h-4 w-4" />
-                  {target === "all" ? "Send to All Users" : "Send to User"}</>
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  {target === "all" ? "Send to All Users" : "Send to User"}
+                </>
               )}
             </Button>
           </CardContent>

@@ -67,7 +67,11 @@ export function NotificationsAlertsForm({ initialData }: NotificationsAlertsForm
           disabled={isSaving}
           className="bg-secondary text-white hover:bg-secondary/90"
         >
-          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          {isSaving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
@@ -75,23 +79,27 @@ export function NotificationsAlertsForm({ initialData }: NotificationsAlertsForm
       <div className="grid gap-6">
         <div className="p-5 border border-border dark:border-border rounded-xl bg-white dark:bg-card shadow-sm space-y-6">
           <h3 className="font-semibold text-lg border-b pb-2">Global Notifications</h3>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">System Notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive critical system-level updates.</p>
+                <p className="text-sm text-muted-foreground">
+                  Receive critical system-level updates.
+                </p>
               </div>
               <Switch
                 checked={formData.systemNotifications}
                 onCheckedChange={() => handleToggle("systemNotifications")}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Shipment Notifications</Label>
-                <p className="text-sm text-muted-foreground">Status updates for active shipments.</p>
+                <p className="text-sm text-muted-foreground">
+                  Status updates for active shipments.
+                </p>
               </div>
               <Switch
                 checked={formData.shipmentNotifications}
@@ -109,7 +117,7 @@ export function NotificationsAlertsForm({ initialData }: NotificationsAlertsForm
                 onCheckedChange={() => handleToggle("paymentNotifications")}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Account Notifications</Label>
@@ -124,7 +132,9 @@ export function NotificationsAlertsForm({ initialData }: NotificationsAlertsForm
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Security Notifications</Label>
-                <p className="text-sm text-muted-foreground">Alerts for suspicious logins or changes.</p>
+                <p className="text-sm text-muted-foreground">
+                  Alerts for suspicious logins or changes.
+                </p>
               </div>
               <Switch
                 checked={formData.securityNotifications}
@@ -135,7 +145,9 @@ export function NotificationsAlertsForm({ initialData }: NotificationsAlertsForm
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base">Maintenance Alerts</Label>
-                <p className="text-sm text-muted-foreground">Broadcast scheduled maintenance to all users.</p>
+                <p className="text-sm text-muted-foreground">
+                  Broadcast scheduled maintenance to all users.
+                </p>
               </div>
               <Switch
                 checked={formData.maintenanceAlerts}

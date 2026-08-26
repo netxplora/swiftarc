@@ -33,33 +33,33 @@
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
-  
+
   --color-muted-bg: var(--muted-bg);
   --color-muted-text: var(--muted-text);
-  
+
   --color-input-bg: var(--input-bg);
   --color-input-border: var(--input-border);
-  
+
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
   --color-info: var(--info);
-  
+
   /* Fallbacks for semantic tokens referencing old vars (we map them to the new dynamic tokens) */
   --color-card-foreground: var(--foreground);
   --color-popover: var(--card);
   --color-popover-foreground: var(--foreground);
-  --color-primary-foreground: #FFFFFF;
-  --color-secondary-foreground: #FFFFFF;
-  --color-accent-foreground: #FFFFFF;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-accent-foreground: #ffffff;
   --color-muted: var(--muted-bg);
   --color-muted-foreground: var(--muted-text);
   --color-destructive: var(--error);
-  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-foreground: #ffffff;
   --color-border: var(--card-border);
   --color-input: var(--input-border);
   --color-ring: var(--primary);
-  
+
   /* Retained chart colors */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -103,29 +103,29 @@
   /* Structural Tokens */
   --radius: 0.5rem;
   --card-radius: 0.75rem;
-  
+
   /* Default Light Mode Palette (Tightened Brand System) */
-  --primary: #EA580C;
-  --primary-hover: #C2410C;
-  --secondary: #032D60;
-  --accent: #2563EB;
-  
-  --background: #FFFFFF;
-  --foreground: #032D60;
-  
-  --card: #FFFFFF;
-  --card-border: #E2E8F0;
-  
-  --muted-bg: #F8FAFC;
-  --muted-text: #64748B;
-  
-  --input-bg: #FFFFFF;
-  --input-border: #CBD5E1;
-  
-  --success: #16A34A;
-  --warning: #F59E0B;
-  --error: #DC2626;
-  --info: #2563EB;
+  --primary: #ea580c;
+  --primary-hover: #c2410c;
+  --secondary: #032d60;
+  --accent: #2563eb;
+
+  --background: #ffffff;
+  --foreground: #032d60;
+
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+
+  --muted-bg: #f8fafc;
+  --muted-text: #64748b;
+
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --error: #dc2626;
+  --info: #2563eb;
 
   /* Component specifics */
   --chart-1: var(--primary);
@@ -137,14 +137,14 @@
   --sidebar: var(--muted-bg);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: rgba(234, 88, 12, 0.1);
   --sidebar-accent-foreground: var(--primary);
   --sidebar-border: var(--card-border);
   --sidebar-ring: var(--primary);
 
   /* Navbar */
-  --navbar-bg: #FFFFFF;
+  --navbar-bg: #ffffff;
 
   /* Glassmorphism tokens - Clean Cloud Mode */
   --glass-bg: rgba(255, 255, 255, 0.92);
@@ -158,40 +158,40 @@
 
 .dark {
   /* Default Dark Mode Palette (Tightened Brand System) */
-  --primary: #F97316;
-  --primary-hover: #EA580C;
+  --primary: #f97316;
+  --primary-hover: #ea580c;
   --secondary: #021836;
-  --accent: #60A5FA;
-  
+  --accent: #60a5fa;
+
   --background: #020617;
-  --foreground: #F8FAFC;
-  
-  --card: #0F172A;
+  --foreground: #f8fafc;
+
+  --card: #0f172a;
   --card-elevated: #172033;
-  --card-border: #1E293B;
-  
-  --muted-bg: #0B1120;
-  --muted-text: #94A3B8;
-  
-  --input-bg: #0F172A;
+  --card-border: #1e293b;
+
+  --muted-bg: #0b1120;
+  --muted-text: #94a3b8;
+
+  --input-bg: #0f172a;
   --input-border: #334155;
-  
-  --success: #22C55E;
-  --warning: #FBBF24;
-  --error: #F87171;
-  --info: #60A5FA;
+
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --info: #60a5fa;
 
   --sidebar: #020617;
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: rgba(249, 115, 22, 0.15);
   --sidebar-accent-foreground: var(--primary);
   --sidebar-border: var(--card-border);
   --sidebar-ring: var(--primary);
 
   /* Navbar */
-  --navbar-bg: #0F172A;
+  --navbar-bg: #0f172a;
 
   /* Glassmorphism tokens - Dark Mode */
   --glass-bg: rgba(2, 6, 23, 0.85);
@@ -218,10 +218,17 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    transition: background-color 0.25s ease, color 0.25s ease;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
     font-weight: 600;
@@ -233,7 +240,7 @@
 
   ::selection {
     background-color: var(--color-primary);
-    color: #FFFFFF;
+    color: #ffffff;
   }
 
   /* Leaflet base */
@@ -246,11 +253,13 @@
     color: var(--color-foreground) !important;
     font-size: 10px !important;
   }
-  .leaflet-control-attribution a { color: var(--color-amber) !important; }
+  .leaflet-control-attribution a {
+    color: var(--color-amber) !important;
+  }
 
   /* Light mode map tiles — clean, minimal filter */
   .leaflet-tile {
-    filter: grayscale(0.15) contrast(1.02) brightness(1.0);
+    filter: grayscale(0.15) contrast(1.02) brightness(1);
   }
 
   /* Dark mode map tiles — inverted to match dark UI */
@@ -262,7 +271,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.001ms !important;
       transition-duration: 0.001ms !important;
     }
@@ -274,10 +285,14 @@
    ========================================== */
 @media print {
   /* Hide non-essential UI */
-  nav, header, footer,
-  .sidebar, [data-sidebar],
+  nav,
+  header,
+  footer,
+  .sidebar,
+  [data-sidebar],
   .glass-header,
-  button, a[role="button"],
+  button,
+  a[role="button"],
   .leaflet-control-zoom,
   .leaflet-control-attribution,
   [data-print-hide],
@@ -291,7 +306,8 @@
   }
 
   /* Reset backgrounds for clean printing */
-  body, html {
+  body,
+  html {
     background: white !important;
     color: black !important;
     font-size: 12pt;
@@ -299,7 +315,8 @@
   }
 
   /* Cards should have visible borders in print */
-  .bg-card, [class*="rounded-2xl"] {
+  .bg-card,
+  [class*="rounded-2xl"] {
     background: white !important;
     color: black !important;
     border: 1px solid #e2e2e2 !important;
@@ -315,7 +332,8 @@
   }
 
   /* Keep brand amber for visual hierarchy */
-  .bg-amber, .text-amber {
+  .bg-amber,
+  .text-amber {
     color: #cc8a00 !important;
   }
 
@@ -332,19 +350,32 @@
   }
 
   /* Prevent awkward page breaks */
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     break-after: avoid;
   }
 
-  table, figure, .card {
+  table,
+  figure,
+  .card {
     break-inside: avoid;
   }
 }
 
 .arc-grid {
   background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--color-foreground) 8%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--color-foreground) 8%, transparent) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-foreground) 8%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-foreground) 8%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 56px 56px;
 }
 
@@ -361,13 +392,23 @@
 }
 
 @keyframes swiftarc-pulse {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .marquee {
@@ -407,23 +448,49 @@
   /* -------------------------------------
      MOBILE-FIRST RESPONSIVE TYPOGRAPHY
      ------------------------------------- */
-  .text-display { @apply text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight; }
-  .text-h1 { @apply text-3xl md:text-4xl lg:text-5xl font-display font-bold leading-tight; }
-  .text-h2 { @apply text-2xl md:text-3xl font-display font-semibold leading-snug; }
-  .text-h3 { @apply text-xl md:text-2xl font-display font-semibold leading-snug; }
-  .text-h4 { @apply text-lg md:text-xl font-display font-medium leading-normal; }
-  .text-body-lg { @apply text-base md:text-lg leading-relaxed text-muted-foreground; }
-  .text-body { @apply text-sm md:text-base leading-relaxed text-muted-foreground; }
-  .text-body-sm { @apply text-xs md:text-sm leading-normal text-muted-foreground; }
-  .text-caption { @apply text-[11px] md:text-xs text-muted-foreground uppercase tracking-wider font-semibold; }
+  .text-display {
+    @apply text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight;
+  }
+  .text-h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-display font-bold leading-tight;
+  }
+  .text-h2 {
+    @apply text-2xl md:text-3xl font-display font-semibold leading-snug;
+  }
+  .text-h3 {
+    @apply text-xl md:text-2xl font-display font-semibold leading-snug;
+  }
+  .text-h4 {
+    @apply text-lg md:text-xl font-display font-medium leading-normal;
+  }
+  .text-body-lg {
+    @apply text-base md:text-lg leading-relaxed text-muted-foreground;
+  }
+  .text-body {
+    @apply text-sm md:text-base leading-relaxed text-muted-foreground;
+  }
+  .text-body-sm {
+    @apply text-xs md:text-sm leading-normal text-muted-foreground;
+  }
+  .text-caption {
+    @apply text-[11px] md:text-xs text-muted-foreground uppercase tracking-wider font-semibold;
+  }
 
   /* -------------------------------------
      MOBILE-FIRST RESPONSIVE SPACING
      ------------------------------------- */
-  .section-padding { @apply py-12 md:py-16 lg:py-24; }
-  .container-padding { @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl w-full; }
-  .card-padding { @apply p-4 sm:p-6 lg:p-8; }
-  .grid-layout { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8; }
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-24;
+  }
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl w-full;
+  }
+  .card-padding {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+  .grid-layout {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8;
+  }
 }
 
 /* ============================================================
@@ -456,7 +523,7 @@
   body {
     background: #ffffff !important;
     color: #0f172a !important;
-    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
   }
@@ -544,7 +611,7 @@
   #print-waybill .tracking-band .tn-value {
     font-size: 18pt;
     font-weight: 800;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     letter-spacing: 0.08em;
     color: #0f172a;
   }

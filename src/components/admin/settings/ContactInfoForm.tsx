@@ -41,18 +41,18 @@ export function ContactInfoForm({ initialData }: { initialData: any }) {
     mutationFn: () =>
       updateSettings({
         data: {
-          contact_info: { 
-            platformName, 
-            website, 
-            supportEmail, 
-            phone, 
-            address, 
-            workingHours, 
+          contact_info: {
+            platformName,
+            website,
+            supportEmail,
+            phone,
+            address,
+            workingHours,
             socialLinks: {
               twitter: socialTwitter,
               linkedin: socialLinkedin,
-              facebook: socialFacebook
-            }
+              facebook: socialFacebook,
+            },
           },
         },
       }),
@@ -81,7 +81,7 @@ export function ContactInfoForm({ initialData }: { initialData: any }) {
           Manage the public platform name and support contact details.
         </p>
       </div>
-      
+
       <div className="rounded-[8px] border border-border dark:border-border bg-white dark:bg-card p-6 shadow-[0_2px_4px_rgba(0,0,0,0.07)]">
         <div className="grid gap-5 max-w-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -96,7 +96,7 @@ export function ContactInfoForm({ initialData }: { initialData: any }) {
                 className="mt-1.5"
               />
             </div>
-            
+
             <div>
               <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Primary Website URL
@@ -169,16 +169,37 @@ export function ContactInfoForm({ initialData }: { initialData: any }) {
         <h3 className="font-semibold text-base border-b pb-3 mb-5">Social Media Links</h3>
         <div className="grid gap-5 max-w-2xl">
           <div>
-            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">X (Twitter) URL</Label>
-            <Input value={socialTwitter} onChange={(e) => setSocialTwitter(e.target.value)} placeholder="https://x.com/..." className="mt-1.5" />
+            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              X (Twitter) URL
+            </Label>
+            <Input
+              value={socialTwitter}
+              onChange={(e) => setSocialTwitter(e.target.value)}
+              placeholder="https://x.com/..."
+              className="mt-1.5"
+            />
           </div>
           <div>
-            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">LinkedIn URL</Label>
-            <Input value={socialLinkedin} onChange={(e) => setSocialLinkedin(e.target.value)} placeholder="https://linkedin.com/company/..." className="mt-1.5" />
+            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              LinkedIn URL
+            </Label>
+            <Input
+              value={socialLinkedin}
+              onChange={(e) => setSocialLinkedin(e.target.value)}
+              placeholder="https://linkedin.com/company/..."
+              className="mt-1.5"
+            />
           </div>
           <div>
-            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Facebook URL</Label>
-            <Input value={socialFacebook} onChange={(e) => setSocialFacebook(e.target.value)} placeholder="https://facebook.com/..." className="mt-1.5" />
+            <Label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Facebook URL
+            </Label>
+            <Input
+              value={socialFacebook}
+              onChange={(e) => setSocialFacebook(e.target.value)}
+              placeholder="https://facebook.com/..."
+              className="mt-1.5"
+            />
           </div>
         </div>
       </div>

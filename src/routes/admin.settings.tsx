@@ -137,7 +137,8 @@ function AdminSettingsPage() {
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight">Platform Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Configure platform parameters, brand identity, compliance, and fees. All changes are persisted to the database.
+          Configure platform parameters, brand identity, compliance, and fees. All changes are
+          persisted to the database.
         </p>
       </div>
 
@@ -233,7 +234,9 @@ function AdminSettingsPage() {
                       placeholder="e.g. 192.168.1.0/24, 10.0.0.1"
                       className="mt-1.5"
                     />
-                    <p className="mt-1 text-xs text-muted-foreground">Leave empty to allow all IPs</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Leave empty to allow all IPs
+                    </p>
                   </div>
                 </div>
               </div>
@@ -375,7 +378,9 @@ function AdminSettingsPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">{int.name}</p>
-                        <p className={`text-xs ${int.ok ? "text-success" : "text-muted-foreground"}`}>
+                        <p
+                          className={`text-xs ${int.ok ? "text-success" : "text-muted-foreground"}`}
+                        >
                           {int.status}
                         </p>
                       </div>
@@ -401,12 +406,22 @@ function AdminSettingsPage() {
             </form>
           )}
 
-          {activeTab === "visual" && <VisualAssetsForm initialData={platformSettings?.visual_assets} />}
-          {activeTab === "design" && <DesignSystemForm initialData={platformSettings?.design_system} />}
-          {activeTab === "contact" && <ContactInfoForm initialData={platformSettings?.contact_info} />}
-          {activeTab === "compliance" && <ComplianceForm initialData={platformSettings?.compliance_legal} />}
+          {activeTab === "visual" && (
+            <VisualAssetsForm initialData={platformSettings?.visual_assets} />
+          )}
+          {activeTab === "design" && (
+            <DesignSystemForm initialData={platformSettings?.design_system} />
+          )}
+          {activeTab === "contact" && (
+            <ContactInfoForm initialData={platformSettings?.contact_info} />
+          )}
+          {activeTab === "compliance" && (
+            <ComplianceForm initialData={platformSettings?.compliance_legal} />
+          )}
           {activeTab === "seo" && <SEOForm initialData={platformSettings?.global_seo} />}
-          {activeTab === "notifications" && <NotificationsAlertsForm initialData={platformSettings?.notifications_alerts} />}
+          {activeTab === "notifications" && (
+            <NotificationsAlertsForm initialData={platformSettings?.notifications_alerts} />
+          )}
           {activeTab === "fees" && <FeesForm initialData={platformFees || []} />}
           {activeTab === "audit" && <AuditLogs />}
         </div>

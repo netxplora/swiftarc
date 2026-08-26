@@ -109,8 +109,8 @@ export function usePlatformSettings() {
         .select("*")
         .limit(1)
         .single();
-        
-      if (error && error.code !== 'PGRST116') {
+
+      if (error && error.code !== "PGRST116") {
         throw error;
       }
       return data as PlatformSettings | null;
@@ -129,7 +129,7 @@ export function usePlatformFees() {
         .select("*")
         .eq("is_active", true)
         .order("name");
-        
+
       if (error) throw error;
       return data as PlatformFee[];
     },

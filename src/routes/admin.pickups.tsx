@@ -103,7 +103,7 @@ function AdminPickups() {
       await qc.cancelQueries({ queryKey: ["admin-pickups"] });
       const prev = qc.getQueryData(["admin-pickups"]);
       qc.setQueryData(["admin-pickups"], (old: any[]) =>
-        old?.map((p) => (p.id === v.id ? { ...p, status: v.status } : p))
+        old?.map((p) => (p.id === v.id ? { ...p, status: v.status } : p)),
       );
       return { prev };
     },
@@ -120,7 +120,18 @@ function AdminPickups() {
   const exportCSV = () => {
     if (filtered.length === 0) return toast.info("No data to export");
     const rows = [
-      ["Reference", "Date", "Slot", "Contact", "Company", "Address", "City", "Postal", "Packages", "Status"].join(","),
+      [
+        "Reference",
+        "Date",
+        "Slot",
+        "Contact",
+        "Company",
+        "Address",
+        "City",
+        "Postal",
+        "Packages",
+        "Status",
+      ].join(","),
       ...filtered.map((p: any) =>
         [
           p.reference ?? "",
@@ -133,7 +144,7 @@ function AdminPickups() {
           p.postal_code ?? "",
           p.package_count ?? 1,
           p.status,
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
     const blob = new Blob([rows], { type: "text/csv" });
@@ -148,14 +159,18 @@ function AdminPickups() {
   const pickups = q.data ?? [];
 
   // Summary stats
-  const stats = useMemo(() => ({
-    total: pickups.length,
-    pending: pickups.filter((p: any) => p.status === "pending").length,
-    confirmed: pickups.filter((p: any) => p.status === "confirmed").length,
-    completed: pickups.filter((p: any) => p.status === "completed").length,
-    cancelled: pickups.filter((p: any) => p.status === "cancelled").length,
-    today: pickups.filter((p: any) => p.pickup_date === new Date().toISOString().slice(0, 10)).length,
-  }), [pickups]);
+  const stats = useMemo(
+    () => ({
+      total: pickups.length,
+      pending: pickups.filter((p: any) => p.status === "pending").length,
+      confirmed: pickups.filter((p: any) => p.status === "confirmed").length,
+      completed: pickups.filter((p: any) => p.status === "completed").length,
+      cancelled: pickups.filter((p: any) => p.status === "cancelled").length,
+      today: pickups.filter((p: any) => p.pickup_date === new Date().toISOString().slice(0, 10))
+        .length,
+    }),
+    [pickups],
+  );
 
   // Filtered list
   const filtered = useMemo(() => {
@@ -195,16 +210,54 @@ function AdminPickups() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
-          { label: "Total", value: stats.total, icon: <Package className="h-4 w-4" />, color: "text-secondary", bg: "bg-secondary/10 dark:bg-white/10 dark:text-white" },
-          { label: "Today", value: stats.today, icon: <CalendarClock className="h-4 w-4" />, color: "text-accent", bg: "bg-accent/10" },
-          { label: "Pending", value: stats.pending, icon: <Clock className="h-4 w-4" />, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Confirmed", value: stats.confirmed, icon: <CheckCircle2 className="h-4 w-4" />, color: "text-accent-hover", bg: "bg-accent-hover/10" },
-          { label: "Completed", value: stats.completed, icon: <CheckCircle2 className="h-4 w-4" />, color: "text-success", bg: "bg-success/10" },
-          { label: "Cancelled", value: stats.cancelled, icon: <XCircle className="h-4 w-4" />, color: "text-error", bg: "bg-error/10" },
+          {
+            label: "Total",
+            value: stats.total,
+            icon: <Package className="h-4 w-4" />,
+            color: "text-secondary",
+            bg: "bg-secondary/10 dark:bg-white/10 dark:text-white",
+          },
+          {
+            label: "Today",
+            value: stats.today,
+            icon: <CalendarClock className="h-4 w-4" />,
+            color: "text-accent",
+            bg: "bg-accent/10",
+          },
+          {
+            label: "Pending",
+            value: stats.pending,
+            icon: <Clock className="h-4 w-4" />,
+            color: "text-primary",
+            bg: "bg-primary/10",
+          },
+          {
+            label: "Confirmed",
+            value: stats.confirmed,
+            icon: <CheckCircle2 className="h-4 w-4" />,
+            color: "text-accent-hover",
+            bg: "bg-accent-hover/10",
+          },
+          {
+            label: "Completed",
+            value: stats.completed,
+            icon: <CheckCircle2 className="h-4 w-4" />,
+            color: "text-success",
+            bg: "bg-success/10",
+          },
+          {
+            label: "Cancelled",
+            value: stats.cancelled,
+            icon: <XCircle className="h-4 w-4" />,
+            color: "text-error",
+            bg: "bg-error/10",
+          },
         ].map((s) => (
           <Card key={s.label}>
             <CardContent className="flex items-center gap-3 p-4">
-              <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[6px] ${s.bg} ${s.color}`}>
+              <span
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-[6px] ${s.bg} ${s.color}`}
+              >
                 {s.icon}
               </span>
               <div>
@@ -268,14 +321,19 @@ function AdminPickups() {
                 </thead>
                 <tbody>
                   {filtered.map((p: any) => (
-                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr
+                      key={p.id}
+                      className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                    >
                       <td className="p-3 pl-4">
                         <span className="font-mono text-xs font-semibold text-primary">
                           {p.reference ?? "—"}
                         </span>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(p.created_at).toLocaleDateString(undefined, {
-                            month: "short", day: "numeric", year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
                           })}
                         </p>
                       </td>
@@ -289,7 +347,9 @@ function AdminPickups() {
                       <td className="p-3">
                         <div className="flex items-center gap-1.5">
                           <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                          <span className="font-medium truncate max-w-[140px]">{p.contact_name}</span>
+                          <span className="font-medium truncate max-w-[140px]">
+                            {p.contact_name}
+                          </span>
                         </div>
                         {p.company && (
                           <p className="text-xs text-muted-foreground mt-0.5 pl-5">{p.company}</p>
@@ -301,7 +361,9 @@ function AdminPickups() {
                             <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
                             <div>
                               <p className="truncate max-w-[160px] text-xs">{p.address}</p>
-                              <p className="text-xs text-muted-foreground">{p.city} {p.postal_code}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {p.city} {p.postal_code}
+                              </p>
                             </div>
                           </div>
                         ) : (
@@ -337,9 +399,7 @@ function AdminPickups() {
                           <PickupForm
                             mode="edit"
                             initial={p}
-                            onSuccess={() =>
-                              qc.invalidateQueries({ queryKey: ["admin-pickups"] })
-                            }
+                            onSuccess={() => qc.invalidateQueries({ queryKey: ["admin-pickups"] })}
                           />
                           <Button
                             size="sm"
@@ -347,7 +407,8 @@ function AdminPickups() {
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={async () => {
                               if (confirm(`Delete pickup ${p.reference}?`)) {
-                                const del = (await import("@/lib/admin.functions")).adminDeletePickup;
+                                const del = (await import("@/lib/admin.functions"))
+                                  .adminDeletePickup;
                                 await del({ data: { id: p.id } });
                                 qc.invalidateQueries({ queryKey: ["admin-pickups"] });
                                 toast.success("Pickup deleted");
@@ -468,24 +529,48 @@ function PickupForm({
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Contact Name *</label>
-            <Input required value={contact} onChange={(e) => setContact(e.target.value)} placeholder="John Smith" />
+            <Input
+              required
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder="John Smith"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Company (Optional)</label>
-            <Input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Ltd." />
+            <Input
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="Acme Ltd."
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Address *</label>
-            <Input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Main St" />
+            <Input
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="123 Main St"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">City *</label>
-              <Input required value={city} onChange={(e) => setCity(e.target.value)} placeholder="London" />
+              <Input
+                required
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="London"
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Postal Code *</label>
-              <Input required value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="SW1A 1AA" />
+              <Input
+                required
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                placeholder="SW1A 1AA"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -508,7 +593,9 @@ function PickupForm({
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 {SLOTS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -528,7 +615,12 @@ function PickupForm({
             </select>
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button
@@ -536,7 +628,13 @@ function PickupForm({
               className="flex-1 bg-amber text-navy-deep hover:bg-amber-soft"
               disabled={loading}
             >
-              {loading ? <Loader2 className="animate-spin h-4 w-4" /> : mode === "create" ? "Create Pickup" : "Save Changes"}
+              {loading ? (
+                <Loader2 className="animate-spin h-4 w-4" />
+              ) : mode === "create" ? (
+                "Create Pickup"
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </div>
         </form>

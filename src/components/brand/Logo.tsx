@@ -19,17 +19,14 @@ export function Logo({ className, tone = "auto", showWord = true }: LogoProps) {
   const platformName = settings?.contact_info?.platformName || "SwiftArc";
 
   // Select logo based on tone
-  const preferredLogo = tone === "light" ? logoLightUrl : (tone === "dark" ? logoDarkUrl : (logoLightUrl || logoDarkUrl));
+  const preferredLogo =
+    tone === "light" ? logoLightUrl : tone === "dark" ? logoDarkUrl : logoLightUrl || logoDarkUrl;
 
   // If a custom logo is uploaded, prefer rendering it
   if (preferredLogo) {
     return (
       <div className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
-        <img
-          src={preferredLogo}
-          alt={`${platformName} logo`}
-          className="h-8 object-contain"
-        />
+        <img src={preferredLogo} alt={`${platformName} logo`} className="h-8 object-contain" />
         {showWord && (
           <span
             className="font-display text-lg font-bold tracking-tight text-foreground"
@@ -50,7 +47,7 @@ export function Logo({ className, tone = "auto", showWord = true }: LogoProps) {
         ? "var(--color-navy-deep, #0A192F)"
         : "currentColor";
   const accent = "var(--primary, #00A1E0)";
-  
+
   return (
     <div className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
       <svg width="34" height="34" viewBox="0 0 40 40" fill="none" aria-hidden="true">

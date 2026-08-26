@@ -33,7 +33,8 @@ export const Route = createFileRoute("/about")({
       },
       {
         name: "keywords",
-        content: "about swiftarc, logistics company, international freight, courier services, global shipping",
+        content:
+          "about swiftarc, logistics company, international freight, courier services, global shipping",
       },
     ],
     links: [{ rel: "canonical", href: "/about" }],
@@ -96,7 +97,6 @@ const team = [
 function AboutPage() {
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
-
       {/* ── Premium Glassmorphic Hero ── */}
       <section
         className="relative min-h-[68vh] flex items-center overflow-hidden pt-12 pb-16"
@@ -105,7 +105,10 @@ function AboutPage() {
         {/* Dot grid */}
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          style={{
+            backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+            backgroundSize: "26px 26px",
+          }}
           aria-hidden
         />
         {/* Glow orbs */}
@@ -114,7 +117,6 @@ function AboutPage() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
-
             {/* Left copy */}
             <div className="lg:col-span-7 space-y-6">
               <motion.div
@@ -167,7 +169,8 @@ function AboutPage() {
                     size="lg"
                     className="group bg-primary text-white hover:bg-primary-hover font-bold px-7 h-12 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/35 hover:shadow-xl hover:-translate-y-0.5 transition-all"
                   >
-                    View Shipping Services <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    View Shipping Services{" "}
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
                 <Link to="/locations">
@@ -188,14 +191,16 @@ function AboutPage() {
                 transition={{ duration: 0.6, delay: 0.35 }}
                 className="flex flex-wrap gap-3 pt-2"
               >
-                {["Founded 2008", "220+ Countries", "ISO 9001 Certified", "24/7 Support"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-white/80 border border-slate-200 rounded-full px-3 py-1 backdrop-blur-sm"
-                  >
-                    <CheckCircle2 className="h-3 w-3 text-primary" /> {tag}
-                  </span>
-                ))}
+                {["Founded 2008", "220+ Countries", "ISO 9001 Certified", "24/7 Support"].map(
+                  (tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-white/80 border border-slate-200 rounded-full px-3 py-1 backdrop-blur-sm"
+                    >
+                      <CheckCircle2 className="h-3 w-3 text-primary" /> {tag}
+                    </span>
+                  ),
+                )}
               </motion.div>
             </div>
 
@@ -222,10 +227,16 @@ function AboutPage() {
                   transition={{ delay: 0.75 }}
                   className="absolute -bottom-5 left-4 right-4 sm:left-6 sm:right-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/70 shadow-xl p-3 grid grid-cols-3 gap-3 text-center"
                 >
-                  {[{ v: "220+", l: "Countries" }, { v: "15M+", l: "Parcels" }, { v: "99.4%", l: "On-Time" }].map(({ v, l }) => (
+                  {[
+                    { v: "220+", l: "Countries" },
+                    { v: "15M+", l: "Parcels" },
+                    { v: "99.4%", l: "On-Time" },
+                  ].map(({ v, l }) => (
                     <div key={l}>
                       <div className="font-display text-lg font-bold text-primary">{v}</div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{l}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                        {l}
+                      </div>
                     </div>
                   ))}
                 </motion.div>
@@ -247,14 +258,14 @@ function AboutPage() {
             </h2>
             <div className="space-y-4 text-slate-500 leading-relaxed text-sm sm:text-base">
               <p>
-                SwiftArc was founded to provide individuals and businesses with a direct, trustworthy
-                way to ship cargo and parcels globally. We believe shipping should be straightforward:
-                accurate quotes, clear tracking, and on-time arrival.
+                SwiftArc was founded to provide individuals and businesses with a direct,
+                trustworthy way to ship cargo and parcels globally. We believe shipping should be
+                straightforward: accurate quotes, clear tracking, and on-time arrival.
               </p>
               <p>
-                Our network links regional road transport, commercial air routes, ocean shipping, and
-                bonded warehouses into a single coordinated system. Each package is inspected, measured,
-                and tracked from our local offices directly to the recipient.
+                Our network links regional road transport, commercial air routes, ocean shipping,
+                and bonded warehouses into a single coordinated system. Each package is inspected,
+                measured, and tracked from our local offices directly to the recipient.
               </p>
               <p>
                 Today, thousands of senders trust SwiftArc daily for critical shipments, commercial
@@ -268,7 +279,10 @@ function AboutPage() {
                 </Button>
               </Link>
               <Link to="/locations">
-                <Button variant="outline" className="border-2 font-bold rounded-xl h-11 px-6 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
+                <Button
+                  variant="outline"
+                  className="border-2 font-bold rounded-xl h-11 px-6 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+                >
                   Find Nearest Office
                 </Button>
               </Link>
@@ -293,7 +307,10 @@ function AboutPage() {
       <section className="border-y border-[#032D60]/20 bg-[#032D60] py-14 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+          style={{
+            backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-1/4 w-80 h-80 rounded-full bg-primary/20 blur-[100px] pointer-events-none" />
@@ -313,8 +330,12 @@ function AboutPage() {
                     <s.icon className="h-5 w-5 text-primary" />
                   </div>
                 </div>
-                <div className="font-display text-4xl sm:text-5xl font-bold text-primary">{s.value}</div>
-                <div className="text-xs uppercase tracking-wider text-white/70 font-semibold">{s.label}</div>
+                <div className="font-display text-4xl sm:text-5xl font-bold text-primary">
+                  {s.value}
+                </div>
+                <div className="text-xs uppercase tracking-wider text-white/70 font-semibold">
+                  {s.label}
+                </div>
               </motion.div>
             ))}
           </div>
@@ -340,10 +361,14 @@ function AboutPage() {
           {values.map((v) => (
             <StaggerItem key={v.title}>
               <div className="group h-full rounded-2xl border border-slate-100 bg-white p-6 shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-primary/15 transition-all duration-400">
-                <div className={`h-12 w-12 rounded-xl ${v.color} grid place-items-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <div
+                  className={`h-12 w-12 rounded-xl ${v.color} grid place-items-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+                >
                   <v.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-display text-lg font-bold text-[#032D60] mb-2 group-hover:text-primary transition-colors">{v.title}</h3>
+                <h3 className="font-display text-lg font-bold text-[#032D60] mb-2 group-hover:text-primary transition-colors">
+                  {v.title}
+                </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{v.desc}</p>
               </div>
             </StaggerItem>
@@ -373,10 +398,18 @@ function AboutPage() {
                 <div className="group h-full rounded-2xl border border-slate-100 bg-white p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/15 transition-all duration-400">
                   {/* Avatar */}
                   <div className="h-14 w-14 rounded-2xl bg-primary/10 grid place-items-center font-display text-lg font-bold text-primary mb-4 group-hover:bg-primary/15 transition-colors">
-                    {p.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
+                    {p.name
+                      .split(" ")
+                      .map((s) => s[0])
+                      .slice(0, 2)
+                      .join("")}
                   </div>
-                  <h3 className="font-display text-lg font-bold text-[#032D60] group-hover:text-primary transition-colors">{p.name}</h3>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-primary mt-1 mb-3">{p.role}</p>
+                  <h3 className="font-display text-lg font-bold text-[#032D60] group-hover:text-primary transition-colors">
+                    {p.name}
+                  </h3>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-primary mt-1 mb-3">
+                    {p.role}
+                  </p>
                   <p className="text-sm text-slate-500 leading-relaxed">{p.desc}</p>
                 </div>
               </StaggerItem>
@@ -389,7 +422,10 @@ function AboutPage() {
       <section className="relative overflow-hidden py-20 bg-[#032D60] text-white">
         <div
           className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+          style={{
+            backgroundImage: "radial-gradient(#EA580C 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-1/4 w-80 h-80 rounded-full bg-primary/25 blur-[100px] pointer-events-none" />
@@ -400,16 +436,24 @@ function AboutPage() {
               Have questions about shipping with SwiftArc?
             </h2>
             <p className="text-white/75 max-w-xl mx-auto leading-relaxed">
-              Our team is available 24/7 to help you choose the right shipping option or track an active package.
+              Our team is available 24/7 to help you choose the right shipping option or track an
+              active package.
             </p>
             <div className="flex flex-wrap justify-center gap-4 pt-2">
               <Link to="/contact">
-                <Button size="lg" className="bg-primary hover:bg-primary-hover text-white font-bold px-8 h-12 rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all">
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary-hover text-white font-bold px-8 h-12 rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 hover:shadow-primary/50 hover:shadow-xl transition-all"
+                >
                   Contact Our Team <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/tracking">
-                <Button size="lg" variant="outline" className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-12 rounded-xl hover:-translate-y-0.5 transition-all">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white/25 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 font-bold px-8 h-12 rounded-xl hover:-translate-y-0.5 transition-all"
+                >
                   Track a Shipment
                 </Button>
               </Link>

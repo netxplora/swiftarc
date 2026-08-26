@@ -3,7 +3,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, MapPin, Package, CheckCircle2, Truck, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import {
+  CalendarClock,
+  MapPin,
+  Package,
+  CheckCircle2,
+  Truck,
+  Loader2,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,7 +37,10 @@ export const Route = createFileRoute("/pickup")({
         property: "og:description",
         content: "Book a same-day or next-day courier collection directly from your doorstep.",
       },
-      { name: "keywords", content: "schedule courier pickup, package collection, doorstep pickup, parcel dispatch" },
+      {
+        name: "keywords",
+        content: "schedule courier pickup, package collection, doorstep pickup, parcel dispatch",
+      },
     ],
     links: [{ rel: "canonical", href: "/pickup" }],
   }),
@@ -72,7 +84,9 @@ function PickupPage() {
     mutationFn: () => create({ data: { ...form, pickup_date: date, slot, package_count: count } }),
     onSuccess: (row) => {
       setConfirmed(row);
-      toast.success("Pickup scheduled successfully", { description: `Reference: ${row.reference}` });
+      toast.success("Pickup scheduled successfully", {
+        description: `Reference: ${row.reference}`,
+      });
       qc.invalidateQueries({ queryKey: ["pickup-slots", date] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -101,7 +115,10 @@ function PickupPage() {
       >
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)", backgroundSize: "26px 26px" }}
+          style={{
+            backgroundImage: "radial-gradient(#032D60 1.2px, transparent 1.2px)",
+            backgroundSize: "26px 26px",
+          }}
           aria-hidden
         />
         <div className="absolute -top-20 right-0 w-[480px] h-[480px] rounded-full bg-primary/[0.06] blur-[130px] pointer-events-none" />
@@ -110,7 +127,11 @@ function PickupPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-6">
-              <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45 }}
+              >
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 backdrop-blur-sm px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-primary shadow-sm">
                   <Truck className="h-3 w-3" />
                   On-Demand Logistics Collection
@@ -126,7 +147,12 @@ function PickupPage() {
                 Schedule a Courier{" "}
                 <span className="relative">
                   <span className="text-primary">Doorstep Pickup</span>
-                  <motion.span className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40" initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8 }} />
+                  <motion.span
+                    className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-primary/40"
+                    initial={{ scaleX: 0, originX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.7, delay: 0.8 }}
+                  />
                 </span>
               </motion.h1>
 
@@ -136,7 +162,8 @@ function PickupPage() {
                 transition={{ duration: 0.6, delay: 0.15 }}
                 className="max-w-2xl text-base sm:text-lg text-slate-600 leading-relaxed"
               >
-                Book a local driver to collect parcels, pallets, or commercial packages directly from your warehouse, office, or residence.
+                Book a local driver to collect parcels, pallets, or commercial packages directly
+                from your warehouse, office, or residence.
               </motion.p>
             </div>
 
@@ -148,7 +175,11 @@ function PickupPage() {
                 className="relative"
               >
                 <div className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/25 backdrop-blur-md p-2 shadow-2xl shadow-[#032D60]/12">
-                  <img src={heroImg} alt="SwiftArc Courier Pickup Service" className="w-full h-72 sm:h-80 rounded-2xl object-cover" />
+                  <img
+                    src={heroImg}
+                    alt="SwiftArc Courier Pickup Service"
+                    className="w-full h-72 sm:h-80 rounded-2xl object-cover"
+                  />
                   <div className="absolute inset-2 rounded-2xl bg-gradient-to-tr from-primary/8 via-transparent to-transparent pointer-events-none" />
                 </div>
               </motion.div>
@@ -160,10 +191,12 @@ function PickupPage() {
       {/* ── Main Form & Sidebar ── */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-12">
-          
           {/* Form */}
           <div className="lg:col-span-8">
-            <FadeInSection direction="left" className="rounded-3xl border border-slate-100 bg-white p-6 sm:p-10 shadow-xl shadow-[#032D60]/5">
+            <FadeInSection
+              direction="left"
+              className="rounded-3xl border border-slate-100 bg-white p-6 sm:p-10 shadow-xl shadow-[#032D60]/5"
+            >
               <form onSubmit={submit} className="space-y-10">
                 {/* Address Section */}
                 <div className="space-y-6">
@@ -171,12 +204,16 @@ function PickupPage() {
                     <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                       <MapPin className="h-5 w-5" />
                     </div>
-                    <h2 className="font-display font-bold text-[#032D60] text-xl">Collection Location</h2>
+                    <h2 className="font-display font-bold text-[#032D60] text-xl">
+                      Collection Location
+                    </h2>
                   </div>
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Contact Name *</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Contact Name *
+                      </Label>
                       <Input
                         required
                         value={form.contact_name}
@@ -186,7 +223,9 @@ function PickupPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Company (Optional)</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Company (Optional)
+                      </Label>
                       <Input
                         value={form.company}
                         onChange={(e) => setForm({ ...form, company: e.target.value })}
@@ -195,7 +234,9 @@ function PickupPage() {
                       />
                     </div>
                     <div className="sm:col-span-2 space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Street Address *</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Street Address *
+                      </Label>
                       <Input
                         required
                         value={form.address}
@@ -205,7 +246,9 @@ function PickupPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">City *</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        City *
+                      </Label>
                       <Input
                         required
                         value={form.city}
@@ -215,7 +258,9 @@ function PickupPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Postal Code *</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Postal Code *
+                      </Label>
                       <Input
                         required
                         value={form.postal_code}
@@ -225,7 +270,9 @@ function PickupPage() {
                       />
                     </div>
                     <div className="sm:col-span-2 space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Driver Instructions (Optional)</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Driver Instructions (Optional)
+                      </Label>
                       <Textarea
                         placeholder="e.g. Ring reception bell on arrival, ground floor dispatch bay..."
                         value={form.instructions}
@@ -248,7 +295,9 @@ function PickupPage() {
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Collection Date</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Collection Date
+                      </Label>
                       <Input
                         type="date"
                         min={today}
@@ -261,7 +310,9 @@ function PickupPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Available Time Slots</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Available Time Slots
+                      </Label>
                       {slots.isLoading ? (
                         <div className="grid h-24 place-items-center rounded-xl border border-slate-100 bg-slate-50/50">
                           <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -300,12 +351,16 @@ function PickupPage() {
                     <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                       <Package className="h-5 w-5" />
                     </div>
-                    <h2 className="font-display font-bold text-[#032D60] text-xl">Package Information</h2>
+                    <h2 className="font-display font-bold text-[#032D60] text-xl">
+                      Package Information
+                    </h2>
                   </div>
 
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Number of Packages</Label>
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Number of Packages
+                      </Label>
                       <Input
                         type="number"
                         min={1}
@@ -316,8 +371,16 @@ function PickupPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Estimated Total Weight (kg)</Label>
-                      <Input type="number" min={0.1} step={0.1} defaultValue={3.5} className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 shadow-sm font-mono text-lg" />
+                      <Label className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Estimated Total Weight (kg)
+                      </Label>
+                      <Input
+                        type="number"
+                        min={0.1}
+                        step={0.1}
+                        defaultValue={3.5}
+                        className="h-12 bg-slate-50 border-slate-200 rounded-xl focus:border-primary/40 shadow-sm font-mono text-lg"
+                      />
                     </div>
                   </div>
                 </div>
@@ -380,18 +443,26 @@ function PickupPage() {
                     Pickup Booking Confirmed
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-600/70">Booking Reference:</p>
-                    <p className="font-mono text-2xl font-extrabold text-emerald-800">{confirmed.reference}</p>
+                    <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-600/70">
+                      Booking Reference:
+                    </p>
+                    <p className="font-mono text-2xl font-extrabold text-emerald-800">
+                      {confirmed.reference}
+                    </p>
                   </div>
                   <p className="text-xs text-emerald-700/80 leading-relaxed pt-3 border-t border-emerald-500/10">
-                    Our dispatch driver will arrive during your designated time window. Please ensure packages are securely packaged.
+                    Our dispatch driver will arrive during your designated time window. Please
+                    ensure packages are securely packaged.
                   </p>
                 </div>
               </FadeInSection>
             )}
 
             <FadeInSection direction="up" delay={0.2}>
-              <div className="rounded-2xl p-7 text-white shadow-xl shadow-[#032D60]/20" style={{ backgroundColor: "#032D60" }}>
+              <div
+                className="rounded-2xl p-7 text-white shadow-xl shadow-[#032D60]/20"
+                style={{ backgroundColor: "#032D60" }}
+              >
                 <div className="flex items-center gap-2.5 text-primary font-bold text-xs uppercase tracking-widest mb-3">
                   <Truck className="h-4 w-4" />
                   Fleet Availability

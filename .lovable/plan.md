@@ -1,4 +1,3 @@
-
 # Phase 6 — Experience Expansion, Admin & Polish
 
 A comprehensive round covering: theme correctness, landing page expansion with real imagery, dashboard redesign with a sidebar shell, a new Admin panel with full CRUD, live chat, motion polish, and cleanup of the hero.

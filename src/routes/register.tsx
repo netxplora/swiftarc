@@ -108,7 +108,7 @@ function Register() {
         {/* Sleek dark gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/50 to-transparent mix-blend-multiply" />
         <div className="absolute inset-0 bg-navy-deep/20 backdrop-blur-[2px]" />
-        
+
         {/* Content over image */}
         <div className="absolute inset-0 flex flex-col justify-between p-12 lg:p-16 xl:p-24">
           <div>
@@ -139,19 +139,22 @@ function Register() {
           <div className="lg:hidden mb-8">
             <Logo />
           </div>
-          
+
           <div>
             <h2 className="font-display text-3xl font-bold tracking-tight text-foreground">
               Open an account
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ready in under 60 seconds.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Ready in under 60 seconds.</p>
           </div>
 
           <div className="mt-8">
             <div className="grid grid-cols-2 gap-3">
-              <Button type="button" variant="outline" className="h-11 w-full font-normal shadow-sm hover:bg-muted/50" onClick={google}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full font-normal shadow-sm hover:bg-muted/50"
+                onClick={google}
+              >
                 <svg className="mr-2 h-4 w-4" aria-hidden="true" viewBox="0 0 24 24">
                   <path
                     d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
@@ -172,7 +175,12 @@ function Register() {
                 </svg>
                 Google
               </Button>
-              <Button type="button" variant="outline" className="h-11 w-full font-normal shadow-sm hover:bg-muted/50" onClick={apple}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full font-normal shadow-sm hover:bg-muted/50"
+                onClick={apple}
+              >
                 <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM15.42 16.59C14.77 17.53 14.07 18.5 12.98 18.5C11.91 18.5 11.53 17.84 10.28 17.84C9.05 17.84 8.61 18.5 7.6 18.5C6.54 18.5 5.76 17.43 5.11 16.5C3.78 14.59 2.8 11.4 4.16 9.27C4.83 8.21 5.91 7.54 7.05 7.52C8.1 7.5 8.86 8.2 9.48 8.2C10.11 8.2 11.05 7.42 12.3 7.46C12.83 7.48 14.34 7.68 15.34 9.15C15.26 9.2 13.54 10.21 13.56 12.2C13.58 14.55 15.65 15.4 15.7 15.42C15.66 15.54 15.31 16.74 15.42 16.59ZM12.28 6.13C12.83 5.47 13.21 4.54 13.11 3.6C12.3 3.63 11.31 4.14 10.74 4.82C10.24 5.41 9.79 6.36 9.91 7.28C10.8 7.35 11.72 6.79 12.28 6.13Z" />
                 </svg>
@@ -239,7 +247,9 @@ function Register() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="first" className="text-muted-foreground font-medium">First name</Label>
+                  <Label htmlFor="first" className="text-muted-foreground font-medium">
+                    First name
+                  </Label>
                   <Input
                     id="first"
                     required
@@ -249,7 +259,9 @@ function Register() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last" className="text-muted-foreground font-medium">Last name</Label>
+                  <Label htmlFor="last" className="text-muted-foreground font-medium">
+                    Last name
+                  </Label>
                   <Input
                     id="last"
                     required
@@ -262,7 +274,9 @@ function Register() {
 
               {mode === "create" && (
                 <div className="space-y-2">
-                  <Label htmlFor="company" className="text-muted-foreground font-medium">Company / Workspace Name</Label>
+                  <Label htmlFor="company" className="text-muted-foreground font-medium">
+                    Company / Workspace Name
+                  </Label>
                   <Input
                     id="company"
                     placeholder="Acme Logistics Corp"
@@ -275,7 +289,9 @@ function Register() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-muted-foreground font-medium">Work Email</Label>
+                <Label htmlFor="email" className="text-muted-foreground font-medium">
+                  Work Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
